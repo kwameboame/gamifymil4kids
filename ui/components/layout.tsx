@@ -1,0 +1,47 @@
+import Header from './header'
+import Link from 'next/link'
+import Image from 'next/image'
+
+interface LayoutProps {
+  children: React.ReactNode
+}
+
+export default function Layout({ children }: LayoutProps) {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-grow">
+        {children}
+      </main>
+      <footer className="bg-gray-800 text-white py-8">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-wrap justify-between items-center">
+            <div className="w-full md:w-1/3 mb-4 md:mb-0">
+              <h3 className="text-lg font-semibold mb-2">StorylineGame</h3>
+              <p className="text-sm">Immersive adventures await!</p>
+            </div>
+            <div className="w-full md:w-1/3 mb-4 md:mb-0">
+              <h4 className="text-md font-semibold mb-2">Legal</h4>
+              <ul className="text-sm">
+                <li><Link href="/privacy-policy" className="hover:text-gray-300">Privacy Policy</Link></li>
+                <li><Link href="/terms-of-service" className="hover:text-gray-300">Terms of Service</Link></li>
+              </ul>
+            </div>
+            <div className="w-full md:w-1/3">
+              <h4 className="text-md font-semibold mb-2">Our Sponsors</h4>
+              <div className="flex space-x-4">
+                {/* Replace with actual sponsor logos */}
+                <Image src="/images/sponsor1.png" alt="Sponsor 1" width={50} height={50} />
+                <Image src="/images/sponsor2.png" alt="Sponsor 2" width={50} height={50} />
+                <Image src="/images/sponsor3.png" alt="Sponsor 3" width={50} height={50} />
+              </div>
+            </div>
+          </div>
+          <div className="mt-8 text-center text-sm">
+            <p>&copy; 2023 StorylineGame. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  )
+}

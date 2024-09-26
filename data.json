@@ -1,0 +1,159 @@
+[
+    {
+      "model": "game.story",
+      "pk": 1,
+      "fields": {
+        "title": "Forest Adventure",
+        "description": "Embark on a mysterious journey through an enchanted forest."
+      }
+    },
+    {
+      "model": "game.level",
+      "pk": 1,
+      "fields": {
+        "story": 1,
+        "prompt": "You find a mysterious door in the forest. What do you do?",
+        "image": "level_images/forest_door.jpg",
+        "order": 1
+      }
+    },
+    {
+      "model": "game.level",
+      "pk": 2,
+      "fields": {
+        "story": 1,
+        "prompt": "Inside, you see a glowing artifact. How do you proceed?",
+        "image": "level_images/glowing_artifact.jpg",
+        "order": 2
+      }
+    },
+    {
+      "model": "game.level",
+      "pk": 3,
+      "fields": {
+        "story": 1,
+        "prompt": "A guardian appears and asks for the password. What do you say?",
+        "image": "level_images/guardian.jpg",
+        "order": 3
+      }
+    },
+    {
+      "model": "game.action",
+      "pk": 1,
+      "fields": {
+        "level": 1,
+        "text": "Open the door",
+        "is_correct": true
+      }
+    },
+    {
+      "model": "game.action",
+      "pk": 2,
+      "fields": {
+        "level": 1,
+        "text": "Walk away",
+        "is_correct": false
+      }
+    },
+    {
+      "model": "game.action",
+      "pk": 3,
+      "fields": {
+        "level": 1,
+        "text": "Knock on the door",
+        "is_correct": false
+      }
+    },
+    {
+      "model": "game.action",
+      "pk": 4,
+      "fields": {
+        "level": 2,
+        "text": "Touch the artifact",
+        "is_correct": false
+      }
+    },
+    {
+      "model": "game.action",
+      "pk": 5,
+      "fields": {
+        "level": 2,
+        "text": "Examine it closely",
+        "is_correct": true
+      }
+    },
+    {
+      "model": "game.action",
+      "pk": 6,
+      "fields": {
+        "level": 2,
+        "text": "Ignore it and explore further",
+        "is_correct": false
+      }
+    },
+    {
+      "model": "game.action",
+      "pk": 7,
+      "fields": {
+        "level": 3,
+        "text": "Say 'Open Sesame'",
+        "is_correct": false
+      }
+    },
+    {
+      "model": "game.action",
+      "pk": 8,
+      "fields": {
+        "level": 3,
+        "text": "Remain silent",
+        "is_correct": true
+      }
+    },
+    {
+      "model": "game.action",
+      "pk": 9,
+      "fields": {
+        "level": 3,
+        "text": "Try to run past the guardian",
+        "is_correct": false
+      }
+    },
+    {
+      "model": "game.leaderboardentry",
+      "pk": 1,
+      "fields": {
+        "name": "Alice",
+        "score": 3,
+        "story": 1,
+        "created_at": "2023-04-15T10:30:00Z"
+      }
+    },
+    {
+      "model": "game.leaderboardentry",
+      "pk": 2,
+      "fields": {
+        "name": "Bob",
+        "score": 2,
+        "story": 1,
+        "created_at": "2023-04-15T11:15:00Z"
+      }
+    },
+    {
+      "model": "game.userprofile",
+      "pk": 1,
+      "fields": {
+        "name": "Alice",
+        "high_scores": {"Forest Adventure": 3},
+        "badges": ["Forest Explorer"]
+      }
+    },
+    {
+      "model": "game.userprofile",
+      "pk": 2,
+      "fields": {
+        "name": "Bob",
+        "high_scores": {"Forest Adventure": 2},
+        "badges": []
+      }
+    }
+  ]
