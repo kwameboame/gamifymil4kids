@@ -3,11 +3,16 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useRouter } from 'next/navigation';
 
-interface UserProfile {
+type UserProfile = {
+  id: number;
   name: string;
-  highScores: { [key: string]: number };
-  badges: string[];
-}
+  highScores: Record<string, number>;
+  badges: { id: number; name: string; description: string; image: string }[];
+};
+
+// type ProfileComponentProps = {
+//   profile: UserProfile;
+// };
 
 export function ProfileComponent({ profile }: { profile: UserProfile }) {
   const router = useRouter();
@@ -40,7 +45,7 @@ export function ProfileComponent({ profile }: { profile: UserProfile }) {
         <h3 className="text-xl font-semibold mb-2">Badges</h3>
         <div className="flex flex-wrap gap-2">
           {profile.badges.map((badge, index) => (
-            <span key={index} className="bg-white text-primary-foreground px-2 py-1 rounded-full text-sm">{badge}</span>
+            <span key={index} className="bg-white text-primary-foreground px-2 py-1 rounded-full text-sm">{badge.name}</span>
           ))}
         </div>
       </div>
