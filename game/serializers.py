@@ -27,6 +27,7 @@ class LeaderboardEntrySerializer(serializers.ModelSerializer):
     class Meta:
         model = LeaderboardEntry
         fields = ['id', 'username', 'score', 'created_at']
+        read_only_fields = ['user', 'created_at']
 
 class BadgeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -37,10 +38,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.EmailField(source='user.email', read_only=True)
     badges = BadgeSerializer(many=True, read_only=True)
-
+    
     class Meta:
         model = UserProfile
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'high_scores', 'badges', 'entry_thumbnail']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'notifications', 'entry_thumbnail', 'image_thumbnail', 'post_thumb', 'high_scores', 'badges']
 
 class GameSessionSerializer(serializers.ModelSerializer):
     class Meta:

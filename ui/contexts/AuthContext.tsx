@@ -23,7 +23,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const token = localStorage.getItem('authToken')
     if (token) {
       try {
-        await axios.get('http://localhost:8000/api/game/user/', {  // Ensure the correct endpoint
+        await axios.get('http://localhost:8000/api/accounts/user/', {  // Ensure the correct endpoint
           headers: {
             'Authorization': `Bearer ${token}`,
             'X-Requested-With': 'XMLHttpRequest'

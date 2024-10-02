@@ -1,23 +1,19 @@
 import datetime
+from django.db import models
 from datetime import date
-from django.contrib.auth.models import AbstractUser, UserManager, Group, Permission, User as CoreUser
+from django.contrib.auth.models import AbstractUser, UserManager, Group, Permission
 from django.core.validators import RegexValidator
-from django.db.models.signals import post_save, pre_delete
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from sorl.thumbnail import ImageField
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 
-CoreUser._meta.get_field('email')._unique = True
-
-# from rest_framework.authtoken.models import Token
-
-from django.db import models
 from game.models import Badge  # Ensure this import is correct based on your project structure
 
 
-# Create your models here.
+CoreUser = AbstractUser  # Updated from get_user_model()
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
@@ -34,12 +30,10 @@ class User(AbstractUser):
         blank=True
     )
     
-    # Remove 'username' from REQUIRED_FIELDS
     REQUIRED_FIELDS = ['email', 'phone']
-
     objects = UserManager()
-
-    # Add related_name to avoid clashes
+    
+    # Define related_name to avoid clashes
     groups = models.ManyToManyField(
         Group,
         verbose_name='groups',
@@ -56,7 +50,6 @@ class User(AbstractUser):
         related_name="accounts_user_set",
         related_query_name="accounts_user",
     )
-
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
@@ -82,11 +75,9 @@ class UserProfile(models.Model):
     def __str__(self):  # __unicode__ for Python 2
         return self.user.username
 
-    @receiver(post_save, sender=User)
-    def create_or_update_user_profile(sender, instance, created, **kwargs):
-        if created:
-            UserProfile.objects.create(user=instance, name=instance.username)
-        instance.profile.save()
-
-
-# Remove the PhoneOTP model as it's not needed for this implementation
+# Signals to create or update UserProfile automatically
+@receiver(post_save, sender=User)
+def create_or_update_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance, name=instance.username)
+    instance.profile.save()

@@ -40,7 +40,7 @@ class LeaderboardEntryViewSet(viewsets.ModelViewSet):
         )
 
         # Update user's high score for this story
-        profile = user.profile  # Changed from user.userprofile to user.profile
+        profile = user.profile
         if str(story_id) not in profile.high_scores or score > profile.high_scores.get(str(story_id), 0):
             profile.high_scores[str(story_id)] = score
             profile.save()

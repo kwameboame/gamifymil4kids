@@ -11,12 +11,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import User
-from .serializers import UserSerializer
 from django.contrib.auth import get_user_model
-from django.db.models import Q  # Add this import
+from django.db.models import Q  # Ensure this import exists
 from rest_framework.views import APIView
 from django.middleware.csrf import get_token
 

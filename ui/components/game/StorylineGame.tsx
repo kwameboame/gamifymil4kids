@@ -50,10 +50,8 @@ type Story = {
 };
 
 type LeaderboardEntry = {
-  id: number;
-  name: string;
+  username: string;
   score: number;
-  username: string; // Add this line to match the expected structure
 };
 
 type UserProfile = {
@@ -65,7 +63,7 @@ type UserProfile = {
 
 
 export function StorylineGame() {
-  const [gameState, setGameState] = useState<"start" | "playing" | "end" | "gameover" | "leaderboard" | "profile" | "login" | "signup">("start"); // Add "signup" to the type
+  const [gameState, setGameState] = useState<"start" | "playing" | "end" | "gameover" | "leaderboard" | "profile" | "login" | "signup">("start"); // Added "signup" to the type
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(0);
   const [story, setStory] = useState<Story | null>(null);
@@ -95,17 +93,29 @@ export function StorylineGame() {
         const storyData = await storyResponse.json();
         setStory(storyData);
 
-        const leaderboardResponse = await fetch(`${API_BASE_URL}/leaderboard/`);
+        // Fetch top-scores for the leaderboard
+        const leaderboardResponse = await fetch(`${API_BASE_URL}/leaderboard/top-scores/`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          },
+        });
         const leaderboardData = await leaderboardResponse.json();
         setLeaderboard(leaderboardData);
 
-        const profileResponse = await fetch(`${API_BASE_URL}/profiles/1/`);
-        const profileData = await profileResponse.json();
-        // Transform the data to match our UserProfile type
-        setUserProfile({
-          ...profileData,
-          highScores: profileData.high_scores, // Assuming the API returns 'high_scores'
-        });
+        // Fetch the authenticated user's profile
+        if (isAuthenticated) {
+          const profileResponse = await fetch(`${API_BASE_URL}/profiles/${userProfile?.id}/`, { // Adjusted to fetch user's own profile
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+            },
+          });
+          const profileData = await profileResponse.json();
+          // Transform the data to match our UserProfile type
+          setUserProfile({
+            ...profileData,
+            highScores: profileData.high_scores, // Assuming the API returns 'high_scores'
+          });
+        }
 
         setIsLoading(false);
       } catch (error) {
@@ -115,7 +125,7 @@ export function StorylineGame() {
     };
 
     fetchData();
-  }, []);
+  }, [isAuthenticated, userProfile?.id]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -139,7 +149,6 @@ export function StorylineGame() {
             'Authorization': `Bearer ${localStorage.getItem('authToken')}`, // Include the auth token
           },
           body: JSON.stringify({
-            name: userProfile.name,
             score: currentScore, // Use the updated score
             story_id: story.id, // Ensure story_id is provided
           }),
