@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Story, Level, Action, LeaderboardEntry, Badge, UserProfile
+from .models import Story, Level, Action, LeaderboardEntry, Badge
 
 class ActionInline(admin.TabularInline):
     model = Action
@@ -23,26 +23,17 @@ class LevelAdmin(admin.ModelAdmin):
 
 @admin.register(Action)
 class ActionAdmin(admin.ModelAdmin):
-    list_display = ('level', 'text', 'is_correct')
+    list_display = ('level', 'text', 'is_correct', 'points')
     list_filter = ('level', 'is_correct')
 
 @admin.register(LeaderboardEntry)
 class LeaderboardEntryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'score', 'story', 'created_at')
+    list_display = ('user', 'score', 'story', 'created_at')
     list_filter = ('story', 'created_at')
-    search_fields = ('name',)
+    search_fields = ('user__username',)
 
 @admin.register(Badge)
 class BadgeAdmin(admin.ModelAdmin):
     list_display = ('name', 'description')
     search_fields = ('name',)
 
-@admin.register(UserProfile)
-class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('name',)
-    search_fields = ('name',)
-
-    def get_readonly_fields(self, request, obj=None):
-        if obj:  # editing an existing object
-            return self.readonly_fields + ('high_scores',)
-        return self.readonly_fields

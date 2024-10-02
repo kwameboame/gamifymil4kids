@@ -1,69 +1,87 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useAuth } from '@/contexts/AuthContext'
+import { useRouter } from 'next/navigation'
 
-export default function Login() {
-  const [email, setEmail] = useState('')
+export type LoginProps = {
+  onSubmit: (username_or_email: string, password: string) => void;
+};
+
+export default function Login({ onSubmit }: LoginProps) {
+  const [usernameOrEmail, setUsernameOrEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const { login } = useAuth()
+  const router = useRouter()
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Ensure component is mounted on client side
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
-    // Here you would typically make an API call to your backend
-    // For demonstration, we'll just log the data and show a success message
-    console.log('Login data:', { email, password })
-    alert('Login successful! (This is a demo)')
+    if (!isMounted) return // Prevent running on server-side
+
+    try {
+      const response = await login(usernameOrEmail, password)
+      console.log('Login successful:', response)
+      onSubmit(usernameOrEmail, password)
+      router.push('/') // Redirect to home page after successful login
+    } catch (error) {
+      // Specify a more precise type for error
+      console.error('Login error:', (error as { response?: { data?: { detail?: string } } })?.response?.data || (error as Error).message)
+      setError((error as { response?: { data?: { detail?: string } } })?.response?.data?.detail || 'An error occurred during login')
+    }
   }
 
+  if (!isMounted) return null // Prevent SSR issues
+
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card>
       <CardHeader>
         <CardTitle>Log In</CardTitle>
         <CardDescription>Enter your credentials to access your account</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+          <div>
+            <Label>Username or Email</Label>
+            <Input
+              type="text"
+              value={usernameOrEmail}
+              onChange={(e) => setUsernameOrEmail(e.target.value)}
+              required
+            />
           </div>
+          <div>
+            <Label>Password</Label>
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          <Button type="submit">Log In</Button>
         </form>
       </CardContent>
-      <CardFooter>
-        <Button type="submit" className="w-full">Log In</Button>
-      </CardFooter>
     </Card>
   )
 }

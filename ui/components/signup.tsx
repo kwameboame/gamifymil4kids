@@ -8,7 +8,11 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
-export default function Signup() {
+type SignupProps = {
+  onSubmit: (username: string, email: string, password: string) => void;
+};
+
+export default function Signup({ onSubmit }: SignupProps) {
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -22,16 +26,17 @@ export default function Signup() {
     // For demonstration, we'll just log the data and show a success message
     console.log('Signup data:', { username, email, password })
     alert('Signup successful! (This is a demo)')
+    onSubmit(username, email, password)
   }
 
   return (
     <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Sign Up</CardTitle>
-        <CardDescription>Create your account to start playing</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
+        <CardHeader>
+          <CardTitle>Sign Up</CardTitle>
+          <CardDescription>Create your account to start playing</CardDescription>
+        </CardHeader>
+        <CardContent>
           <div className="space-y-4">
             <div>
               <Label htmlFor="username">Username</Label>
@@ -70,11 +75,11 @@ export default function Signup() {
               </Alert>
             )}
           </div>
-        </form>
-      </CardContent>
-      <CardFooter>
-        <Button type="submit" className="w-full">Sign Up</Button>
-      </CardFooter>
+        </CardContent>
+        <CardFooter>
+          <Button type="submit" className="w-full">Sign Up</Button>
+        </CardFooter>
+      </form>
     </Card>
   )
 }

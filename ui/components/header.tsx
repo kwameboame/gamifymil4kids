@@ -1,16 +1,18 @@
+'use client'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import Image from 'next/image'
+import { useAuth } from '@/contexts/AuthContext' // We'll create this context
 
 const navItems = [
   { href: '/', label: 'Home' },
   { href: '/game', label: 'Play Game' },
   { href: '/profile', label: 'Profile' },
-  { href: '/login', label: 'Login' },
-  { href: '/signup', label: 'Sign Up' }
 ]
 
 export default function Header() {
+  const { isAuthenticated, logout } = useAuth()
+
   return (
     <header className="bg-purple-950">
       <div className="container mx-auto px-4 flex justify-between items-center">
@@ -28,6 +30,32 @@ export default function Header() {
                 </Button>
               </li>
             ))}
+            {isAuthenticated !== undefined && (
+              isAuthenticated ? (
+                <li>
+                  <Button variant="ghost" onClick={logout} className="text-white hover:text-orange-500">
+                    Logout
+                  </Button>
+                </li>
+              ) : (
+                <>
+                  <li>
+                    <Button variant="ghost" asChild>
+                      <Link href="/login" className="text-white hover:text-orange-500">
+                        Login
+                      </Link>
+                    </Button>
+                  </li>
+                  <li>
+                    <Button variant="ghost" asChild>
+                      <Link href="/signup" className="text-white hover:text-orange-500">
+                        Sign Up
+                      </Link>
+                    </Button>
+                  </li>
+                </>
+              )
+            )}
           </ul>
         </nav>
       </div>
