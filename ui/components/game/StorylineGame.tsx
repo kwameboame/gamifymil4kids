@@ -7,11 +7,11 @@ import { Loader2 } from "lucide-react";
 import { AudioControl } from "./AudioControl";
 import { LeaderboardComponent } from "./LeaderboardComponent";
 import { ProfileComponent } from "./ProfileComponent";
-// import Confetti from "react-confetti";
+import Confetti from "react-confetti";
 import Image from "next/image";
-import axios from "axios";
+import axios from "@/lib/axios";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRouter } from "next/navigation";
+import { FaVolumeUp, FaVolumeMute } from 'react-icons/fa'; // Import sound control icons
 
 export interface Action {
   id: number;
@@ -19,6 +19,7 @@ export interface Action {
   is_correct: boolean;
   points: number;
 }
+
 
 interface Level {
   id: number;
@@ -67,26 +68,26 @@ export function StorylineGame() {
     | "signup"
   >("start");
   const [score, setScore] = useState(0);
-  // const [level, setLevel] = useState(0); // Remove this line
+  const [level, setLevel] = useState(0);
   const [story, setStory] = useState<Story | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  // const [isGameStarted, setIsGameStarted] = useState(false); // Remove this line
+  // const [isGameStarted, setIsGameStarted] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
-  // const audioRef = useRef<HTMLAudioElement>(null);
-  // const successAudioRef = useRef<HTMLAudioElement>(null);
-  // const gameOverAudioRef = useRef<HTMLAudioElement>(null);
-  const gameAreaRef = useRef<HTMLDivElement>(null);
-  // const [initialWidth, setInitialWidth] = useState<string>("");
+  // Audio references
+  const mainMusicRef = useRef<HTMLAudioElement>(null);
+  const congratsSoundRef = useRef<HTMLAudioElement>(null);
+  const gameOverSoundRef = useRef<HTMLAudioElement>(null);
   const { isAuthenticated, logout } = useAuth();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [vsMode, setVsMode] = useState<boolean>(false);
-  const router = useRouter();
+  const [inviterScore, setInviterScore] = useState<number | null>(null);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
 
-  const [levelIndex, setLevelIndex] = useState(0); // Add this line
+  const gameAreaRef = useRef<HTMLDivElement>(null);
 
-  const backendBaseURL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   useEffect(() => {
     const { invite } = getQueryParams();
@@ -111,7 +112,7 @@ export function StorylineGame() {
 
   const fetchInitialData = async () => {
     try {
-      const storyResponse = await axios.get<Story>(`${backendBaseURL}/game/stories/1/`, {
+      const storyResponse = await axios.get<Story>("/game/stories/1/", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
@@ -119,19 +120,16 @@ export function StorylineGame() {
       setStory(storyResponse.data);
 
       // Fetch top-scores for the leaderboard
-      const leaderboardResponse = await axios.get<LeaderboardEntry[]>(
-        `${backendBaseURL}/game/leaderboard/top-scores/`,
-        {
+      const leaderboardResponse = await axios.get<LeaderboardEntry[]>("/game/leaderboard/top-scores/", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
-        }
-      );
+      });
       setLeaderboard(leaderboardResponse.data);
 
       // Fetch the authenticated user's profile if not in VS Mode
       if (isAuthenticated && !vsMode) {
-        const profileResponse = await axios.get<UserProfile>(`${backendBaseURL}/game/profiles/me/`, {
+        const profileResponse = await axios.get<UserProfile>("/game/profiles/me/", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
@@ -147,18 +145,18 @@ export function StorylineGame() {
 
   const fetchInviterInfo = async (token: string) => {
     try {
-      await axios.get<{ username: string; highest_score: number }>(
-        `${backendBaseURL}/game/invites/${token}/inviter-score/`,
+      const response = await axios.get<{ username: string; highest_score: number }>(
+        `/game/invites/${token}/inviter-score/`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
         }
       );
-      // setInviterScore(response.data.highest_score); // Remove this line
+      setInviterScore(response.data.highest_score);
     } catch (error) {
       console.error("Error fetching inviter's info:", error);
-      // Optionally, navigate the user back or show an error message
+      // Optionally, show an error message to the user
     } finally {
       setIsLoading(false);
     }
@@ -167,7 +165,7 @@ export function StorylineGame() {
   const createInvite = async () => {
     if (!story) return;
     try {
-      const response = await axios.post<GameInviteResponse>(`${backendBaseURL}/game/invites/`, {
+      const response = await axios.post<GameInviteResponse>("/game/invites/", {
         story: story.id,
       }, {
         headers: {
@@ -180,7 +178,6 @@ export function StorylineGame() {
       setInviteLink(fullInviteLink);
     } catch (error) {
       console.error("Error creating invite:", error);
-      // Optionally, show an error message to the user
     }
   };
 
@@ -199,7 +196,9 @@ export function StorylineGame() {
       setGameState("start");
       setLeaderboard([]);
       setUserProfile(null);
-      // Optionally, redirect the user to a login page or refresh the page
+      setInviterScore(null);
+      setInviteLink(null);
+      // Optionally, you can redirect the user to a login page or refresh the page
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -215,35 +214,76 @@ export function StorylineGame() {
     }
   };
 
-  const handleStartGame = () => {
-    router.push("/game/play/game"); // Ensure this route exists
+  const handleMuteToggle = () => {
+    setIsMuted(!isMuted);
   };
 
-  const handleEndGame = () => {
-    router.push("/game/play/end"); // Ensure this route exists
+  const playMainMusic = () => {
+    if (mainMusicRef.current && !isMuted) {
+      mainMusicRef.current.play();
+    }
   };
 
-  const handleBack = () => {
-    setGameState("start");
+  const pauseMainMusic = () => {
+    if (mainMusicRef.current) {
+      mainMusicRef.current.pause();
+    }
   };
+
+  const playCongratsSound = () => {
+    if (congratsSoundRef.current && !isMuted) {
+      congratsSoundRef.current.play();
+    }
+  };
+
+  const playGameOverSound = () => {
+    if (gameOverSoundRef.current && !isMuted) {
+      gameOverSoundRef.current.play();
+    }
+  };
+
+  useEffect(() => {
+    if (gameState === "playing") {
+      playMainMusic();
+    } else {
+      pauseMainMusic();
+    }
+
+    return () => {
+      pauseMainMusic();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameState]);
 
   const handleAction = (action: Action) => {
     const newScore = score + action.points;
     setScore(Math.max(0, newScore));
 
     if (action.is_correct) {
-      if (levelIndex < (story?.levels.length || 0) - 1) {
-        setLevelIndex((prev) => prev + 1);
+      if (level < (story?.levels.length || 0) - 1) {
+        setLevel((prev) => prev + 1);
       } else {
         // Game end logic
-        router.push("/game/play/end"); // Ensure this route exists
+        playCongratsSound();
+        setShowConfetti(true);
+        setGameState("end");
       }
     } else {
       // Handle incorrect action
-      // Show game over logic
-      router.push("/game/play/gameover"); // Ensure this route exists
+      playGameOverSound();
+      setGameState("gameover");
     }
   };
+
+  const handleEndGame = () => {
+    // Reset game state or perform other end game actions
+    setGameState("leaderboard");
+  };
+
+  const handleBack = () => {
+    setGameState("start");
+  };
+
 
   if (isLoading) {
     return <Loader2 className="animate-spin" />;
@@ -251,6 +291,29 @@ export function StorylineGame() {
 
   return (
     <div className="relative flex flex-col h-full" style={{ zIndex: 1 }}>
+      {/* Show Confetti */}
+      {showConfetti && <Confetti />}
+
+      {/* Show Inviter Score */}
+      {vsMode && inviterScore !== null && (
+        <div className="absolute top-4 left-4 bg-white p-2 rounded shadow">
+          Inviter&apos;s Score: {inviterScore}
+        </div>
+      )}
+
+      {/* Audio Elements */}
+      <audio ref={mainMusicRef} src="/audio/sound.mp3" loop />
+      <audio ref={congratsSoundRef} src="/audio/congrats.mp3" />
+      <audio ref={gameOverSoundRef} src="/audio/GameOver.wav" />
+
+      {/* Sound Control */}
+      <div className="absolute top-4 right-4 flex items-center space-x-2">
+        <Button onClick={handleMuteToggle} variant="ghost" size="icon">
+          {isMuted ? <FaVolumeMute className="h-4 w-4" /> : <FaVolumeUp className="h-4 w-4" />}
+        </Button>
+      </div>
+
+      {/* Game Controls */}
       <div className="flex justify-between items-center mb-4">
         {isFullscreen ? (
           <Button onClick={toggleFullscreen} className="text-xs">
@@ -280,6 +343,7 @@ export function StorylineGame() {
         <AudioControl isGameStarted={gameState === "playing"} />
       </div>
 
+      {/* Share Invite Link */}
       {inviteLink && (
         <div className="mb-4 text-center">
           <p>Share this link with your friends:</p>
@@ -332,7 +396,7 @@ export function StorylineGame() {
               height={300}
             />
             {isAuthenticated ? (
-              <Button onClick={handleStartGame}>Start Game</Button>
+              <Button onClick={() => setGameState("playing")}>Start Game</Button>
             ) : (
               <p>Please log in or sign up to play the game.</p>
             )}
@@ -349,18 +413,18 @@ export function StorylineGame() {
           >
             <Card className="w-full max-w-3xl">
               <CardHeader>
-                <CardTitle>{story.levels[levelIndex].prompt}</CardTitle>
+                <CardTitle>{story.levels[level].prompt}</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col items-center">
                 <Image
-                  src={story.levels[levelIndex].image}
+                  src={story.levels[level].image}
                   alt="Level Image"
                   className="mb-4 w-full max-w-md rounded-lg"
                   width={500}
                   height={300}
                 />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
-                  {story.levels[levelIndex].actions.map((action) => (
+                  {story.levels[level].actions.map((action) => (
                     <Button key={action.id} onClick={() => handleAction(action)} className="w-full">
                       {action.text}
                     </Button>
@@ -391,6 +455,7 @@ export function StorylineGame() {
                 </Button>
               </div>
             </div>
+            {gameState === "end" && <Confetti />}
           </motion.div>
         )}
 
