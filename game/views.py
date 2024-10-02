@@ -1,10 +1,18 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Story, LeaderboardEntry, Badge, GameSession
+from .models import Story, LeaderboardEntry, Badge, GameSession, GameInvite
 from accounts.models import UserProfile
-from .serializers import StorySerializer, LeaderboardEntrySerializer, UserProfileSerializer, BadgeSerializer, GameSessionSerializer
+from accounts.serializers import UserProfileSerializer
+from .serializers import (
+    StorySerializer,
+    LeaderboardEntrySerializer,
+    BadgeSerializer,
+    GameSessionSerializer,
+    GameInviteSerializer
+)
 from django.db.models import Max
+from rest_framework.permissions import IsAuthenticated
 
 class StoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Story.objects.all()
@@ -85,3 +93,25 @@ class GameSessionViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+class GameInviteViewSet(viewsets.ModelViewSet):
+    queryset = GameInvite.objects.all()
+    serializer_class = GameInviteSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def perform_create(self, serializer):
+        serializer.save(inviter=self.request.user)
+    
+    @action(detail=True, methods=['get'], url_path='inviter-score')
+    def inviter_score(self, request, pk=None):
+        try:
+            invite = self.get_object()
+            if invite.is_expired():
+                return Response({'error': 'Invite has expired.'}, status=status.HTTP_400_BAD_REQUEST)
+            inviter_profile = invite.inviter.profile
+            # Assuming high_scores holds story IDs as strings
+            story_id_str = str(invite.story.id)
+            highest_score = inviter_profile.high_scores.get(story_id_str, 0)
+            return Response({'username': invite.inviter.username, 'highest_score': highest_score}, status=status.HTTP_200_OK)
+        except GameInvite.DoesNotExist:
+            return Response({'error': 'Invite does not exist.'}, status=status.HTTP_404_NOT_FOUND)

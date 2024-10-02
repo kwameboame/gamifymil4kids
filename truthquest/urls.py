@@ -19,6 +19,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/accounts/', include('accounts.urls')),  # Updated to include accounts app
-    path('api/', include('game.urls')),         # Include game app URLs
+    path('api/accounts/', include('accounts.urls')),  # Include accounts app under /api/accounts/
+    path('api/game/', include('game.urls')),         # Include game app URLs under /api/game/
 ]

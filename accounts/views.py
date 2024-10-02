@@ -6,6 +6,7 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth import login, authenticate, logout
 from .forms import LoginForm, UserRegisterForm, UserProfileForm, ProfileUpdateForm
 from .models import User, UserProfile
+from .serializers import UserSerializer
 from django.contrib import messages
 from rest_framework import status
 from rest_framework.response import Response

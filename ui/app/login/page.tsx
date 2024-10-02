@@ -4,24 +4,35 @@ import { useState, useEffect } from 'react';
 import Layout from '@/components/layout';
 import Login from '@/components/login';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
-  const { login } = useAuth(); // Moved useAuth here
+  const { login } = useAuth();
   const [isMounted, setIsMounted] = useState(false);
+  const router = useRouter();
+  const [next, setNext] = useState<string>('/');
 
-  // Ensure component is mounted on client side
   useEffect(() => {
     setIsMounted(true);
+    const params = new URLSearchParams(window.location.search);
+    const nextParam = params.get('next');
+    if (nextParam) {
+      setNext(nextParam);
+    }
   }, []);
 
   const handleLogin = async (username_or_email: string, password: string) => {
-    if (!isMounted) return; // Prevent running on server-side
+    if (!isMounted) return;
 
-    await login(username_or_email, password); // Ensure the login function is called
-    console.log('Login attempt:', username_or_email, password);
+    try {
+      await login(username_or_email, password);
+      router.push(next);
+    } catch (error) {
+      console.error('Login attempt failed:', error);
+    }
   };
 
-  if (!isMounted) return null; // Prevent SSR issues
+  if (!isMounted) return null;
 
   return (
     <Layout>

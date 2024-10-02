@@ -1,5 +1,11 @@
 from django.db import models
 from django.conf import settings
+import uuid
+from datetime import timedelta
+from django.utils import timezone
+
+def get_expiry():
+    return timezone.now() + timedelta(days=7)
 
 class Story(models.Model):
     title = models.CharField(max_length=200)
@@ -56,3 +62,16 @@ class GameSession(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.story.title} - {self.start_time}"
+
+class GameInvite(models.Model):
+    inviter = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sent_invites', on_delete=models.CASCADE)
+    token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    story = models.ForeignKey(Story, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(default=get_expiry)  # Correctly using get_expiry
+    
+    def __str__(self):
+        return f"Invite from {self.inviter.username} for story {self.story.title}"
+    
+    def is_expired(self):
+        return timezone.now() > self.expires_at

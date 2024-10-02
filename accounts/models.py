@@ -13,8 +13,6 @@ from imagekit.processors import ResizeToFill
 from game.models import Badge  # Ensure this import is correct based on your project structure
 
 
-CoreUser = AbstractUser  # Updated from get_user_model()
-
 class User(AbstractUser):
     email = models.EmailField(unique=True)
     phone_regex = RegexValidator(

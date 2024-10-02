@@ -7,8 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useAuth } from '@/contexts/AuthContext'
-import { useRouter } from 'next/navigation'
+// import { useRouter } from 'next/navigation'
 
 export type LoginProps = {
   onSubmit: (username_or_email: string, password: string) => void;
@@ -18,8 +17,7 @@ export default function Login({ onSubmit }: LoginProps) {
   const [usernameOrEmail, setUsernameOrEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const { login } = useAuth()
-  const router = useRouter()
+  // const router = useRouter()
   const [isMounted, setIsMounted] = useState(false)
 
   // Ensure component is mounted on client side
@@ -34,10 +32,8 @@ export default function Login({ onSubmit }: LoginProps) {
     if (!isMounted) return // Prevent running on server-side
 
     try {
-      const response = await login(usernameOrEmail, password)
-      console.log('Login successful:', response)
-      onSubmit(usernameOrEmail, password)
-      router.push('/') // Redirect to home page after successful login
+      await onSubmit(usernameOrEmail, password)
+      console.log('Login successful:', usernameOrEmail, password)
     } catch (error) {
       // Specify a more precise type for error
       console.error('Login error:', (error as { response?: { data?: { detail?: string } } })?.response?.data || (error as Error).message)
