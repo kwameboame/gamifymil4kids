@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Leaderboard</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Rank</th>
+            <th>Player</th>
+            <th>Total Points</th>
+            <th>Badges</th>
+            <th>Profile Photo</th>
+            <th>Timestamp</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in leaderboard_entries %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ entry.user.username }}</td>
+            <td>{{ entry.high_scores.total_points }}</td>
+            <td>
+                {% for badge in entry.badges.all %}
+                    <img src="{{ badge.image.url }}" alt="{{ badge.name }}" width="30">
+                {% endfor %}
+            </td>
+            <td>
+                {% if entry.entry_thumbnail %}
+                    <img src="{{ entry.image_thumbnail.url }}" alt="Profile" width="50">
+                {% else %}
+                    No Photo
+                {% endif %}
+            </td>
+            <td>{{ entry.user.date_joined }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

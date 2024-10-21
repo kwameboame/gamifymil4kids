@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Game Session Ended</h1>
+<p>Thank you for playing! Your total points have been recorded.</p>
+<a href="{% url 'leaderboard' %}">View Leaderboard</a>
+{% endblock %}

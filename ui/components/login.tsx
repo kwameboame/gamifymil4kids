@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription } from "@/components/ui/alert"
-// import { useRouter } from 'next/navigation'
 
 export type LoginProps = {
   onSubmit: (username_or_email: string, password: string) => void;

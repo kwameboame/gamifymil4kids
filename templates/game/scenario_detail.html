@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{ scenario.title }}</h1>
+<p>{{ scenario.description }}</p>
+
+<h2>Choices</h2>
+<ul>
+    {% for choice in choices %}
+        <li>
+            <a href="{% url 'record_choice' choice.id %}">{{ choice.text }}</a>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}

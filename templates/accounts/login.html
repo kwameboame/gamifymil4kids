@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+
+{% block content %}
+
+
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card border-0 shadow">
+        <div class="card-body">
+          <ul class="nav nav-tabs border-0" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active text-white bg-primary" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" role="tab" aria-controls="login" aria-selected="true">Login</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link text-white bg-primary" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab" aria-controls="register" aria-selected="false">Register</button>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab">
+              {% if messages %}
+                {% for message in messages %}
+                  <div class="{% if message.tags %}{{ message.tags }}{% endif %}">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+              <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                  <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+                  {{ form.username|add_class:"form-control" }}
+                </div>
+                <div class="mb-3">
+                  <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
+                  {{ form.password|add_class:"form-control" }}
+                </div>
+                <div class="form-check mb-3">
+                  {{ form.remember_me|add_class:"form-check-input" }}
+                  <label class="form-check-label" for="{{ form.remember_me.id_for_label }}">
+                    Remember me
+                  </label>
+                </div>
+                <button type="submit" class="btn btn-primary acctbtn">Login</button>
+              </form>
+            </div>
+
+            <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
+              <form>
+                <div class="mb-3">
+                  <label for="register-username" class="form-label">Username</label>
+                  <input type="text" class="form-control" id="register-username">
+                </div>
+                <div class="mb-3">
+                  <label for="register-email" class="form-label">Email address</label>
+                  <input type="email" class="form-control" id="register-email" aria-describedby="emailHelp">
+                  <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+                </div>
+                <div class="mb-3">
+                  <label for="register-password" class="form-label">Password</label>
+                  <input type="password" class="form-control" id="register-password">
+                </div>
+                <button type="submit" class="btn btn-primary acctbtn">Register</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<style>
+.nav-item{
+  width:50%;
+  padding-right: 20px;
+}
+
+.nav-tabs .nav-link {
+  background-color: #E8831E;
+  background-image: linear-gradient(to top, #e8831e, #ed9b31, #f2b147, #f8c75e, #fddc77);
+  margin: 10px;
+  padding: 15px 45px;
+  text-align: center;
+  transition: 0.5s;
+  background-size: 200% auto;
+  color: black !important;            
+  border-radius: 10px;
+  display: block;
+  width: 100%;;
+}
+
+.nav-tabs .nav-link.active ,.nav-tabs .nav-link:hover {
+  background-position: right center; /* change the direction of the change here */
+  color: black;
+  text-decoration: none;
+}     
+
+.acctbtn{
+  background-color: #E8831E;
+  background-image: linear-gradient(to top, #e8831e, #ed9b31, #f2b147, #f8c75e, #fddc77);
+  color:#000;
+  width:100%;
+}
+
+.card-body {
+  background-color: #160024;
+  color: #fff;
+  border:3px solid #E8831E;
+  opacity: 0.8;
+}
+
+.form-control {
+  background-color: #5c00e6;
+  color: #fff;
+  border: none;
+}
+
+.form-check-label {
+  color: #fff;
+}
+</style>
+
+{% endblock %}

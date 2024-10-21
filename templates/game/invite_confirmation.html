@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Invite Sent!</h1>
+<p>You have invited <strong>{{ recipient.username }}</strong> to play <strong>{{ scenario.title }}</strong>.</p>
+<a href="{% url 'scenario_list' %}">Back to Scenarios</a>
+{% endblock %}

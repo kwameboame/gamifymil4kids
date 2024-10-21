@@ -11,7 +11,8 @@ import Confetti from "react-confetti";
 import Image from "next/image";
 import axios from "@/lib/axios";
 import { useAuth } from "@/contexts/AuthContext";
-import { FaVolumeUp, FaVolumeMute } from 'react-icons/fa'; // Import sound control icons
+// import { FaVolumeUp, FaVolumeMute } from 'react-icons/fa'; // Import sound control icons
+import Link from "next/link";
 
 export interface Action {
   id: number;
@@ -80,11 +81,11 @@ export function StorylineGame() {
   const mainMusicRef = useRef<HTMLAudioElement>(null);
   const congratsSoundRef = useRef<HTMLAudioElement>(null);
   const gameOverSoundRef = useRef<HTMLAudioElement>(null);
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [vsMode, setVsMode] = useState<boolean>(false);
   const [inviterScore, setInviterScore] = useState<number | null>(null);
-  const [isMuted, setIsMuted] = useState<boolean>(false);
+  // const [isMuted, setIsMuted] = useState<boolean>(false);
 
   const gameAreaRef = useRef<HTMLDivElement>(null);
 
@@ -112,29 +113,28 @@ export function StorylineGame() {
 
   const fetchInitialData = async () => {
     try {
-      const storyResponse = await axios.get<Story>("/game/stories/1/", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
-      });
+      // Fetch story information without authentication
+      const storyResponse = await axios.get<Story>("/game/stories/1/");
       setStory(storyResponse.data);
 
-      // Fetch top-scores for the leaderboard
-      const leaderboardResponse = await axios.get<LeaderboardEntry[]>("/game/leaderboard/top-scores/", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-      });
-      setLeaderboard(leaderboardResponse.data);
-
-      // Fetch the authenticated user's profile if not in VS Mode
-      if (isAuthenticated && !vsMode) {
-        const profileResponse = await axios.get<UserProfile>("/game/profiles/me/", {
+      if (isAuthenticated) {
+        // Fetch top-scores for the leaderboard
+        const leaderboardResponse = await axios.get<LeaderboardEntry[]>("/game/leaderboard/top-scores/", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
         });
-        setUserProfile(profileResponse.data);
+        setLeaderboard(leaderboardResponse.data);
+
+        // Fetch the authenticated user's profile if not in VS Mode
+        if (!vsMode) {
+          const profileResponse = await axios.get<UserProfile>("/accounts/user/", {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            },
+          });
+          setUserProfile(profileResponse.data);
+        }
       }
     } catch (error) {
       console.error("Error fetching initial data:", error);
@@ -173,7 +173,7 @@ export function StorylineGame() {
         },
       });
       const invite: GameInviteResponse = response.data;
-      const frontendBaseURL = process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000";
+      const frontendBaseURL = process.env.NEXT_PUBLIC_FRONTEND_URL;
       const fullInviteLink = `${frontendBaseURL}/game/play/?invite=${invite.token}`;
       setInviteLink(fullInviteLink);
     } catch (error) {
@@ -190,36 +190,23 @@ export function StorylineGame() {
     };
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      setGameState("start");
-      setLeaderboard([]);
-      setUserProfile(null);
-      setInviterScore(null);
-      setInviteLink(null);
-      // Optionally, you can redirect the user to a login page or refresh the page
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
-  };
 
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      gameAreaRef.current?.requestFullscreen();
-      setIsFullscreen(true);
-    } else {
-      document.exitFullscreen();
-      setIsFullscreen(false);
-    }
-  };
+  // const toggleFullscreen = () => {
+  //   if (!document.fullscreenElement) {
+  //     gameAreaRef.current?.requestFullscreen();
+  //     setIsFullscreen(true);
+  //   } else {
+  //     document.exitFullscreen();
+  //     setIsFullscreen(false);
+  //   }
+  // };
 
-  const handleMuteToggle = () => {
-    setIsMuted(!isMuted);
-  };
+  // const handleMuteToggle = () => {
+  //   setIsMuted(!isMuted);
+  // };
 
   const playMainMusic = () => {
-    if (mainMusicRef.current && !isMuted) {
+    if (mainMusicRef.current) {
       mainMusicRef.current.play();
     }
   };
@@ -231,13 +218,13 @@ export function StorylineGame() {
   };
 
   const playCongratsSound = () => {
-    if (congratsSoundRef.current && !isMuted) {
+    if (congratsSoundRef.current) {
       congratsSoundRef.current.play();
     }
   };
 
   const playGameOverSound = () => {
-    if (gameOverSoundRef.current && !isMuted) {
+    if (gameOverSoundRef.current) {
       gameOverSoundRef.current.play();
     }
   };
@@ -307,41 +294,71 @@ export function StorylineGame() {
       <audio ref={gameOverSoundRef} src="/audio/GameOver.wav" />
 
       {/* Sound Control */}
-      <div className="absolute top-4 right-4 flex items-center space-x-2">
+      {/* <div className="absolute top-4 right-4 flex items-center space-x-2">
         <Button onClick={handleMuteToggle} variant="ghost" size="icon">
           {isMuted ? <FaVolumeMute className="h-4 w-4" /> : <FaVolumeUp className="h-4 w-4" />}
         </Button>
-      </div>
+      </div> */}
 
       {/* Game Controls */}
       <div className="flex justify-between items-center mb-4">
-        {isFullscreen ? (
-          <Button onClick={toggleFullscreen} className="text-xs">
-            Exit Fullscreen
-          </Button>
-        ) : (
-          <Button onClick={toggleFullscreen} className="text-xs">
-            Fullscreen
-          </Button>
-        )}
-        {isAuthenticated && !vsMode && ( // Show invite button only if authenticated and not in VS Mode
-          <Button onClick={createInvite} className="text-xs">
-            Create Invite
-          </Button>
-        )}
-        {isAuthenticated && ( // Show logout button if authenticated
-          <Button onClick={handleLogout} className="text-xs">
-            Logout
-          </Button>
-        )}
-        <Button onClick={() => setGameState("leaderboard")} className="text-xs">
-          Leaderboard
-        </Button>
-        {gameState === "playing" && (
-          <div className="text-xl font-bold">Score: {score}</div>
-        )}
-        <AudioControl isGameStarted={gameState === "playing"} />
-      </div>
+      {isAuthenticated && (
+        <>
+          {isFullscreen ? (
+            <Button
+              onClick={() => {
+                if (document.exitFullscreen) {
+                  document.exitFullscreen();
+                }
+                setIsFullscreen(false);
+              }}
+              className="text-xs"
+            >
+              Exit Fullscreen
+            </Button>
+          ) : (
+            <Button
+              onClick={() => {
+                if (gameAreaRef.current && gameAreaRef.current.requestFullscreen) {
+                  gameAreaRef.current.requestFullscreen();
+                }
+                setIsFullscreen(true);
+              }}
+              className="text-xs"
+            >
+              Fullscreen
+            </Button>
+          )}
+        </>
+      )}
+
+  {isAuthenticated && !vsMode && (
+    <Button onClick={createInvite} className="text-xs">
+      Create Invite
+    </Button>
+  )}
+
+  {/* {isAuthenticated && (
+    <Button onClick={handleLogout} className="text-xs">
+      Logout
+    </Button>
+  )} */}
+
+  {isAuthenticated && (
+    <Button onClick={() => setGameState("leaderboard")} className="text-xs">
+      Leaderboard
+    </Button>
+  )}
+
+  {gameState === "playing" && (
+    <div className="text-xl font-bold">Score: {score}</div>
+  )}
+  {isAuthenticated && (
+    <AudioControl isGameStarted={gameState === "playing"} />
+  )}
+  
+</div>
+
 
       {/* Share Invite Link */}
       {inviteLink && (
@@ -398,7 +415,31 @@ export function StorylineGame() {
             {isAuthenticated ? (
               <Button onClick={() => setGameState("playing")}>Start Game</Button>
             ) : (
-              <p>Please log in or sign up to play the game.</p>
+              <>
+                <p className="mb-4">Please log in or sign up to play the game.</p>
+                <div className="flex space-x-4">
+                  <Button variant="default" asChild className="bg-violet-950 hover:bg-violet-900">
+                    <Link href="/login" className="text-yellow-300">
+                      Login
+                    </Link>
+                  </Button>
+                  <Button variant="default" asChild className="bg-blue-950 hover:bg-blue-900">
+                    <Link href="/signup" className="text-yellow-300">
+                      Sign Up
+                    </Link>
+                  </Button>
+                </div>
+                <Button variant="ghost" asChild>
+                  <Link href="/login" className="text-white hover:text-orange-500">
+                    Login
+                  </Link>
+                </Button>
+                <Button variant="ghost" asChild>
+                      <Link href="/signup" className="text-white hover:text-orange-500">
+                        Sign Up
+                      </Link>
+                    </Button>
+              </>
             )}
           </motion.div>
         )}

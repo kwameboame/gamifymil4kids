@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{ profile.user.username }}'s Profile</h1>
+<p>Email: {{ profile.user.email }}</p>
+<p>Phone: {{ profile.user.phone }}</p>
+
+<h2>Badges</h2>
+<ul>
+    {% for badge in profile.badges.all %}
+    <li>{{ badge.name }} - <img src="{{ badge.image.url }}" alt="{{ badge.name }}" width="30"></li>
+    {% empty %}
+    <li>No badges earned yet.</li>
+    {% endfor %}
+</ul>
+
+<h2>Profile Photo</h2>
+{% if profile.entry_thumbnail %}
+    <img src="{{ profile.image_thumbnail.url }}" alt="Profile Photo">
+{% else %}
+    <p>No photo available.</p>
+{% endif %}
+{% endblock %}

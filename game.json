@@ -1,0 +1,120 @@
+[
+   {
+       "model": "game.scenario",
+       "pk": 1,
+       "fields": {
+           "title": "The Social Media Frenzy - Scenario 1",
+           "description": "Adjoa finds a Facebook post claiming ginger tea prevents all illnesses. What should she do?"
+       }
+   },
+   {
+       "model": "game.choice",
+       "pk": 1,
+       "fields": {
+           "scenario": 1,
+           "text": "Share it with friends because it sounds helpful.",
+           "points": 0
+       }
+   },
+   {
+       "model": "game.outcome",
+       "pk": 1,
+       "fields": {
+           "choice": 1,
+           "description": "Adjoa feels good but later regrets it when she learns the post misled people to stop medication."
+       }
+   },
+   {
+       "model": "game.choice",
+       "pk": 2,
+       "fields": {
+           "scenario": 1,
+           "text": "Ask her elder sister and look it up online.",
+           "points": 3
+       }
+   },
+   {
+       "model": "game.outcome",
+       "pk": 2,
+       "fields": {
+           "choice": 2,
+           "description": "She discovers the post is partly true but exaggerated and informs her friends not to share it."
+       }
+   },
+   {
+       "model": "game.choice",
+       "pk": 3,
+       "fields": {
+           "scenario": 1,
+           "text": "Ignore it and keep scrolling.",
+           "points": 1
+       }
+   },
+   {
+       "model": "game.outcome",
+       "pk": 3,
+       "fields": {
+           "choice": 3,
+           "description": "Adjoa avoids spreading the post but later regrets not intervening when others believed it."
+       }
+   },
+   {
+       "model": "game.scenario",
+       "pk": 2,
+       "fields": {
+           "title": "Scenario 2: The Influencer's Endorsement",
+           "description": "Adjoa sees a post with a famous doctor endorsing the tea. She feels suspicious."
+       }
+   },
+   {
+       "model": "game.choice",
+       "pk": 4,
+       "fields": {
+           "scenario": 2,
+           "text": "Share the message because it sounds convincing.",
+           "points": 0
+       }
+   },
+   {
+       "model": "game.outcome",
+       "pk": 4,
+       "fields": {
+           "choice": 4,
+           "description": "The false message spreads quickly, misleading more people."
+       }
+   },
+   {
+       "model": "game.choice",
+       "pk": 5,
+       "fields": {
+           "scenario": 2,
+           "text": "Search online to verify if the doctor endorsed it.",
+           "points": 3
+       }
+   },
+   {
+       "model": "game.outcome",
+       "pk": 5,
+       "fields": {
+           "choice": 5,
+           "description": "Adjoa finds out the picture is fake and informs her friends."
+       }
+   },
+   {
+       "model": "game.choice",
+       "pk": 6,
+       "fields": {
+           "scenario": 2,
+           "text": "Ask friends on group chat if the message is true.",
+           "points": 1
+       }
+   },
+   {
+       "model": "game.outcome",
+       "pk": 6,
+       "fields": {
+           "choice": 6,
+           "description": "The friends are unsure, and the false message continues to spread."
+       }
+   }
+]

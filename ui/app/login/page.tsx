@@ -10,7 +10,7 @@ export default function LoginPage() {
   const { login } = useAuth();
   const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
-  const [next, setNext] = useState<string>('/');
+  const [next, setNext] = useState<string>('/game');
 
   useEffect(() => {
     setIsMounted(true);

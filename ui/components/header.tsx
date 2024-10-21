@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext' // We'll create this context
 
 const navItems = [
-  { href: '/', label: 'Home' },
+  { href: '/game', label: 'Home' },
   { href: '/game', label: 'Play Game' },
   { href: '/profile', label: 'Profile' },
 ]
@@ -16,7 +16,7 @@ export default function Header() {
   return (
     <header className="bg-purple-950">
       <div className="container mx-auto px-4 flex justify-between items-center">
-        <Link href="/" className="flex items-center">
+        <Link href="/game" className="flex items-center">
           <Image src="/images/logo.png" alt="Logo" height={80} width={100} priority />
         </Link>
         <nav>

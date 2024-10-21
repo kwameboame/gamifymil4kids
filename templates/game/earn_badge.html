@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Badge Earned!</h1>
+<p>Congratulations! You earned the <strong>{{ badge.name }}</strong> badge.</p>
+<p>Description: {{ badge.description }}</p>
+<a href="{% url 'scenario_list' %}">Continue Playing</a>
+{% endblock %}

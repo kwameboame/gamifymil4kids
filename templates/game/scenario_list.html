@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Scenarios</h1>
+<ul>
+    {% for scenario in scenarios %}
+        <li><a href="{% url 'scenario_detail' scenario.id %}">{{ scenario.title }}</a></li>
+    {% endfor %}
+</ul>
+{% endblock %}
