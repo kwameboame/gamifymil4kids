@@ -1,6 +1,8 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import StoryViewSet, LeaderboardEntryViewSet, UserProfileViewSet, BadgeViewSet, GameSessionViewSet, GameInviteViewSet
+from .views import (StoryViewSet, LeaderboardEntryViewSet, UserProfileViewSet, 
+                    LevelViewSet, ActionViewSet, BadgeViewSet, ScenarioViewSet,
+                    GameSessionViewSet, GameInviteViewSet)
 
 router = DefaultRouter()
 router.register(r'stories', StoryViewSet)
@@ -12,4 +14,7 @@ router.register(r'invites', GameInviteViewSet, basename='gameinvite')  # Added G
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('stories/<int:story_id>/levels/', LevelViewSet.as_view({'get': 'list'}), name='story-levels'),
+    path('stories/<int:story_id>/levels/<int:level_id>/scenarios/', ScenarioViewSet.as_view({'get': 'list'}), name='level-scenarios'),
+    path('scenarios/<int:scenario_id>/actions/', ActionViewSet.as_view({'get': 'list'}), name='scenario-actions'),
 ]

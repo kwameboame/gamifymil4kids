@@ -10,21 +10,35 @@ def get_expiry():
 class Story(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
+    image = models.ImageField(upload_to='level_images/', null=True, blank=True)
 
     def __str__(self):
         return self.title
 
+
 class Level(models.Model):
+    title = models.CharField(null=True, blank=True, max_length=200)
     story = models.ForeignKey(Story, related_name='levels', on_delete=models.CASCADE)
-    prompt = models.TextField()
     image = models.ImageField(upload_to='level_images/', null=True, blank=True)
     order = models.IntegerField()
 
     def __str__(self):
         return f"{self.story.title} - Level {self.order}"
 
+
+class Scenario(models.Model):
+    story = models.ForeignKey(Story, related_name='story', on_delete=models.CASCADE)
+    level = models.ForeignKey(Level, related_name='levels', on_delete=models.CASCADE)
+    description = models.TextField()
+    image = models.ImageField(upload_to='level_images/', null=True, blank=True)
+    order = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.story.title} - Scenario {self.order}"
+
+
 class Action(models.Model):
-    level = models.ForeignKey(Level, related_name='actions', on_delete=models.CASCADE)
+    scenario = models.ForeignKey(Scenario, related_name='actions', null=True, blank=True, on_delete=models.CASCADE)
     text = models.CharField(max_length=200)
     is_correct = models.BooleanField(default=False)
     points = models.IntegerField(default=0)

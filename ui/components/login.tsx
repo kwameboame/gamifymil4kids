@@ -74,6 +74,7 @@ export default function Login({ onSubmit }: LoginProps) {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
+          <br />
           <Button type="submit">Log In</Button>
         </form>
       </CardContent>

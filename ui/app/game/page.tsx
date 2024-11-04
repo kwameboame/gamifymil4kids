@@ -4,7 +4,7 @@ import { StorylineGame } from "@/components/game";
 export default function GamePage() {
   return (
     <Layout> {/* Wrap StorylineGame in Layout */}
-      <div className="min-h-screen bg-gradient-to-b flex items-center justify-center">
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <StorylineGame />
       </div>
     </Layout>

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Story, Level, Action, LeaderboardEntry, Badge, GameSession, GameInvite
+from .models import Story, Level, Scenario, Action, LeaderboardEntry, Badge, GameSession, GameInvite
 from accounts.models import UserProfile
 
 class ActionSerializer(serializers.ModelSerializer):
@@ -8,18 +8,25 @@ class ActionSerializer(serializers.ModelSerializer):
         fields = ['id', 'text', 'is_correct', 'points']
 
 class LevelSerializer(serializers.ModelSerializer):
-    actions = ActionSerializer(many=True, read_only=True)
 
     class Meta:
         model = Level
-        fields = ['id', 'prompt', 'image', 'order', 'actions']
+        fields = ['id', 'title', 'story', 'image', 'order']
+
+class ScenarioSerializer(serializers.ModelSerializer):
+    actions = ActionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Scenario
+        fields = ['id', 'story', 'level', 'description', 'image', 'order', 'actions']
 
 class StorySerializer(serializers.ModelSerializer):
     levels = LevelSerializer(many=True, read_only=True)
+    scenarios = ScenarioSerializer(many=True, read_only=True)
 
     class Meta:
         model = Story
-        fields = ['id', 'title', 'description', 'levels']
+        fields = ['id', 'title', 'description', 'image', 'levels', 'scenarios']
 
 class LeaderboardEntrySerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)

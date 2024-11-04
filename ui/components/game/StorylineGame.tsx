@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, Maximize2, Minimize2 } from "lucide-react";
 import { AudioControl } from "./AudioControl";
 import { LeaderboardComponent } from "./LeaderboardComponent";
 import { ProfileComponent } from "./ProfileComponent";
@@ -11,7 +11,6 @@ import Confetti from "react-confetti";
 import Image from "next/image";
 import axios from "@/lib/axios";
 import { useAuth } from "@/contexts/AuthContext";
-// import { FaVolumeUp, FaVolumeMute } from 'react-icons/fa'; // Import sound control icons
 import Link from "next/link";
 
 export interface Action {
@@ -33,7 +32,18 @@ export interface Story {
   id: number;
   title: string;
   description: string;
+  image: string;
   levels: Level[];
+}
+
+export interface Scenarios {
+  id: number;
+  story: number;
+  level: number;
+  description: string;
+  image: string | null;
+  order: number;
+  actions: Action[];
 }
 
 interface LeaderboardEntry {
@@ -57,6 +67,7 @@ interface GameInviteResponse {
   expires_at: string;
 }
 
+
 export function StorylineGame() {
   const [gameState, setGameState] = useState<
     | "start"
@@ -71,10 +82,15 @@ export function StorylineGame() {
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(0);
   const [story, setStory] = useState<Story | null>(null);
+  const [scenarios, setScenarios] = useState<Scenarios[] | null>(null);
+  const [scenarioIndex, setScenarioIndex] = useState(0);
+  const selectedScenario = scenarios ? scenarios[scenarioIndex] : null;
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  // const [isGameStarted, setIsGameStarted] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [lives, setLives] = useState(3);
+  const gameContainerRef = useRef<HTMLDivElement>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   // Audio references
@@ -82,12 +98,11 @@ export function StorylineGame() {
   const congratsSoundRef = useRef<HTMLAudioElement>(null);
   const gameOverSoundRef = useRef<HTMLAudioElement>(null);
   const { isAuthenticated } = useAuth();
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [vsMode, setVsMode] = useState<boolean>(false);
   const [inviterScore, setInviterScore] = useState<number | null>(null);
   // const [isMuted, setIsMuted] = useState<boolean>(false);
 
-  const gameAreaRef = useRef<HTMLDivElement>(null);
+  // const gameAreaRef = useRef<HTMLDivElement>(null);
 
 
   useEffect(() => {
@@ -114,8 +129,12 @@ export function StorylineGame() {
   const fetchInitialData = async () => {
     try {
       // Fetch story information without authentication
-      const storyResponse = await axios.get<Story>("/game/stories/1/");
+      const storyResponse = await axios.get<Story>("/game/stories/3/");
       setStory(storyResponse.data);
+
+      // Fetch story scenarios
+      const scenariosResponse = await axios.get<Scenarios[]>("game/stories/3/levels/6/scenarios/");
+      setScenarios(scenariosResponse.data);
 
       if (isAuthenticated) {
         // Fetch top-scores for the leaderboard
@@ -191,19 +210,43 @@ export function StorylineGame() {
   };
 
 
-  // const toggleFullscreen = () => {
-  //   if (!document.fullscreenElement) {
-  //     gameAreaRef.current?.requestFullscreen();
-  //     setIsFullscreen(true);
-  //   } else {
-  //     document.exitFullscreen();
-  //     setIsFullscreen(false);
-  //   }
-  // };
+  // Function to handle entering fullscreen
+  const enterFullscreen = async () => {
+    if (gameContainerRef.current) {
+      try {
+        if (gameContainerRef.current.requestFullscreen) {
+          await gameContainerRef.current.requestFullscreen();
+        }
+        setIsFullscreen(true);
+      } catch (err) {
+        console.error("Error attempting to enable fullscreen:", err);
+      }
+    }
+  };
 
-  // const handleMuteToggle = () => {
-  //   setIsMuted(!isMuted);
-  // };
+  // Function to handle exiting fullscreen
+  const exitFullscreen = async () => {
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      }
+      setIsFullscreen(false);
+    } catch (err) {
+      console.error("Error attempting to exit fullscreen:", err);
+    }
+  };
+
+  // Handle fullscreen change events
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   const playMainMusic = () => {
     if (mainMusicRef.current) {
@@ -245,10 +288,16 @@ export function StorylineGame() {
   const handleAction = (action: Action) => {
     const newScore = score + action.points;
     setScore(Math.max(0, newScore));
-
+  
     if (action.is_correct) {
-      if (level < (story?.levels.length || 0) - 1) {
+      // Check if there are more scenarios in the current level
+      if (scenarioIndex < (scenarios?.length || 0) - 1) {
+        // Move to the next scenario
+        setScenarioIndex((prev) => prev + 1);
+      } else if (level < (story?.levels.length || 0) - 1) {
+        // Move to the next level if scenarios are finished
         setLevel((prev) => prev + 1);
+        setScenarioIndex(0); // Reset scenario index for the new level
       } else {
         // Game end logic
         playCongratsSound();
@@ -257,8 +306,12 @@ export function StorylineGame() {
       }
     } else {
       // Handle incorrect action
-      playGameOverSound();
-      setGameState("gameover");
+      // Deduct a life and update game state if lives reach zero
+      setLives((prevLives) => prevLives - 1);
+      if (lives - 1 <= 0) {
+        playGameOverSound();
+        setGameState("gameover");
+      }
     }
   };
 
@@ -271,13 +324,25 @@ export function StorylineGame() {
     setGameState("start");
   };
 
+  // Modified start game handler to enter fullscreen
+  const handleStartGame = async () => {
+    await enterFullscreen();
+    setLives(3);  // Reset lives when starting a new game
+    setScore(0);    // Reset score when starting a new game
+    setShowConfetti(false); // Stop confetti
+    setGameState("playing");
+  };
 
   if (isLoading) {
     return <Loader2 className="animate-spin" />;
   }
 
   return (
-    <div className="relative flex flex-col h-full" style={{ zIndex: 1 }}>
+    <div 
+      ref={gameContainerRef}
+      className="relative w-3/4 flex flex-col h-full"
+      style={{ zIndex: 1 }}
+    >
       {/* Show Confetti */}
       {showConfetti && <Confetti />}
 
@@ -293,72 +358,50 @@ export function StorylineGame() {
       <audio ref={congratsSoundRef} src="/audio/congrats.mp3" />
       <audio ref={gameOverSoundRef} src="/audio/GameOver.wav" />
 
-      {/* Sound Control */}
-      {/* <div className="absolute top-4 right-4 flex items-center space-x-2">
-        <Button onClick={handleMuteToggle} variant="ghost" size="icon">
-          {isMuted ? <FaVolumeMute className="h-4 w-4" /> : <FaVolumeUp className="h-4 w-4" />}
-        </Button>
-      </div> */}
-
       {/* Game Controls */}
       <div className="flex justify-between items-center mb-4">
       {isAuthenticated && (
         <>
-          {isFullscreen ? (
-            <Button
-              onClick={() => {
-                if (document.exitFullscreen) {
-                  document.exitFullscreen();
-                }
-                setIsFullscreen(false);
-              }}
-              className="text-xs"
-            >
-              Exit Fullscreen
-            </Button>
-          ) : (
-            <Button
-              onClick={() => {
-                if (gameAreaRef.current && gameAreaRef.current.requestFullscreen) {
-                  gameAreaRef.current.requestFullscreen();
-                }
-                setIsFullscreen(true);
-              }}
-              className="text-xs"
-            >
-              Fullscreen
-            </Button>
-          )}
+
+        {/* Only show exit fullscreen button when in fullscreen mode */}
+        {isFullscreen && (
+          <Button
+            onClick={exitFullscreen}
+            className="absolute top-4 right-4 bg-orange-700"
+          >
+            <Minimize2 className="mr-2 h-4 w-4" />
+            Exit Fullscreen
+          </Button>
+        )}
+
         </>
       )}
 
   {isAuthenticated && !vsMode && (
-    <Button onClick={createInvite} className="text-xs">
+    <Button className="bg-orange-700 text-xs" onClick={createInvite}>
       Create Invite
     </Button>
   )}
 
-  {/* {isAuthenticated && (
-    <Button onClick={handleLogout} className="text-xs">
-      Logout
-    </Button>
-  )} */}
-
   {isAuthenticated && (
-    <Button onClick={() => setGameState("leaderboard")} className="text-xs">
+    <Button className="bg-orange-700 text-xs" onClick={() => setGameState("leaderboard")}>
       Leaderboard
     </Button>
   )}
 
   {gameState === "playing" && (
-    <div className="text-xl font-bold">Score: {score}</div>
+    <div className="flex items-center space-x-2">
+      <span className="text-xl font-bold text-white">Score: {score}</span>
+      {[...Array(lives)].map((_, index) => (
+        <span key={index} className="text-red-500">❤️</span>
+      ))}
+    </div>
   )}
   {isAuthenticated && (
     <AudioControl isGameStarted={gameState === "playing"} />
   )}
   
 </div>
-
 
       {/* Share Invite Link */}
       {inviteLink && (
@@ -403,17 +446,31 @@ export function StorylineGame() {
             transition={{ duration: 0.5 }}
             className="flex flex-col items-center justify-center flex-grow text-center"
           >
-            <h1 className="text-4xl font-bold mb-4">{story.title}</h1>
-            <p className="mb-4">{story.description}</p>
-            <Image
-              src="/images/placeholder.png"
-              alt="Adventure Intro"
-              className="mb-4 w-full max-w-xl rounded-lg"
-              width={500}
-              height={300}
-            />
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+              <div className="md:w-3/4">
+                <h1 className="text-4xl font-bold mb-4 text-white">{story.title}</h1>
+                <p className="mb-4 text-white">{story.description}</p>
+              </div>
+              <div className="md:w-1/4">
+                <Image
+                  src={story.image}
+                  alt="Adventure Intro"
+                  className="mb-4 w-full max-w-xl rounded-lg"
+                  width={300}
+                  height={175}
+                />
+              </div>
+            </div>
+
             {isAuthenticated ? (
-              <Button onClick={() => setGameState("playing")}>Start Game</Button>
+              <Button 
+              className="bg-orange-700" 
+              onClick={handleStartGame}
+            >
+              <Maximize2 className="mr-2 h-4 w-4" />
+              Start Game
+            </Button>
+              // <Button className="bg-orange-700" onClick={() => setGameState("playing")}>Start Game</Button>
             ) : (
               <>
                 <p className="mb-4">Please log in or sign up to play the game.</p>
@@ -429,16 +486,6 @@ export function StorylineGame() {
                     </Link>
                   </Button>
                 </div>
-                <Button variant="ghost" asChild>
-                  <Link href="/login" className="text-white hover:text-orange-500">
-                    Login
-                  </Link>
-                </Button>
-                <Button variant="ghost" asChild>
-                      <Link href="/signup" className="text-white hover:text-orange-500">
-                        Sign Up
-                      </Link>
-                    </Button>
               </>
             )}
           </motion.div>
@@ -452,27 +499,39 @@ export function StorylineGame() {
             transition={{ duration: 0.5 }}
             className="flex-grow flex items-center justify-center overflow-y-auto"
           >
-            <Card className="w-full max-w-3xl">
-              <CardHeader>
-                <CardTitle>{story.levels[level].prompt}</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col items-center">
-                <Image
-                  src={story.levels[level].image}
-                  alt="Level Image"
-                  className="mb-4 w-full max-w-md rounded-lg"
-                  width={500}
-                  height={300}
-                />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
-                  {story.levels[level].actions.map((action) => (
-                    <Button key={action.id} onClick={() => handleAction(action)} className="w-full">
-                      {action.text}
-                    </Button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+
+<Card className="w-full max-w-full">
+  <CardHeader>
+    <CardTitle>{selectedScenario?.description}</CardTitle>
+  </CardHeader>
+  <CardContent className="flex flex-col items-center">
+    {selectedScenario?.image ? (
+      <Image
+        src={selectedScenario.image}
+        alt="Level Image"
+        className="mb-4 w-full max-w-md rounded-lg"
+        width={500}
+        height={300}
+      />
+    ) : (
+      <div className="mb-4 w-full max-w-md rounded-lg bg-gray-200 flex items-center justify-center h-48">
+        <p>No Image Available</p>
+      </div>
+    )}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
+      {selectedScenario?.actions.map((action) => (
+        <Button
+          key={action.id}
+          onClick={() => handleAction(action)}
+          className="w-full"
+        >
+          {action.text}
+        </Button>
+      ))}
+    </div>
+  </CardContent>
+</Card>
+
           </motion.div>
         )}
 
@@ -488,9 +547,19 @@ export function StorylineGame() {
               <h2 className="text-4xl font-bold mb-6">{gameState === "end" ? "Congratulations!" : "Game Over!"}</h2>
               <p className="text-2xl mb-8">Your Score: {score}</p>
               <div className="space-y-4">
-                <Button onClick={() => setGameState("start")} className="w-full max-w-xs mx-auto text-lg py-3">
-                  Play Again
-                </Button>
+              <Button 
+                onClick={() => {
+                  setShowConfetti(false); // Stop confetti
+                  setScore(0);            // Reset score
+                  setLives(3);            // Reset lives
+                  setScenarioIndex(0);    // Start from the first scenario
+                  setGameState("start");  // Restart the game
+                }} 
+                className="w-full max-w-xs mx-auto text-lg py-3"
+              >
+                Play Again
+              </Button>
+
                 <Button onClick={handleEndGame} className="w-full max-w-xs mx-auto text-lg py-3">
                   View Leaderboard
                 </Button>

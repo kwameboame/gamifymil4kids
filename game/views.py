@@ -1,11 +1,14 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Story, LeaderboardEntry, Badge, GameSession, GameInvite
+from .models import Story, Scenario, Level, Action, LeaderboardEntry, Badge, GameSession, GameInvite
 from accounts.models import UserProfile
 from accounts.serializers import UserProfileSerializer
 from .serializers import (
     StorySerializer,
+    ScenarioSerializer,
+    LevelSerializer,
+    ActionSerializer,
     LeaderboardEntrySerializer,
     BadgeSerializer,
     GameSessionSerializer,
@@ -17,6 +20,33 @@ from rest_framework.permissions import IsAuthenticated
 class StoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Story.objects.all()
     serializer_class = StorySerializer
+    
+class LevelViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = LevelSerializer
+
+    def get_queryset(self):
+        # Get the `story_id` from the URL kwargs
+        story_id = self.kwargs.get('story_id')
+        if story_id:
+            # Filter levels to only those associated with the given story_id
+            return Level.objects.filter(story__id=story_id)
+        # Default queryset if no story_id is provided (though this should never be the case here)
+        return Level.objects.none()
+
+
+class ScenarioViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = ScenarioSerializer
+
+    def get_queryset(self):
+        story_id = self.kwargs.get('story_id')
+        level_id = self.kwargs.get('level_id')
+        if story_id and level_id:
+            return Scenario.objects.filter(story__id=story_id, level__id=level_id)
+        return Scenario.objects.all()
+
+class ActionViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Action.objects.all()
+    serializer_class = ActionSerializer
 
 class LeaderboardEntryViewSet(viewsets.ModelViewSet):
     queryset = LeaderboardEntry.objects.all().order_by('-score')

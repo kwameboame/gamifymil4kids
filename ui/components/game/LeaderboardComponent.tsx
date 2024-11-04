@@ -13,7 +13,7 @@ type LeaderboardProps = {
 
 export function LeaderboardComponent({ leaderboard, onBack }: LeaderboardProps) {
   return (
-    <div className="w-full max-w-4xl mx-auto">
+    <div className="w-full max-w-4xl mx-auto text-white">
       <h2 className="text-2xl font-bold mb-4">Leaderboard</h2>
       <Table>
         <TableHeader>
