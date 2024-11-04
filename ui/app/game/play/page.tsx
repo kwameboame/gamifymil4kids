@@ -39,7 +39,7 @@ export default function PlayPage() {
 
   const fetchStory = async () => {
     try {
-      const response = await axios.get<Story>('/game/stories/1/');
+      const response = await axios.get<Story>('/game/stories/3/');
       setStory(response.data);
     } catch (error) {
       console.error("Error fetching story:", error);
@@ -59,7 +59,7 @@ export default function PlayPage() {
 
   const handleStartGame = () => {
     if (isAuthenticated) {
-      router.push('/game/play/game');
+      router.push('/game/');
     } else {
       router.push(`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
     }
