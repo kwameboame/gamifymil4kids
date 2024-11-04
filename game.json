@@ -4,7 +4,8 @@
     "pk": 1,
     "fields": {
         "title": "Forest Adventure",
-        "description": "Embark on a mysterious journey through an enchanted forest."
+        "description": "Embark on a mysterious journey through an enchanted forest.",
+        "image": ""
     }
 },
 {
@@ -12,15 +13,25 @@
     "pk": 2,
     "fields": {
         "title": "Space Odyssey",
-        "description": "Explore the vast reaches of space in this cosmic adventure."
+        "description": "Explore the vast reaches of space in this cosmic adventure.",
+        "image": ""
+    }
+},
+{
+    "model": "game.story",
+    "pk": 3,
+    "fields": {
+        "title": "Truth Quest",
+        "description": "Hi, I am Adjoa. I live in Accra with my parents and 2 older siblings, Jay and Kwaku. \r\nI am a curious 12-year-old and I love to spend time on Facebook, where I follow musicians, my favourite influencers and chat with friends. Follow me on this journey as I navigate through daily social media frenzies.",
+        "image": "level_images/_85a7bd21-d8ce-4203-9e5f-486e41b1ef45_w5li8Yy.jpeg"
     }
 },
 {
     "model": "game.level",
     "pk": 1,
     "fields": {
+        "title": null,
         "story": 1,
-        "prompt": "You find a mysterious door in the forest. What do you do?",
         "image": "level_images/_ccc8a9a9-10d7-4621-a92d-e684ada13330.jpeg",
         "order": 1
     }
@@ -29,8 +40,8 @@
     "model": "game.level",
     "pk": 2,
     "fields": {
+        "title": null,
         "story": 1,
-        "prompt": "Inside, you see a glowing artifact. How do you proceed?",
         "image": "level_images/_85a7bd21-d8ce-4203-9e5f-486e41b1ef45.jpeg",
         "order": 2
     }
@@ -39,8 +50,8 @@
     "model": "game.level",
     "pk": 3,
     "fields": {
+        "title": null,
         "story": 1,
-        "prompt": "A guardian appears and asks for the password. What do you say?",
         "image": "level_images/_2b41be72-d093-4711-afad-cb2c78b38084.jpeg",
         "order": 3
     }
@@ -49,8 +60,8 @@
     "model": "game.level",
     "pk": 4,
     "fields": {
+        "title": null,
         "story": 2,
-        "prompt": "Your spaceship encounters an asteroid field. How do you navigate?",
         "image": "level_images/asteroid_field.jpg",
         "order": 1
     }
@@ -59,17 +70,137 @@
     "model": "game.level",
     "pk": 5,
     "fields": {
+        "title": null,
         "story": 2,
-        "prompt": "You receive a distress signal from a nearby planet. What's your next move?",
         "image": "level_images/distress_signal.jpg",
         "order": 2
+    }
+},
+{
+    "model": "game.level",
+    "pk": 6,
+    "fields": {
+        "title": "1",
+        "story": 3,
+        "image": "",
+        "order": 1
+    }
+},
+{
+    "model": "game.scenario",
+    "pk": 1,
+    "fields": {
+        "story": 3,
+        "level": 6,
+        "description": "One Saturday afternoon, Adjoa took her sisterÆs phone to check whatÆs happening on Facebook. While scrolling through her feed, Adjoa comes across a post that catches her attention.\r\nOne of her favourites and a popular influence had posted: \"Drinking ginger tea every morning will keep you from getting sick forever!\" The post had over 10k likes and shares, and it seems everyone is talking about it. What should I do?",
+        "image": "level_images/_e3a880f3-4d79-467e-9190-88decc040561.jpeg",
+        "order": 1
+    }
+},
+{
+    "model": "game.scenario",
+    "pk": 2,
+    "fields": {
+        "story": 3,
+        "level": 6,
+        "description": "Adjoa sees another post, this time claiming that a famous local doctor endorses the tea as a miracle cure. The message even includes a picture of the doctor holding a cup of ginger tea.\r\nBut Adjoa remembers what she learned from the previous scenario and feels suspicious.",
+        "image": "level_images/_200b158c-9a32-4336-b775-74069bc975c4.jpeg",
+        "order": 2
+    }
+},
+{
+    "model": "game.scenario",
+    "pk": 3,
+    "fields": {
+        "story": 3,
+        "level": 6,
+        "description": "Adjoa receives a heartfelt sponsored message via her DM about a child who needs help for surgery. The message says that donations are urgently needed and includes a link to a donation page. This seems very convincing as the child is seen in a known hospital. Kindhearted Adjoa is moved to donate some of her savings.",
+        "image": "level_images/_9b612f54-2dd5-4644-8ad8-6a623b41673c.jpeg",
+        "order": 3
+    }
+},
+{
+    "model": "game.scenario",
+    "pk": 4,
+    "fields": {
+        "story": 3,
+        "level": 6,
+        "description": "As Adjoa starts becoming more aware of online dangers, she begins noticing how easy it is for people to be misinformed. But soon, she faces another challenge.\r\n\r\nOn Monday during school lunch break, while talking to her friends about the false donation link, Adjoa hears a rumor thatÆs spreading in her class: \"School is going to close early because someone got really sick!\" The rumor is spreading fast, and everyone is getting worried.\r\n\r\nAdjoa remembers how easily false messages can spread and decides to be careful.",
+        "image": "level_images/_6e570f12-4604-4983-adf8-e8a9565de465.jpeg",
+        "order": 4
+    }
+},
+{
+    "model": "game.scenario",
+    "pk": 5,
+    "fields": {
+        "story": 3,
+        "level": 6,
+        "description": "Just as Adjoa is feeling more confident in her ability to spot fake news. While relaxing after school, her elder brother, Kweku tells her of a TikTok post he saw about her favorite musician. The post claims that the musician got into serious trouble with the police and even shows pictures of the musician looking upset.\r\n\r\nThe post is getting a lot of attention, and Adjoa feels tempted to share it with her class group chat.",
+        "image": "level_images/_07194e24-8e97-4ca5-88e5-e0af5b79287a.jpeg",
+        "order": 5
+    }
+},
+{
+    "model": "game.scenario",
+    "pk": 6,
+    "fields": {
+        "story": 3,
+        "level": 6,
+        "description": "On a rainy Saturday morning, Adjoa is feeling more confident after successfully navigating the previous situations. She sees a chain WhatsApp message on her motherÆs phone from one of her contacts that says, \"Forward this to 10 people, and youÆll have good luck! If you donÆt, something bad might happen!\" The message seems harmless, but she remembers what she has been through recently.",
+        "image": "level_images/_33a49a26-72ca-41b5-9335-ee966b763b35.jpeg",
+        "order": 6
+    }
+},
+{
+    "model": "game.scenario",
+    "pk": 7,
+    "fields": {
+        "story": 3,
+        "level": 6,
+        "description": "Just before she sent the phone back to her mum, Adjoa saw a breaking news alert on the news app. The notification says - \"Massive flood disaster in the cityùstay indoors!\" The alert includes dramatic flooding photos and urgent warnings.",
+        "image": "level_images/_af65edf8-114f-49a5-9e9e-53701dfb78bf.jpeg",
+        "order": 7
+    }
+},
+{
+    "model": "game.scenario",
+    "pk": 8,
+    "fields": {
+        "story": 3,
+        "level": 6,
+        "description": "Adjoa gets an email claiming she has won a prize in a regional schools contest. To claim it, she needs to provide personal details and pay a small handling fee. She approaches her mother about this email. What should she do afterwards?",
+        "image": "level_images/_0f3fdf2b-f32d-460e-8cfa-9618b0385313.jpeg",
+        "order": 8
+    }
+},
+{
+    "model": "game.scenario",
+    "pk": 9,
+    "fields": {
+        "story": 3,
+        "level": 6,
+        "description": "Adjoa sees a TikTok challenge thatÆs trending, promising fun and excitement. The challenge involves doing a specific activity and posting a video to win a prize.",
+        "image": "level_images/_4f48cce3-1cd8-4ff7-bc58-7658b7ead659.jpeg",
+        "order": 9
+    }
+},
+{
+    "model": "game.scenario",
+    "pk": 10,
+    "fields": {
+        "story": 3,
+        "level": 6,
+        "description": "Adjoa sees another email notification about a package being delivered to her home by Amazon that she didnÆt order. The notification says the package contains makeup kits and dresses worth over 300USD and asks for confirmation and personal details to ensure delivery. They even mention her full name in the email which makes it sound very legitimate.",
+        "image": "level_images/_eaed5da5-cddb-44b2-81c8-10166fad9c61.jpeg",
+        "order": 10
     }
 },
 {
     "model": "game.action",
     "pk": 1,
     "fields": {
-        "level": 1,
+        "scenario": null,
         "text": "Open the door",
         "is_correct": true,
         "points": 100
@@ -79,7 +210,7 @@
     "model": "game.action",
     "pk": 2,
     "fields": {
-        "level": 1,
+        "scenario": null,
         "text": "Walk away",
         "is_correct": false,
         "points": -100
@@ -89,7 +220,7 @@
     "model": "game.action",
     "pk": 3,
     "fields": {
-        "level": 1,
+        "scenario": null,
         "text": "Knock on the door",
         "is_correct": false,
         "points": -100
@@ -99,7 +230,7 @@
     "model": "game.action",
     "pk": 4,
     "fields": {
-        "level": 2,
+        "scenario": null,
         "text": "Touch the artifact",
         "is_correct": false,
         "points": -100
@@ -109,7 +240,7 @@
     "model": "game.action",
     "pk": 5,
     "fields": {
-        "level": 2,
+        "scenario": null,
         "text": "Examine it closely",
         "is_correct": true,
         "points": 100
@@ -119,7 +250,7 @@
     "model": "game.action",
     "pk": 6,
     "fields": {
-        "level": 2,
+        "scenario": null,
         "text": "Ignore it and explore further",
         "is_correct": false,
         "points": -100
@@ -129,7 +260,7 @@
     "model": "game.action",
     "pk": 7,
     "fields": {
-        "level": 3,
+        "scenario": null,
         "text": "Say 'Open Sesame'",
         "is_correct": false,
         "points": -100
@@ -139,7 +270,7 @@
     "model": "game.action",
     "pk": 8,
     "fields": {
-        "level": 3,
+        "scenario": null,
         "text": "Remain silent",
         "is_correct": true,
         "points": 100
@@ -149,7 +280,7 @@
     "model": "game.action",
     "pk": 9,
     "fields": {
-        "level": 3,
+        "scenario": null,
         "text": "Try to run past the guardian",
         "is_correct": false,
         "points": -100
@@ -159,7 +290,7 @@
     "model": "game.action",
     "pk": 10,
     "fields": {
-        "level": 4,
+        "scenario": null,
         "text": "Activate shields and plow through",
         "is_correct": false,
         "points": 0
@@ -169,7 +300,7 @@
     "model": "game.action",
     "pk": 11,
     "fields": {
-        "level": 4,
+        "scenario": null,
         "text": "Carefully maneuver around the asteroids",
         "is_correct": true,
         "points": 0
@@ -179,7 +310,7 @@
     "model": "game.action",
     "pk": 12,
     "fields": {
-        "level": 4,
+        "scenario": null,
         "text": "Use the ship's weapons to destroy the asteroids",
         "is_correct": false,
         "points": 0
@@ -189,7 +320,7 @@
     "model": "game.action",
     "pk": 13,
     "fields": {
-        "level": 5,
+        "scenario": null,
         "text": "Ignore the signal and continue your mission",
         "is_correct": false,
         "points": 0
@@ -199,7 +330,7 @@
     "model": "game.action",
     "pk": 14,
     "fields": {
-        "level": 5,
+        "scenario": null,
         "text": "Investigate the source of the signal",
         "is_correct": true,
         "points": 0
@@ -209,8 +340,308 @@
     "model": "game.action",
     "pk": 15,
     "fields": {
-        "level": 5,
+        "scenario": null,
         "text": "Report the signal to space command and await orders",
+        "is_correct": false,
+        "points": 0
+    }
+},
+{
+    "model": "game.action",
+    "pk": 16,
+    "fields": {
+        "scenario": 1,
+        "text": "Share it with your friends because it sounds helpful and would save lives.",
+        "is_correct": false,
+        "points": 0
+    }
+},
+{
+    "model": "game.action",
+    "pk": 17,
+    "fields": {
+        "scenario": 1,
+        "text": "Ask her elder sister and look it up online to see if it's true.",
+        "is_correct": true,
+        "points": 3
+    }
+},
+{
+    "model": "game.action",
+    "pk": 18,
+    "fields": {
+        "scenario": 1,
+        "text": "Ignore it and keep scrolling.",
+        "is_correct": true,
+        "points": 1
+    }
+},
+{
+    "model": "game.action",
+    "pk": 19,
+    "fields": {
+        "scenario": 2,
+        "text": "Share the message because it sounds convincing, especially with the doctorÆs picture.",
+        "is_correct": false,
+        "points": 0
+    }
+},
+{
+    "model": "game.action",
+    "pk": 21,
+    "fields": {
+        "scenario": 2,
+        "text": "Ask her friends on their group chat if they think the message is true",
+        "is_correct": true,
+        "points": 1
+    }
+},
+{
+    "model": "game.action",
+    "pk": 22,
+    "fields": {
+        "scenario": 3,
+        "text": "Donate immediately because itÆs for a good cause and kindness is a good deed",
+        "is_correct": false,
+        "points": 0
+    }
+},
+{
+    "model": "game.action",
+    "pk": 23,
+    "fields": {
+        "scenario": 3,
+        "text": "Check with her sister or any elderly person around to see if the donation link is legitimate",
+        "is_correct": true,
+        "points": 3
+    }
+},
+{
+    "model": "game.action",
+    "pk": 24,
+    "fields": {
+        "scenario": 3,
+        "text": "Share the message with her friends so they can help too.",
+        "is_correct": false,
+        "points": 0
+    }
+},
+{
+    "model": "game.action",
+    "pk": 25,
+    "fields": {
+        "scenario": 4,
+        "text": "Ask a teacher or the school office to find out if itÆs true.",
+        "is_correct": true,
+        "points": 3
+    }
+},
+{
+    "model": "game.action",
+    "pk": 26,
+    "fields": {
+        "scenario": 4,
+        "text": "Tell all her friends about the rumor to make sure they know.",
+        "is_correct": false,
+        "points": 0
+    }
+},
+{
+    "model": "game.action",
+    "pk": 27,
+    "fields": {
+        "scenario": 4,
+        "text": "Decides to stay home until the rumor is cleared",
+        "is_correct": false,
+        "points": 0
+    }
+},
+{
+    "model": "game.action",
+    "pk": 28,
+    "fields": {
+        "scenario": 5,
+        "text": "Share the post because itÆs surprising and others should know.",
+        "is_correct": false,
+        "points": 0
+    }
+},
+{
+    "model": "game.action",
+    "pk": 29,
+    "fields": {
+        "scenario": 5,
+        "text": "Ask her friends what they think about the post",
+        "is_correct": true,
+        "points": 1
+    }
+},
+{
+    "model": "game.action",
+    "pk": 30,
+    "fields": {
+        "scenario": 5,
+        "text": "Check the musicianÆs official pages to see if itÆs true",
+        "is_correct": true,
+        "points": 3
+    }
+},
+{
+    "model": "game.action",
+    "pk": 31,
+    "fields": {
+        "scenario": 2,
+        "text": "Search online to see if the popular doctor really endorses the tea and it is reported elsewhere",
+        "is_correct": true,
+        "points": 3
+    }
+},
+{
+    "model": "game.action",
+    "pk": 32,
+    "fields": {
+        "scenario": 6,
+        "text": "Forward the message because it is harmless and she doesnÆt want bad luck",
+        "is_correct": false,
+        "points": 0
+    }
+},
+{
+    "model": "game.action",
+    "pk": 33,
+    "fields": {
+        "scenario": 6,
+        "text": "Ignore the message because she doesnÆt believe in it",
+        "is_correct": true,
+        "points": 1
+    }
+},
+{
+    "model": "game.action",
+    "pk": 34,
+    "fields": {
+        "scenario": 6,
+        "text": "Ask her parents if these kinds of messages are true",
+        "is_correct": true,
+        "points": 3
+    }
+},
+{
+    "model": "game.action",
+    "pk": 35,
+    "fields": {
+        "scenario": 7,
+        "text": "Verify by checking the news from reliable news sources before reacting",
+        "is_correct": true,
+        "points": 3
+    }
+},
+{
+    "model": "game.action",
+    "pk": 36,
+    "fields": {
+        "scenario": 7,
+        "text": "Stay indoors and warn her friends and family",
+        "is_correct": true,
+        "points": 1
+    }
+},
+{
+    "model": "game.action",
+    "pk": 37,
+    "fields": {
+        "scenario": 7,
+        "text": "Share the alert with everyone to make sure they are safe",
+        "is_correct": false,
+        "points": 0
+    }
+},
+{
+    "model": "game.action",
+    "pk": 38,
+    "fields": {
+        "scenario": 8,
+        "text": "Provide her personal details and pay the fee using her mumÆs mobile money to claim the prize.",
+        "is_correct": false,
+        "points": 0
+    }
+},
+{
+    "model": "game.action",
+    "pk": 39,
+    "fields": {
+        "scenario": 8,
+        "text": "Ignore the message because it seems suspicious.",
+        "is_correct": true,
+        "points": 1
+    }
+},
+{
+    "model": "game.action",
+    "pk": 40,
+    "fields": {
+        "scenario": 8,
+        "text": "Check with her school to see if the contest is real.",
+        "is_correct": true,
+        "points": 3
+    }
+},
+{
+    "model": "game.action",
+    "pk": 41,
+    "fields": {
+        "scenario": 9,
+        "text": "Check if the challenge is safe and if the prize is real by looking out for reviews",
+        "is_correct": true,
+        "points": 3
+    }
+},
+{
+    "model": "game.action",
+    "pk": 42,
+    "fields": {
+        "scenario": 9,
+        "text": "Participate in the challenge and post the video",
+        "is_correct": false,
+        "points": 0
+    }
+},
+{
+    "model": "game.action",
+    "pk": 43,
+    "fields": {
+        "scenario": 9,
+        "text": "Ask her friends if they are participating and what they think",
+        "is_correct": true,
+        "points": 1
+    }
+},
+{
+    "model": "game.action",
+    "pk": 44,
+    "fields": {
+        "scenario": 10,
+        "text": "Ignore the notification because it seems suspicious",
+        "is_correct": true,
+        "points": 1
+    }
+},
+{
+    "model": "game.action",
+    "pk": 45,
+    "fields": {
+        "scenario": 10,
+        "text": "Search for AmazonÆs customer care contact and directly ask them to verify the package",
+        "is_correct": true,
+        "points": 3
+    }
+},
+{
+    "model": "game.action",
+    "pk": 46,
+    "fields": {
+        "scenario": 10,
+        "text": "Provide the details to confirm the delivery",
         "is_correct": false,
         "points": 0
     }
