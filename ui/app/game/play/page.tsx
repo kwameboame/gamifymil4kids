@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import Image from "next/image";
 
 interface InviterInfo {
   username: string;
@@ -16,6 +17,7 @@ interface InviterInfo {
 interface Story {
   id: number;
   title: string;
+  image: string,
   description: string;
 }
 
@@ -69,11 +71,18 @@ export default function PlayPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
-      <div className="max-w-md w-full bg-white shadow-md rounded-lg p-6">
+      <div className="max-w-xl w-full bg-white shadow-md rounded-lg p-6">
         {story && (
           <>
             <h1 className="text-2xl font-bold mb-4">{story.title}</h1>
             <p className="mb-6">{story.description}</p>
+            <Image
+                  src={story.image}
+                  alt="Adventure Intro"
+                  className="mb-4 w-full max-w-xl rounded-lg"
+                  width={300}
+                  height={175}
+                />
           </>
         )}
 
