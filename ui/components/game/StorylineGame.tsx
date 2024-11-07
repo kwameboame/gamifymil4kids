@@ -292,7 +292,6 @@ export function StorylineGame() {
     if (action.is_correct) {
       // Check if there are more scenarios in the current level
       if (scenarioIndex < (scenarios?.length || 0) - 1) {
-        // Move to the next scenario
         setScenarioIndex((prev) => prev + 1);
       } else if (level < (story?.levels.length || 0) - 1) {
         // Move to the next level if scenarios are finished
@@ -305,15 +304,27 @@ export function StorylineGame() {
         setGameState("end");
       }
     } else {
-      // Handle incorrect action
-      // Deduct a life and update game state if lives reach zero
+      // Handle incorrect action - Deduct a life
       setLives((prevLives) => prevLives - 1);
       if (lives - 1 <= 0) {
         playGameOverSound();
         setGameState("gameover");
+      } else {
+        // Move to the next scenario after deducting a life
+        if (scenarioIndex < (scenarios?.length || 0) - 1) {
+          setScenarioIndex((prev) => prev + 1);
+        } else if (level < (story?.levels.length || 0) - 1) {
+          // Move to the next level if scenarios are finished
+          setLevel((prev) => prev + 1);
+          setScenarioIndex(0); // Reset scenario index for the new level
+        } else {
+          // Game end logic if no more levels
+          setGameState("gameover");
+        }
       }
     }
   };
+  
 
   const handleEndGame = () => {
     // Reset game state or perform other end game actions
@@ -470,7 +481,6 @@ export function StorylineGame() {
               <Maximize2 className="mr-2 h-4 w-4" />
               Start Game
             </Button>
-              // <Button className="bg-orange-700" onClick={() => setGameState("playing")}>Start Game</Button>
             ) : (
               <>
                 <p className="mb-4">Please log in or sign up to play the game.</p>

@@ -1,13 +1,13 @@
 import Layout from '@/components/layout'
 import Link from 'next/link'
-import Image from 'next/image'
+// import Image from 'next/image'
 import { Button } from "@/components/ui/button"
 
-const games = [
-  { title: 'Space Odyssey', image: '/images/space-odyssey.jpg' },
-  { title: 'Time Traveler', image: '/images/time-traveler.jpg' },
-  { title: 'Mystery Manor', image: '/images/mystery-manor.jpg' },
-]
+// const games = [
+//   { title: 'Space Odyssey', image: '/images/space-odyssey.jpg' },
+//   { title: 'Time Traveler', image: '/images/time-traveler.jpg' },
+//   { title: 'Mystery Manor', image: '/images/mystery-manor.jpg' },
+// ]
 
 export default function HomePage() {
   return (
@@ -24,16 +24,16 @@ export default function HomePage() {
         >
           <div className="absolute inset-0 bg-black opacity-50"></div>
           <div className="relative z-10 text-center max-w-2xl mx-auto px-4">
-            <h1 className="text-5xl font-bold mb-6 text-white">Welcome to StorylineGame</h1>
-            <p className="text-xl mb-8 text-white">Embark on an adventure through enchanted forests and mysterious realms. Make choices, face challenges, and write your own story!</p>
+            <h1 className="text-5xl font-bold mb-6 text-white">Play Truth Quest</h1>
+            <p className="text-xl mb-8 text-white">Embark on an Media Information Literacy (MIL) adventure with Adjoa</p>
             <Button asChild size="lg" className="bg-primary hover:bg-primary-dark text-white">
-              <Link href="/game">Start Your Adventure</Link>
+              <Link href="/game">Play Game</Link>
             </Button>
           </div>
         </div>
 
         {/* Other Games Section */}
-        <section className="py-16 bg-gray-100">
+        {/* <section className="py-16 bg-gray-100">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold mb-8 text-center">Explore Other Adventures</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -55,7 +55,7 @@ export default function HomePage() {
               ))}
             </div>
           </div>
-        </section>
+        </section> */}
       </div>
     </Layout>
   )
