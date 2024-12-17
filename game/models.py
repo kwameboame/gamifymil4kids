@@ -46,6 +46,16 @@ class Action(models.Model):
     def __str__(self):
         return self.text
 
+
+class Outcome(models.Model):
+    action = models.OneToOneField(Action, on_delete=models.CASCADE, related_name='outcome', null=True, blank=True)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Outcome for {self.action.text if self.action else 'Unknown Action'}"
+
+
 class LeaderboardEntry(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE)
     story = models.ForeignKey(Story, related_name='leaderboard_entries', on_delete=models.CASCADE)

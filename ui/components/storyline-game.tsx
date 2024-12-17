@@ -1,6 +1,6 @@
 "use client"
 import { ArrowLeft, Trophy, AlertCircle } from "lucide-react"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Confetti from "react-confetti"
 import { Button } from "@/components/ui/button"
@@ -10,35 +10,33 @@ import { Slider } from "@/components/ui/slider"
 import { Volume2, VolumeX, Loader2 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from 'next/navigation'
+import axios from 'axios'
 
-const storyline = [
-  {
-    prompt: "You find a mysterious door in the forest. What do you do?",
-    actions: [
-      { text: "Open the door", correct: true },
-      { text: "Walk away", correct: false },
-      { text: "Knock on the door", correct: false },
-    ],
-  },
-  {
-    prompt: "Inside, you see a glowing artifact. How do you proceed?",
-    actions: [
-      { text: "Touch the artifact", correct: false },
-      { text: "Examine it closely", correct: true },
-      { text: "Ignore it and explore further", correct: false },
-    ],
-  },
-  {
-    prompt: "A guardian appears and asks for the password. What do you say?",
-    actions: [
-      { text: "Say 'Open Sesame'", correct: false },
-      { text: "Remain silent", correct: true },
-      { text: "Try to run past the guardian", correct: false },
-    ],
-  },
-]
+interface Story {
+  id: number;
+  title: string;
+  description: string;
+  levels: Level[];
+}
 
-type GameState = "start" | "playing" | "end" | "gameover" | "leaderboard" | "profile"
+interface Level {
+  id: number;
+  title: string;
+  prompt: string;
+  image: string;
+  actions: Action[];
+}
+
+interface Action {
+  id: number;
+  text: string;
+  is_correct: boolean;
+  points: number;
+  outcome: {
+    id: number;
+    text: string;
+  };
+}
 
 interface LeaderboardEntry {
   name: string
@@ -52,6 +50,8 @@ interface UserProfile {
   }
   badges: string[]
 }
+
+type GameState = 'start' | 'playing' | 'outcome' | 'end' | 'gameover' | 'leaderboard'
 
 function LeaderboardComponent({ leaderboard, onBack }: { leaderboard: LeaderboardEntry[], onBack: () => void }) {
   return (
@@ -252,118 +252,127 @@ export function ProfileComponent({ profile }: { profile: UserProfile }) {
 }
 
 export function StorylineGame() {
-  const [gameState, setGameState] = useState<GameState>("start")
+  const [gameState, setGameState] = useState<GameState>('start')
   const [score, setScore] = useState(0)
   const [level, setLevel] = useState(0)
   const [showConfetti, setShowConfetti] = useState(false)
-  const [playerName, setPlayerName] = useState("")
+  const [playerName, setPlayerName] = useState('')
+  const [selectedAction, setSelectedAction] = useState<Action | null>(null)
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
-  const [userProfile, setUserProfile] = useState<UserProfile>({
-    name: "Player",
-    highScores: {
-      "Forest Adventure": 0,
-      "Space Odyssey": 0,
-      "Time Traveler": 0,
-    },
-    badges: ["Novice Explorer", "Quick Thinker"],
-  })
+  const [story, setStory] = useState<Story | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isGameStarted, setIsGameStarted] = useState(false)
-  const audioRef = useRef<HTMLAudioElement | null>(null); // Store main audio instance
-  const gameOverAudioRef = useRef<HTMLAudioElement | null>(null); // Store game over audio instance
-  const congratsAudioRef = useRef<HTMLAudioElement | null>(null); // Store congrats audio instance
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const gameOverAudioRef = useRef<HTMLAudioElement | null>(null)
+  const congratsAudioRef = useRef<HTMLAudioElement | null>(null)
+  const backendBaseURL = process.env.NEXT_PUBLIC_BACKEND_URL
+
+  const fetchStory = useCallback(async () => {
+    try {
+      const response = await axios.get<Story>(`${backendBaseURL}/game/stories/1/`)
+      setStory(response.data)
+    } catch (error) {
+      console.error('Error fetching story:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [backendBaseURL])
 
   useEffect(() => {
-    const storedLeaderboard = localStorage.getItem("leaderboard")
+    fetchStory()
+    
+    const storedLeaderboard = localStorage.getItem('leaderboard')
     if (storedLeaderboard) {
       setLeaderboard(JSON.parse(storedLeaderboard))
     }
 
-    const storedProfile = localStorage.getItem("userProfile")
+    const storedProfile = localStorage.getItem('userProfile')
     if (storedProfile) {
       setUserProfile(JSON.parse(storedProfile))
     }
-
-    // Simulate loading delay
-    setTimeout(() => setIsLoading(false), 1000)
-  }, [])
+  }, [fetchStory])
 
   const handleStart = () => {
-    // Reset all game state
-    setGameState("playing");
-    setScore(0);
-    setLevel(0);
-    setShowConfetti(false);
-    setPlayerName("");
-    setIsGameStarted(true);
+    setGameState('playing')
+    setScore(0)
+    setLevel(0)
+    setShowConfetti(false)
+    setPlayerName('')
+    setSelectedAction(null)
+    setIsGameStarted(true)
     
-    // Reset audio state
-    if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(error => console.error("Audio playback failed:", error));
-    }
-    
-    // Request fullscreen for the game area
-    const gameArea = document.getElementById("game-area");
-    if (gameArea?.requestFullscreen) {
-      gameArea.requestFullscreen();
-    }
-
-    // Start main audio playback or restart if already playing
     if (!audioRef.current) {
-      audioRef.current = new Audio("/audio/sound.mp3");
-      audioRef.current.loop = true;
+      audioRef.current = new Audio('/audio/sound.mp3')
+      audioRef.current.loop = true
     }
-    audioRef.current.play().catch(error => console.error("Audio playback failed:", error));
+    audioRef.current.play().catch(error => console.error('Audio playback failed:', error))
+    fetchStory()
   }
 
-  // Function to handle game over
-  const handleGameOver = () => {
-    setGameState("gameover");
-    audioRef.current?.pause(); // Pause main audio
-    if (!gameOverAudioRef.current) {
-      gameOverAudioRef.current = new Audio("/audio/GameOver.wav");
-    }
-    gameOverAudioRef.current.play().catch(error => console.error("Game over audio playback failed:", error));
-  }
+  const handleAction = (action: Action) => {
+    console.log('handleAction called with action:', action)
+    console.log('action.outcome:', action.outcome)
+    setSelectedAction(action)
+    const newScore = score + action.points
+    setScore(Math.max(0, newScore))
+    console.log('Setting gameState to outcome')
+    setGameState('outcome')
 
-  // Function to show confetti
-  const showConfettiEffect = () => {
-    setShowConfetti(true);
-    if (!congratsAudioRef.current) {
-      congratsAudioRef.current = new Audio("/audio/congrats.mp3");
-    }
-    congratsAudioRef.current.play().catch(error => console.error("Congrats audio playback failed:", error));
-  }
-
-  // Add a function to exit fullscreen
-  const exitFullscreen = () => {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    }
-  }
-
-  const handleAction = (correct: boolean) => {
-    if (correct) {
-      setScore((prevScore) => prevScore + 10)
+    if (newScore < 0) {
+      handleGameOver()
     } else {
-      setScore((prevScore) => prevScore - 5)
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0
+        audioRef.current.play().catch(error => console.error('Audio playback failed:', error))
+      }
+    }
+  }
+
+  const handleContinue = () => {
+    console.log('handleContinue called')
+    if (!story) {
+      console.log('No story found')
+      return
     }
 
-    if (score < 0) {
-      handleGameOver();
-    } else if (level < storyline.length - 1) {
-      setLevel((prevLevel) => prevLevel + 1)
+    setSelectedAction(null)
+    console.log('Current level:', level, 'Story levels length:', story.levels.length)
+    if (level < story.levels.length - 1) {
+      console.log('Moving to next level')
+      setLevel(prev => prev + 1)
+      setGameState('playing')
     } else {
+      console.log('Game ending')
       if (score > 0) {
-        showConfettiEffect();
+        showConfettiEffect()
         setTimeout(() => setShowConfetti(false), 5000)
       }
-      setGameState("end")
+      setGameState('end')
     }
+  }
 
-    // Restart audio when an action is taken
-    audioRef.current?.play();
+  const handleGameOver = () => {
+    setGameState('gameover')
+    audioRef.current?.pause()
+    if (!gameOverAudioRef.current) {
+      gameOverAudioRef.current = new Audio('/audio/GameOver.wav')
+    }
+    gameOverAudioRef.current.play().catch(error => console.error('Game over audio playback failed:', error))
+  }
+
+  const showConfettiEffect = () => {
+    setShowConfetti(true)
+    if (!congratsAudioRef.current) {
+      congratsAudioRef.current = new Audio('/audio/congrats.mp3')
+    }
+    congratsAudioRef.current.play().catch(error => console.error('Congrats audio playback failed:', error))
+  }
+
+  const exitFullscreen = () => {
+    if (document && document.exitFullscreen) {
+      document.exitFullscreen().catch(console.error)
+    }
   }
 
   const handleSubmitScore = () => {
@@ -372,40 +381,49 @@ export function StorylineGame() {
         .sort((a, b) => b.score - a.score)
         .slice(0, 10)
       setLeaderboard(newLeaderboard)
-      localStorage.setItem("leaderboard", JSON.stringify(newLeaderboard))
+      localStorage.setItem('leaderboard', JSON.stringify(newLeaderboard))
 
-      // Update user profile
-      const updatedProfile = { ...userProfile }
+      const updatedProfile: UserProfile = userProfile || {
+        name: playerName,
+        highScores: {},
+        badges: []
+      }
+      
       updatedProfile.name = playerName
       if (score > (updatedProfile.highScores["Forest Adventure"] || 0)) {
         updatedProfile.highScores["Forest Adventure"] = score
       }
       setUserProfile(updatedProfile)
-      localStorage.setItem("userProfile", JSON.stringify(updatedProfile))
+      localStorage.setItem('userProfile', JSON.stringify(updatedProfile))
 
-      setPlayerName("")
-      setGameState("leaderboard")
+      setPlayerName('')
+      setGameState('leaderboard')
     }
 
-    // Restart audio when submitting score
-    audioRef.current?.play();
+    audioRef.current?.play()
   }
 
+  useEffect(() => {
+    console.log('Current gameState:', gameState)
+    console.log('Selected action:', selectedAction)
+  }, [gameState, selectedAction])
+
   return (
-    <div className="w-full max-w-3xl p-4" id="game-area"> {/* Added id for fullscreen */}
+    <div className="w-full max-w-3xl p-4" id="game-area">
+      {showConfetti && <Confetti />}
+      
       {isGameStarted && (
         <div className="w-full mb-4 flex items-center bg-gray-800 p-2 rounded-lg">
           <Button 
             variant="ghost" 
-            onClick={exitFullscreen} 
-            aria-label="Exit Fullscreen" 
+            onClick={exitFullscreen}
             className="bg-gray-700 hover:bg-gray-600 text-white mr-auto"
           >
             Exit Fullscreen
-          </Button> {/* Close button for fullscreen */}
+          </Button>
           
           <motion.div
-            className="mt-6 text-xl font-bold text-center flex-grow"
+            className="text-xl font-bold text-center text-white flex-grow"
             key={score}
             initial={{ scale: 1 }}
             animate={{ scale: [1, 1.2, 1] }}
@@ -419,6 +437,7 @@ export function StorylineGame() {
           </div>
         </div>
       )}
+
       <AnimatePresence mode="wait">
         {isLoading ? (
           <motion.div
@@ -432,14 +451,14 @@ export function StorylineGame() {
           </motion.div>
         ) : (
           <>
-            {(gameState === "start" || gameState === "playing" || gameState === "end" || gameState === "gameover") && (
+            {story && (gameState === 'start' || gameState === 'playing' || gameState === 'outcome' || gameState === 'end' || gameState === 'gameover') && (
               <Card className="w-full">
                 <CardHeader>
-                  <CardTitle className="text-3xl font-bold text-center">Forest Adventure</CardTitle>
+                  <CardTitle className="text-3xl font-bold text-center">{story.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <AnimatePresence mode="wait">
-                    {gameState === "start" && (
+                    {gameState === 'start' && (
                       <motion.div
                         key="start"
                         initial={{ opacity: 0, y: 20 }}
@@ -454,21 +473,19 @@ export function StorylineGame() {
                           height={300}
                           className="rounded-lg w-full h-64 object-cover mb-6"
                         />
-                        <p className="text-lg mb-4">
-                          Embark on a mysterious journey through an enchanted forest. Make wise choices to progress and earn points. Be careful, wrong choices will cost you points! Are you ready for the adventure?
-                        </p>
+                        <p className="text-lg mb-4">{story.description}</p>
                         <div className="space-y-2">
                           <Button className="w-full text-lg py-3" onClick={handleStart}>
                             Start Game
                           </Button>
-                          <Button className="w-full text-lg py-3" variant="outline" onClick={() => setGameState("leaderboard")}>
+                          <Button className="w-full text-lg py-3" variant="outline" onClick={() => setGameState('leaderboard')}>
                             View Leaderboard
                           </Button>
                         </div>
                       </motion.div>
                     )}
 
-                    {gameState === "playing" && (
+                    {gameState === 'playing' && story.levels[level] && (
                       <motion.div
                         key="playing"
                         initial={{ opacity: 0, y: 20 }}
@@ -478,18 +495,18 @@ export function StorylineGame() {
                       >
                         <div className="mb-6">
                           <Image
-                            src="/images/placeholder.png"
+                            src={story.levels[level].image || '/images/placeholder.png'}
                             alt="Story scene"
                             width={600}
                             height={300}
                             className="rounded-lg w-full h-64 object-cover"
                           />
                         </div>
-                        <p className="text-lg mb-4">{storyline[level].prompt}</p>
+                        <p className="text-lg mb-4">{story.levels[level].prompt}</p>
                         <div className="grid gap-3">
-                          {storyline[level].actions.map((action, index) => (
+                          {story.levels[level].actions.map((action, index) => (
                             <motion.div
-                              key={index}
+                              key={action.id}
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ duration: 0.3, delay: index * 0.1 }}
@@ -497,7 +514,7 @@ export function StorylineGame() {
                               <Button
                                 variant="outline"
                                 className="w-full text-left justify-start"
-                                onClick={() => handleAction(action.correct)}
+                                onClick={() => handleAction(action)}
                               >
                                 {action.text}
                               </Button>
@@ -507,7 +524,32 @@ export function StorylineGame() {
                       </motion.div>
                     )}
 
-                    {gameState === "end" && (
+                    {gameState === 'outcome' && selectedAction && (
+                      <motion.div
+                        key="outcome"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.5 }}
+                        className="space-y-4"
+                      >
+                        <div className="bg-gray-100 dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                          <h3 className="text-xl font-semibold mb-4">Outcome</h3>
+                          <p className="text-lg mb-4">{selectedAction.outcome.text}</p>
+                          <div className={`text-lg font-semibold ${selectedAction.points >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                            {selectedAction.points > 0 ? `+${selectedAction.points}` : selectedAction.points} points
+                          </div>
+                        </div>
+                        <Button 
+                          className="w-full text-lg py-3" 
+                          onClick={handleContinue}
+                        >
+                          Continue to Next Scene
+                        </Button>
+                      </motion.div>
+                    )}
+
+                    {gameState === 'end' && (
                       <motion.div
                         key="end"
                         initial={{ opacity: 0, y: 20 }}
@@ -553,14 +595,14 @@ export function StorylineGame() {
                           <Button className="w-full" onClick={handleStart}>
                             Play Again
                           </Button>
-                          <Button className="w-full" variant="outline" onClick={() => setGameState("leaderboard")}>
+                          <Button className="w-full" variant="outline" onClick={() => setGameState('leaderboard')}>
                             View Leaderboard
                           </Button>
                         </div>
                       </motion.div>
                     )}
 
-                    {gameState === "gameover" && (
+                    {gameState === 'gameover' && (
                       <motion.div
                         key="gameover"
                         initial={{ opacity: 0, y: 20 }}
@@ -582,7 +624,7 @@ export function StorylineGame() {
                           <Button className="w-full" onClick={handleStart}>
                             Try Again
                           </Button>
-                          <Button className="w-full" variant="outline" onClick={() => setGameState("leaderboard")}>
+                          <Button className="w-full" variant="outline" onClick={() => setGameState('leaderboard')}>
                             View Leaderboard
                           </Button>
                         </div>
@@ -593,16 +635,15 @@ export function StorylineGame() {
               </Card>
             )}
 
-            {gameState === "leaderboard" && (
+            {gameState === 'leaderboard' && (
               <LeaderboardComponent
                 leaderboard={leaderboard}
-                onBack={() => setGameState("start")}
+                onBack={() => setGameState('start')}
               />
             )}
           </>
         )}
       </AnimatePresence>
-      {showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight} />}
     </div>
   )
 }

@@ -7,7 +7,6 @@ import { useAuth } from '@/contexts/AuthContext' // We'll create this context
 const navItems = [
   { href: '/game', label: 'Home' },
   { href: '/game', label: 'Play Game' },
-  { href: '/profile', label: 'Profile' },
 ]
 
 export default function Header() {
@@ -30,6 +29,15 @@ export default function Header() {
                 </Button>
               </li>
             ))}
+            {isAuthenticated && (
+              <li>
+                <Button variant="ghost" asChild>
+                  <Link href="/profile" className="text-white hover:text-orange-500">
+                    Profile
+                  </Link>
+                </Button>
+              </li>
+            )}
             {isAuthenticated !== undefined && (
               isAuthenticated ? (
                 <li>

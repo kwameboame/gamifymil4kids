@@ -1,11 +1,18 @@
 from rest_framework import serializers
-from .models import Story, Level, Scenario, Action, LeaderboardEntry, Badge, GameSession, GameInvite
+from .models import Story, Level, Scenario, Action, LeaderboardEntry, Badge, GameSession, GameInvite, Outcome
 from accounts.models import UserProfile
 
+class OutcomeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Outcome
+        fields = ['id', 'text']
+
 class ActionSerializer(serializers.ModelSerializer):
+    outcome = OutcomeSerializer(read_only=True)
+    
     class Meta:
         model = Action
-        fields = ['id', 'text', 'is_correct', 'points']
+        fields = ['id', 'text', 'is_correct', 'points', 'outcome']
 
 class LevelSerializer(serializers.ModelSerializer):
 
