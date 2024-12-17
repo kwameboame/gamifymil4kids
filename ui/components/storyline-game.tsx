@@ -289,10 +289,19 @@ export function StorylineGame() {
   }, [])
 
   const handleStart = () => {
-    setGameState("playing")
-    setScore(0)
-    setLevel(0)
-    setIsGameStarted(true)
+    // Reset all game state
+    setGameState("playing");
+    setScore(0);
+    setLevel(0);
+    setShowConfetti(false);
+    setPlayerName("");
+    setIsGameStarted(true);
+    
+    // Reset audio state
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(error => console.error("Audio playback failed:", error));
+    }
     
     // Request fullscreen for the game area
     const gameArea = document.getElementById("game-area");
