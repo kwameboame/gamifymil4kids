@@ -1,0 +1,50 @@
+/* General styles */
+.game-container {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.game-image, .game-scenario {
+  display: block;
+  margin: 10px 0;
+  width: 100%;
+}
+
+/* Mobile Portrait */
+@media (max-width: 768px) {
+  .game-container {
+    font-size: 16px;
+  }
+  .game-image {
+    max-width: 100%;
+    height: auto;
+  }
+  .game-scenario {
+    font-size: 14px;
+    text-align: center;
+  }
+}
+
+/* Mobile Landscape */
+@media (min-width: 344px) and (max-width: 767px) and (orientation: landscape) {
+  .game-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+  }
+  .game-image, .game-scenario {
+    flex: 1;
+    max-width: 45%;
+  }
+  .game-scenario {
+    font-size: 12px;
+    text-align: left;
+  }
+
+  .gamecard {
+    margin-top:150px !important;
+  }
+}
+

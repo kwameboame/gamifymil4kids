@@ -11,7 +11,8 @@ import Confetti from "react-confetti";
 import Image from "next/image";
 import axios from "@/lib/axios";
 import { useAuth } from "@/contexts/AuthContext";
-import Link from "next/link";
+import './Game.module.css';
+// import Link from "next/link";
 
 export interface Action {
   id: number;
@@ -381,7 +382,7 @@ export function StorylineGame() {
             className="absolute top-4 right-4 bg-orange-700"
           >
             <Minimize2 className="mr-2 h-4 w-4" />
-            Exit Fullscreen
+            
           </Button>
         )}
 
@@ -473,7 +474,15 @@ export function StorylineGame() {
               </div>
             </div>
 
-            {isAuthenticated ? (
+            <Button 
+              className="bg-orange-700" 
+              onClick={handleStartGame}
+            >
+              <Maximize2 className="mr-2 h-4 w-4" />
+              Start Game
+            </Button>
+
+            {/* {isAuthenticated ? (
               <Button 
               className="bg-orange-700" 
               onClick={handleStartGame}
@@ -497,7 +506,7 @@ export function StorylineGame() {
                   </Button>
                 </div>
               </>
-            )}
+            )} */}
           </motion.div>
         )}
 
