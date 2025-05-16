@@ -41,7 +41,7 @@ export default function PlayPage() {
 
   const fetchStory = async () => {
     try {
-      const response = await axios.get<Story>('/game/stories/3/');
+      const response = await axios.get<Story>('/api/game/stories/3/');
       setStory(response.data);
     } catch (error) {
       console.error("Error fetching story:", error);
@@ -52,7 +52,7 @@ export default function PlayPage() {
 
   const fetchInviterInfo = async (token: string) => {
     try {
-      const response = await axios.get<InviterInfo>(`/game/invites/${token}/inviter-score/`);
+      const response = await axios.get<InviterInfo>(`/api/game/invites/${token}/inviter-score/`);
       setInviterInfo(response.data);
     } catch (error) {
       console.error("Error fetching inviter's info:", error);

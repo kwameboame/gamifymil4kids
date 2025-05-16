@@ -14,13 +14,18 @@ import { useAuth } from "@/contexts/AuthContext";
 import './Game.module.css';
 // import Link from "next/link";
 
+export interface Outcome {
+  id: number;
+  text: string;
+}
+
 export interface Action {
   id: number;
   text: string;
   is_correct: boolean;
   points: number;
+  outcome?: Outcome;
 }
-
 
 interface Level {
   id: number;
@@ -68,7 +73,6 @@ interface GameInviteResponse {
   expires_at: string;
 }
 
-
 export function StorylineGame() {
   const [gameState, setGameState] = useState<
     | "start"
@@ -85,7 +89,18 @@ export function StorylineGame() {
   const [story, setStory] = useState<Story | null>(null);
   const [scenarios, setScenarios] = useState<Scenarios[] | null>(null);
   const [scenarioIndex, setScenarioIndex] = useState(0);
+  const [showOutcome, setShowOutcome] = useState(false);
+  const [selectedAction, setSelectedAction] = useState<Action | null>(null);
+  const [maxPointsForCurrentScenario, setMaxPointsForCurrentScenario] = useState(0);
   const selectedScenario = scenarios ? scenarios[scenarioIndex] : null;
+  
+  // Calculate maximum points available for the current scenario
+  useEffect(() => {
+    if (selectedScenario && selectedScenario.actions && selectedScenario.actions.length > 0) {
+      const maxPoints = Math.max(...selectedScenario.actions.map(action => action.points || 0));
+      setMaxPointsForCurrentScenario(maxPoints);
+    }
+  }, [selectedScenario]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -104,7 +119,6 @@ export function StorylineGame() {
   // const [isMuted, setIsMuted] = useState<boolean>(false);
 
   // const gameAreaRef = useRef<HTMLDivElement>(null);
-
 
   useEffect(() => {
     const { invite } = getQueryParams();
@@ -130,16 +144,16 @@ export function StorylineGame() {
   const fetchInitialData = async () => {
     try {
       // Fetch story information without authentication
-      const storyResponse = await axios.get<Story>("/game/stories/3/");
+      const storyResponse = await axios.get<Story>("/api/game/stories/3/");
       setStory(storyResponse.data);
 
       // Fetch story scenarios
-      const scenariosResponse = await axios.get<Scenarios[]>("game/stories/3/levels/6/scenarios/");
+      const scenariosResponse = await axios.get<Scenarios[]>("/api/game/stories/3/levels/6/scenarios/");
       setScenarios(scenariosResponse.data);
 
       if (isAuthenticated) {
         // Fetch top-scores for the leaderboard
-        const leaderboardResponse = await axios.get<LeaderboardEntry[]>("/game/leaderboard/top-scores/", {
+        const leaderboardResponse = await axios.get<LeaderboardEntry[]>("/api/game/leaderboard/top-scores/", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
@@ -209,7 +223,6 @@ export function StorylineGame() {
       telegram: `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent("Join me in this game!")}`,
     };
   };
-
 
   // Function to handle entering fullscreen
   const enterFullscreen = async () => {
@@ -287,10 +300,26 @@ export function StorylineGame() {
   }, [gameState]);
 
   const handleAction = (action: Action) => {
-    const newScore = score + action.points;
+    // Calculate new score immediately
+    const pointsToAdd = action.points || 0;
+    const newScore = score + pointsToAdd;
     setScore(Math.max(0, newScore));
-  
-    if (action.is_correct) {
+    
+    // Store the selected action to display its outcome
+    setSelectedAction(action);
+    // Show the outcome screen
+    setShowOutcome(true);
+  };
+
+  // Handle proceeding to the next scenario after showing the outcome
+  const handleProceedToNextScenario = () => {
+    // Hide the outcome screen
+    setShowOutcome(false);
+    setSelectedAction(null);
+    
+    if (!selectedAction) return;
+    
+    if (selectedAction.is_correct) {
       // Check if there are more scenarios in the current level
       if (scenarioIndex < (scenarios?.length || 0) - 1) {
         setScenarioIndex((prev) => prev + 1);
@@ -325,7 +354,6 @@ export function StorylineGame() {
       }
     }
   };
-  
 
   const handleEndGame = () => {
     // Reset game state or perform other end game actions
@@ -518,38 +546,71 @@ export function StorylineGame() {
             transition={{ duration: 0.5 }}
             className="flex-grow flex items-center justify-center overflow-y-auto"
           >
-
-<Card className="w-full max-w-full">
-  <CardHeader>
-    <CardTitle>{selectedScenario?.description}</CardTitle>
-  </CardHeader>
-  <CardContent className="flex flex-col items-center">
-    {selectedScenario?.image ? (
-      <Image
-        src={selectedScenario.image}
-        alt="Level Image"
-        className="mb-4 w-full max-w-md rounded-lg"
-        width={500}
-        height={300}
-      />
-    ) : (
-      <div className="mb-4 w-full max-w-md rounded-lg bg-gray-200 flex items-center justify-center h-48">
-        <p>No Image Available</p>
-      </div>
-    )}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
-      {selectedScenario?.actions.map((action) => (
-        <Button
-          key={action.id}
-          onClick={() => handleAction(action)}
-          className="w-full"
-        >
-          {action.text}
-        </Button>
-      ))}
-    </div>
-  </CardContent>
-</Card>
+            {showOutcome && selectedAction ? (
+              <Card className="w-full max-w-full">
+                <CardHeader>
+                  <CardTitle>
+                    {selectedAction.is_correct 
+                      ? (selectedAction.points < maxPointsForCurrentScenario ? "Partially Correct!" : "Correct Choice!") 
+                      : "Incorrect Choice!"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center">
+                  {/* Display the outcome text if available */}
+                  <div className="mb-6 text-center">
+                    <p className="text-lg">{selectedAction.outcome?.text || 
+                      (selectedAction.is_correct 
+                        ? (selectedAction.points < maxPointsForCurrentScenario ? "Good try! You were partially correct." : "Good job! You made the right choice.") 
+                        : "That wasn't the best choice.")}
+                    </p>
+                    <p className="mt-4">
+                      {selectedAction.is_correct 
+                        ? `You earned ${selectedAction.points || 0} points! Your score is now ${score}.` 
+                        : `You lost a life.`}
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={handleProceedToNextScenario} 
+                    className="mt-4 w-full max-w-md"
+                  >
+                    Continue
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="w-full max-w-full">
+                <CardHeader>
+                  <CardTitle>{selectedScenario?.description}</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center">
+                  {selectedScenario?.image ? (
+                    <Image
+                      src={selectedScenario.image}
+                      alt="Level Image"
+                      className="mb-4 w-full max-w-md rounded-lg"
+                      width={500}
+                      height={300}
+                    />
+                  ) : (
+                    <div className="mb-4 w-full max-w-md rounded-lg bg-gray-200 flex items-center justify-center h-48">
+                      <p>No Image Available</p>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
+                    {selectedScenario?.actions.map((action) => (
+                      <Button
+                        key={action.id}
+                        onClick={() => handleAction(action)}
+                        className="w-full"
+                      >
+                        {action.text}
+                      </Button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          }
 
           </motion.div>
         )}
@@ -563,8 +624,8 @@ export function StorylineGame() {
             className="flex-grow flex items-center justify-center"
           >
             <div className="text-center p-8 bg-white rounded-lg shadow-md w-full max-w-2xl">
-              <h2 className="text-4xl font-bold mb-6">{gameState === "end" ? "Congratulations!" : "Game Over!"}</h2>
-              <p className="text-2xl mb-8">Your Score: {score}</p>
+              <h2 className="text-4xl font-bold mb-6 text-gray-900">{gameState === "end" ? "Congratulations!" : "Game Over!"}</h2>
+              <p className="text-2xl mb-8 text-gray-800">Your Score: {score}</p>
               <div className="space-y-4">
               <Button 
                 onClick={() => {
