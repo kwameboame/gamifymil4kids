@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Maximize2, Minimize2 } from "lucide-react";
+import { Loader2, Maximize2, Minimize2, Volume2, VolumeX } from "lucide-react";
 import { AudioControl } from "./AudioControl";
 import { LeaderboardComponent } from "./LeaderboardComponent";
 import { ProfileComponent } from "./ProfileComponent";
@@ -12,7 +12,7 @@ import Image from "next/image";
 import axios from "@/lib/axios";
 import { useAuth } from "@/contexts/AuthContext";
 import './Game.module.css';
-// import Link from "next/link";
+
 
 export interface Outcome {
   id: number;
@@ -92,6 +92,7 @@ export function StorylineGame() {
   const [showOutcome, setShowOutcome] = useState(false);
   const [selectedAction, setSelectedAction] = useState<Action | null>(null);
   const [maxPointsForCurrentScenario, setMaxPointsForCurrentScenario] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
   const selectedScenario = scenarios ? scenarios[scenarioIndex] : null;
   
   // Calculate maximum points available for the current scenario
@@ -424,17 +425,66 @@ export function StorylineGame() {
   )}
 
   {isAuthenticated && (
-    <Button className="bg-orange-700 text-xs" onClick={() => setGameState("leaderboard")}>
+    <Button className="bg-orange-700 text-sm" onClick={() => setGameState("leaderboard")}>
       Leaderboard
     </Button>
   )}
 
   {gameState === "playing" && (
-    <div className="flex items-center space-x-2">
-      <span className="text-xl font-bold text-white">Score: {score}</span>
-      {[...Array(lives)].map((_, index) => (
-        <span key={index} className="text-red-500">❤️</span>
-      ))}
+    <div className="flex flex-col my-1 w-full">
+  <div className="flex flex-wrap items-center justify-between mb-1 w-full bg-black px-4 py-2 rounded-md">
+        {/* Game score with game-like UI */}
+        <div className="flex items-center">
+          <div className="bg-gradient-to-r from-indigo-600 to-blue-500 px-4 py-2 rounded-lg shadow-lg flex items-center">
+            <svg className="w-5 h-5 mr-2 text-yellow-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
+              <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
+            </svg>
+            <span className="text-xl font-bold text-white">{score}</span>
+          </div>
+          
+          {/* Lives with animated heart icons */}
+          <div className="ml-4 flex items-center">
+            {[...Array(lives)].map((_, index) => (
+              <span key={index} className="text-red-500 text-xl mx-1 animate-pulse">❤️</span>
+            ))}
+          </div>
+        </div>
+
+        {/* Scenario counter and mute button */}
+        <div className="flex items-center gap-2">
+  <div className="bg-gray-800 text-white px-3 py-1 rounded-md text-sm font-medium">
+    Scenario {scenarioIndex + 1}/{scenarios?.length || 1}
+  </div>
+  <Button
+    variant="ghost"
+    size="icon"
+    aria-label={isMuted ? 'Unmute' : 'Mute'}
+    className="ml-2 group hover:bg-gray-700 focus:bg-gray-700 transition"
+    onClick={() => {
+      setIsMuted((prev) => !prev);
+      // Mute/unmute all audio refs
+      if (mainMusicRef.current) mainMusicRef.current.muted = !isMuted;
+      if (congratsSoundRef.current) congratsSoundRef.current.muted = !isMuted;
+      if (gameOverSoundRef.current) gameOverSoundRef.current.muted = !isMuted;
+    }}
+  >
+    {isMuted ? (
+      <VolumeX className="w-5 h-5 text-gray-200 group-hover:text-yellow-300 group-focus:text-yellow-300 transition" />
+    ) : (
+      <Volume2 className="w-5 h-5 text-gray-200 group-hover:text-yellow-300 group-focus:text-yellow-300 transition" />
+    )}
+  </Button>
+</div>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="w-full bg-gray-300 rounded-full h-2 mb-1">
+        <div 
+          className="bg-gradient-to-r from-green-400 to-blue-500 h-2 rounded-full transition-all duration-500 ease-in-out" 
+          style={{ width: `${(scenarioIndex / (scenarios?.length || 1)) * 100}%` }}
+        ></div>
+      </div>
     </div>
   )}
   {isAuthenticated && (
@@ -510,31 +560,7 @@ export function StorylineGame() {
               Start Game
             </Button>
 
-            {/* {isAuthenticated ? (
-              <Button 
-              className="bg-orange-700" 
-              onClick={handleStartGame}
-            >
-              <Maximize2 className="mr-2 h-4 w-4" />
-              Start Game
-            </Button>
-            ) : (
-              <>
-                <p className="mb-4">Please log in or sign up to play the game.</p>
-                <div className="flex space-x-4">
-                  <Button variant="default" asChild className="bg-violet-950 hover:bg-violet-900">
-                    <Link href="/login" className="text-yellow-300">
-                      Login
-                    </Link>
-                  </Button>
-                  <Button variant="default" asChild className="bg-blue-950 hover:bg-blue-900">
-                    <Link href="/signup" className="text-yellow-300">
-                      Sign Up
-                    </Link>
-                  </Button>
-                </div>
-              </>
-            )} */}
+            {}
           </motion.div>
         )}
 
@@ -544,26 +570,26 @@ export function StorylineGame() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.5 }}
-            className="flex-grow flex items-center justify-center overflow-y-auto"
+            className="flex-grow flex items-center justify-center mt-1"
           >
             {showOutcome && selectedAction ? (
               <Card className="w-full max-w-full">
-                <CardHeader>
+                <CardHeader className="pb-2">
                   <CardTitle>
                     {selectedAction.is_correct 
                       ? (selectedAction.points < maxPointsForCurrentScenario ? "Partially Correct!" : "Correct Choice!") 
                       : "Incorrect Choice!"}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="flex flex-col items-center">
+                <CardContent className="flex flex-col items-center pt-2">
                   {/* Display the outcome text if available */}
-                  <div className="mb-6 text-center">
+                  <div className="mb-4 text-center">
                     <p className="text-lg">{selectedAction.outcome?.text || 
                       (selectedAction.is_correct 
                         ? (selectedAction.points < maxPointsForCurrentScenario ? "Good try! You were partially correct." : "Good job! You made the right choice.") 
                         : "That wasn't the best choice.")}
                     </p>
-                    <p className="mt-4">
+                    <p className="mt-2">
                       {selectedAction.is_correct 
                         ? `You earned ${selectedAction.points || 0} points! Your score is now ${score}.` 
                         : `You lost a life.`}
@@ -571,7 +597,7 @@ export function StorylineGame() {
                   </div>
                   <Button 
                     onClick={handleProceedToNextScenario} 
-                    className="mt-4 w-full max-w-md"
+                    className="mt-2 w-full max-w-md"
                   >
                     Continue
                   </Button>
@@ -579,33 +605,43 @@ export function StorylineGame() {
               </Card>
             ) : (
               <Card className="w-full max-w-full">
-                <CardHeader>
-                  <CardTitle>{selectedScenario?.description}</CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-col items-center">
-                  {selectedScenario?.image ? (
-                    <Image
-                      src={selectedScenario.image}
-                      alt="Level Image"
-                      className="mb-4 w-full max-w-md rounded-lg"
-                      width={500}
-                      height={300}
-                    />
-                  ) : (
-                    <div className="mb-4 w-full max-w-md rounded-lg bg-gray-200 flex items-center justify-center h-48">
-                      <p>No Image Available</p>
+                <CardHeader className="pb-2">
+  <CardTitle>
+    <span style={{ fontSize: '0.9rem' }}>{selectedScenario?.description}</span>
+  </CardTitle>
+</CardHeader>
+                <CardContent className="p-3">
+                  <div className="flex flex-col gap-4 items-center">
+                    {/* Scenario Image on top */}
+                    <div className="w-full flex justify-center">
+  {selectedScenario?.image ? (
+    <Image
+      src={selectedScenario.image}
+      alt="Level Image"
+      className="w-full max-w-xs rounded-lg" // Reduced width
+      width={350}
+      height={210}
+    />
+                      ) : (
+                        <div className="w-full max-w-md rounded-lg bg-gray-200 flex items-center justify-center h-48">
+                          <p>No Image Available</p>
+                        </div>
+                      )}
                     </div>
-                  )}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
-                    {selectedScenario?.actions.map((action) => (
-                      <Button
-                        key={action.id}
-                        onClick={() => handleAction(action)}
-                        className="w-full"
-                      >
-                        {action.text}
-                      </Button>
-                    ))}
+                    {/* Actions below image */}
+                    <div className="w-full grid grid-cols-2 gap-4 justify-items-center">
+  {selectedScenario?.actions.map((action) => (
+    <Button
+      key={action.id}
+      onClick={() => handleAction(action)}
+      className="w-[95%] min-h-[3rem] py-2 px-2 whitespace-normal text-center text-sm flex items-center justify-center"
+      variant="default"
+      size="sm"
+    >
+      {action.text}
+    </Button>
+  ))}
+</div>
                   </div>
                 </CardContent>
               </Card>

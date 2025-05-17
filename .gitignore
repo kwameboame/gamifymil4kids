@@ -3,6 +3,8 @@
 
 .gitignore
 
+.windsurf/
+
 ### Django ###
 *.log
 *.pot
