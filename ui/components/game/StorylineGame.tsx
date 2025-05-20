@@ -456,6 +456,27 @@ export function StorylineGame() {
   <div className="bg-gray-800 text-white px-3 py-1 rounded-md text-sm font-medium">
     Scenario {scenarioIndex + 1}/{scenarios?.length || 1}
   </div>
+  {/* Fullscreen toggle button */}
+  <Button
+    variant="ghost"
+    size="icon"
+    aria-label={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+    className="ml-2 group hover:bg-gray-700 focus:bg-gray-700 transition"
+    onClick={() => {
+      if (isFullscreen) {
+        exitFullscreen();
+      } else {
+        enterFullscreen();
+      }
+    }}
+  >
+    {isFullscreen ? (
+      <Minimize2 className="w-5 h-5 text-gray-200 group-hover:text-yellow-300 group-focus:text-yellow-300 transition" />
+    ) : (
+      <Maximize2 className="w-5 h-5 text-gray-200 group-hover:text-yellow-300 group-focus:text-yellow-300 transition" />
+    )}
+  </Button>
+  {/* Mute button */}
   <Button
     variant="ghost"
     size="icon"
