@@ -17,13 +17,25 @@ interface Story {
   title: string;
   description: string;
   levels: Level[];
+  scenarios: Scenario[];
 }
 
 interface Level {
   id: number;
   title: string;
-  prompt: string;
+  intro_text: string;
   image: string;
+  order: number;
+  story: number;
+}
+
+interface Scenario {
+  id: number;
+  story: number;
+  level: number;
+  description: string;
+  image: string;
+  order: number;
   actions: Action[];
 }
 
@@ -51,7 +63,8 @@ interface UserProfile {
   badges: string[]
 }
 
-type GameState = 'start' | 'playing' | 'outcome' | 'end' | 'gameover' | 'leaderboard'
+// Define all possible game states
+type GameState = 'start' | 'playing' | 'outcome' | 'end' | 'gameover' | 'leaderboard' | 'level-intro' | 'level-complete'
 
 function LeaderboardComponent({ leaderboard, onBack }: { leaderboard: LeaderboardEntry[], onBack: () => void }) {
   return (
@@ -255,6 +268,7 @@ export function StorylineGame() {
   const [gameState, setGameState] = useState<GameState>('start')
   const [score, setScore] = useState(0)
   const [level, setLevel] = useState(0)
+  const [scenarioIndex, setScenarioIndex] = useState(0)
   const [showConfetti, setShowConfetti] = useState(false)
   const [playerName, setPlayerName] = useState('')
   const [selectedAction, setSelectedAction] = useState<Action | null>(null)
@@ -263,6 +277,51 @@ export function StorylineGame() {
   const [isLoading, setIsLoading] = useState(true)
   const [isGameStarted, setIsGameStarted] = useState(false)
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
+  const [currentLevelScenarios, setCurrentLevelScenarios] = useState<Scenario[]>([])
+
+  // DEBUG: Log level, scenarioIndex, and currentLevelScenarios whenever they change
+  useEffect(() => {
+    console.log('[DEBUG] Level:', level, 'ScenarioIndex:', scenarioIndex, 'GameState:', gameState)
+    if (story && story.scenarios && story.levels && story.levels[level]) {
+      const levelId = story.levels[level].id;
+      const scenariosForLevel = story.scenarios.filter((s: Scenario) => s.level === levelId).sort((a: Scenario, b: Scenario) => a.order - b.order);
+      setCurrentLevelScenarios(scenariosForLevel);
+      console.log('[DEBUG] Updated currentLevelScenarios for level', level, scenariosForLevel);
+    }
+  }, [level, story, gameState, scenarioIndex]);
+  
+  // Debug function to help troubleshoot level transitions
+  const debugLevelTransition = () => {
+    if (story) {
+      console.log("=== DEBUGGING LEVEL TRANSITION ===");
+      console.log("Current level index:", level);
+      console.log("Current level data:", story.levels[level]);
+      
+      if (level + 1 < story.levels.length) {
+        console.log("Next level index:", level + 1);
+        console.log("Next level data:", story.levels[level + 1]);
+        
+        // Get scenarios for next level
+        const nextLevelId = story.levels[level + 1].id;
+        const nextLevelScenarios = story.scenarios
+          .filter(s => s.level === nextLevelId)
+          .sort((a, b) => a.order - b.order);
+        
+        console.log("Next level ID:", nextLevelId);
+        console.log("Scenarios for next level:", nextLevelScenarios);
+        console.log("Scenarios count for next level:", nextLevelScenarios.length);
+      } else {
+        console.log("No next level available - at last level");
+      }
+      
+      console.log("Current level scenarios:", currentLevelScenarios);
+      console.log("Current scenario index:", scenarioIndex);
+      console.log("Current game state:", gameState);
+      console.log("=== END DEBUG ===");
+    } else {
+      console.error("Cannot debug: story is null");
+    }
+  }
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const gameOverAudioRef = useRef<HTMLAudioElement | null>(null)
   const congratsAudioRef = useRef<HTMLAudioElement | null>(null)
@@ -270,8 +329,36 @@ export function StorylineGame() {
 
   const fetchStory = useCallback(async () => {
     try {
-      const response = await axios.get<Story>(`${backendBaseURL}/game/stories/1/`)
+      const response = await axios.get<Story>(`${backendBaseURL}/game/stories/3/`)
       setStory(response.data)
+      // Initialize with appropriate level's scenarios based on restored progress
+      if (response.data?.scenarios) {
+        const progressData = localStorage.getItem('gameProgress')
+        let targetLevel = 0
+        
+        if (progressData) {
+          try {
+            const progress = JSON.parse(progressData)
+            if (progress.story === 3) {
+              targetLevel = progress.level || 0
+              
+              // Set game state to playing if we have stored progress
+              if (progress.level >= 0) {
+                setGameState('playing')
+              }
+            }
+          } catch (error) {
+            console.error('Error parsing stored progress:', error)
+          }
+        }
+        
+        // Get scenarios for the current level
+        const levelScenarios = response.data.scenarios
+          .filter((s: Scenario) => s.level === response.data.levels[targetLevel]?.id)
+          .sort((a: Scenario, b: Scenario) => a.order - b.order)
+          
+        setCurrentLevelScenarios(levelScenarios)
+      }
     } catch (error) {
       console.error('Error fetching story:', error)
     } finally {
@@ -291,12 +378,30 @@ export function StorylineGame() {
     if (storedProfile) {
       setUserProfile(JSON.parse(storedProfile))
     }
+    
+    // Restore game progress if available
+    const storedProgress = localStorage.getItem('gameProgress')
+    if (storedProgress) {
+      try {
+        const progress = JSON.parse(storedProgress)
+        if (progress.story === 3) { // Only restore if it's the Truth Quest game (id=3)
+          setLevel(progress.level || 0)
+          setScenarioIndex(progress.scenarioIndex || 0)
+          setScore(progress.score || 0)
+          setIsGameStarted(true)
+          // Don't set the gameState yet - wait for story data to load first
+        }
+      } catch (error) {
+        console.error('Error parsing stored game progress:', error)
+      }
+    }
   }, [fetchStory])
 
   const handleStart = () => {
     setGameState('playing')
     setScore(0)
     setLevel(0)
+    setScenarioIndex(0)
     setShowConfetti(false)
     setPlayerName('')
     setSelectedAction(null)
@@ -319,6 +424,15 @@ export function StorylineGame() {
     console.log('Setting gameState to outcome')
     setGameState('outcome')
 
+    // Save game progress to localStorage to persist between sessions
+    const gameProgress = {
+      level,
+      scenarioIndex,
+      score: Math.max(0, newScore),
+      story: story?.id
+    }
+    localStorage.setItem('gameProgress', JSON.stringify(gameProgress))
+
     if (newScore < 0) {
       handleGameOver()
     } else {
@@ -330,25 +444,72 @@ export function StorylineGame() {
   }
 
   const handleContinue = () => {
-    console.log('handleContinue called')
+    console.log('=== HANDLE CONTINUE DEBUG ===');
+    console.log('currentLevelScenarios:', currentLevelScenarios);
+    console.log('currentLevelScenarios.length:', currentLevelScenarios.length);
+    console.log('scenarioIndex:', scenarioIndex);
+    console.log('isLastScenarioInLevel:', scenarioIndex === currentLevelScenarios.length - 1);
+    
     if (!story) {
       console.log('No story found')
       return
     }
-
+  
     setSelectedAction(null)
-    console.log('Current level:', level, 'Story levels length:', story.levels.length)
-    if (level < story.levels.length - 1) {
-      console.log('Moving to next level')
-      setLevel(prev => prev + 1)
-      setGameState('playing')
+    
+    // Get fresh scenarios to ensure we have current data
+    const levelId = story.levels[level].id;
+    const levelScenarios = story.scenarios
+      .filter((s: Scenario) => s.level === levelId)
+      .sort((a: Scenario, b: Scenario) => a.order - b.order);
+    
+    console.log('[DEBUG] Fresh level scenarios:', levelScenarios.length);
+    
+    // Use fresh data instead of state
+    const isLastScenarioInLevel = scenarioIndex === levelScenarios.length - 1;
+    
+    if (!isLastScenarioInLevel) {
+      setScenarioIndex(scenarioIndex + 1);
+      setGameState('playing');
+      console.log('[DEBUG] Moving to next scenario:', scenarioIndex + 1);
     } else {
-      console.log('Game ending')
-      if (score > 0) {
-        showConfettiEffect()
-        setTimeout(() => setShowConfetti(false), 5000)
-      }
-      setGameState('end')
+      showConfettiEffect();
+      setGameState('level-complete');
+      console.log('[DEBUG] Level complete! Moving to level-complete screen');
+    }
+  }
+
+  const handleStartNextLevel = () => {
+    console.log('[DEBUG] Starting next level');
+    
+    // Check if story exists
+    if (!story) {
+      console.error('[ERROR] Cannot start next level: story is null');
+      return;
+    }
+    
+    // Check if there are more levels
+    if (level < story.levels.length - 1) {
+      const nextLevel = level + 1;
+      
+      // Get scenarios for the next level
+      const nextLevelScenarios = story.scenarios
+        .filter((s: Scenario) => s.level === story.levels[nextLevel].id)
+        .sort((a: Scenario, b: Scenario) => a.order - b.order);
+      
+      console.log('[DEBUG] Next level scenarios:', nextLevelScenarios);
+      
+      // Update level and reset scenario index
+      setLevel(nextLevel);
+      setScenarioIndex(0);
+      setSelectedAction(null);
+      
+      // Move to next level intro
+      setGameState('level-intro');
+    } else {
+      // End of game
+      showConfettiEffect();
+      setGameState('end');
     }
   }
 
@@ -360,7 +521,7 @@ export function StorylineGame() {
     }
     gameOverAudioRef.current.play().catch(error => console.error('Game over audio playback failed:', error))
   }
-
+  
   const showConfettiEffect = () => {
     setShowConfetti(true)
     if (!congratsAudioRef.current) {
@@ -451,7 +612,7 @@ export function StorylineGame() {
           </motion.div>
         ) : (
           <>
-            {story && (gameState === 'start' || gameState === 'playing' || gameState === 'outcome' || gameState === 'end' || gameState === 'gameover') && (
+            {story && (gameState === 'start' || gameState === 'playing' || gameState === 'outcome' || gameState === 'end' || gameState === 'level-intro' || gameState === 'level-complete' || gameState === 'gameover') && (
               <Card className="w-full">
                 <CardHeader>
                   <CardTitle className="text-3xl font-bold text-center">{story.title}</CardTitle>
@@ -485,7 +646,7 @@ export function StorylineGame() {
                       </motion.div>
                     )}
 
-                    {gameState === 'playing' && story.levels[level] && (
+                    {gameState === 'playing' && story.levels[level] && currentLevelScenarios[scenarioIndex] && (
                       <motion.div
                         key="playing"
                         initial={{ opacity: 0, y: 20 }}
@@ -495,16 +656,17 @@ export function StorylineGame() {
                       >
                         <div className="mb-6">
                           <Image
-                            src={story.levels[level].image || '/images/placeholder.png'}
+                            src={currentLevelScenarios[scenarioIndex].image || '/images/placeholder.png'}
                             alt="Story scene"
                             width={600}
                             height={300}
                             className="rounded-lg w-full h-64 object-cover"
                           />
                         </div>
-                        <p className="text-lg mb-4">{story.levels[level].prompt}</p>
+                        <h3 className="text-xl font-semibold mb-2">Level {level + 1}: {story.levels[level].title}</h3>
+                        <p className="text-lg mb-4">{currentLevelScenarios[scenarioIndex].description}</p>
                         <div className="grid gap-3">
-                          {story.levels[level].actions.map((action, index) => (
+                          {currentLevelScenarios[scenarioIndex].actions.map((action, index) => (
                             <motion.div
                               key={action.id}
                               initial={{ opacity: 0, x: -20 }}
@@ -544,7 +706,72 @@ export function StorylineGame() {
                           className="w-full text-lg py-3" 
                           onClick={handleContinue}
                         >
-                          Continue to Next Scene
+                          {scenarioIndex < currentLevelScenarios.length - 1
+                            ? "Continue to Next Scene"
+                            : "Finish Level"
+                          }
+                        </Button>
+                      </motion.div>
+                    )}
+
+                    {gameState === 'level-intro' && story && story.levels && story.levels[level] && (
+                      <motion.div
+                        key="level-intro"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.5 }}
+                        className="space-y-4"
+                      >
+                        <div className="bg-gray-100 dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                          <h3 className="text-xl font-semibold mb-4">Level {level + 1}: {story.levels[level].title}</h3>
+                          <p className="text-lg mb-4">{story.levels[level].intro_text}</p>
+                        </div>
+                        <Button 
+                          className="w-full text-lg py-3" 
+                          onClick={() => {
+                            // Start playing the current level
+                            setGameState('playing');
+                            console.log('[DEBUG] Starting level with index:', level, 'and ID:', story.levels[level].id);
+                          }}
+                        >
+                          Start Level
+                        </Button>
+                      </motion.div>
+                    )}
+
+                    {(gameState as GameState) === 'level-complete' && (
+                      <motion.div
+                        key="level-complete"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.5 }}
+                        className="space-y-4"
+                      >
+                        <div className="bg-gray-100 dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                          <motion.div
+                            className="flex justify-center mb-4"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ duration: 0.5 }}
+                          >
+                            <Trophy className="w-16 h-16 text-yellow-400" />
+                          </motion.div>
+                          <h3 className="text-xl font-semibold mb-4 text-center">Level {level + 1} Completed!</h3>
+                          <p className="text-lg mb-4 text-center">Congratulations! You&apos;ve completed Level {level + 1} with a current score of {score}.</p>
+                          {/* Debug button - only visible during development */}
+                          {process.env.NODE_ENV === 'development' && (
+                            <Button variant="outline" size="sm" onClick={debugLevelTransition} className="mt-2">
+                              Debug Level Data
+                            </Button>
+                          )}
+                        </div>
+                        <Button 
+                          className="w-full text-lg py-3" 
+                          onClick={handleStartNextLevel}
+                        >
+                          Continue to Next Level
                         </Button>
                       </motion.div>
                     )}

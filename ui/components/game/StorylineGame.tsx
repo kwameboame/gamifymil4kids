@@ -83,6 +83,8 @@ export function StorylineGame() {
     | "profile"
     | "login"
     | "signup"
+    | "level-complete"
+    | "level-intro"
   >("start");
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(0);
@@ -320,14 +322,23 @@ export function StorylineGame() {
     
     if (!selectedAction) return;
     
+    // Debug info
+    console.log('[DEBUG] handleProceedToNextScenario');
+    console.log('[DEBUG] scenarioIndex:', scenarioIndex, 'total scenarios:', scenarios?.length);
+    console.log('[DEBUG] level:', level, 'total levels:', story?.levels.length);
+    
     if (selectedAction.is_correct) {
       // Check if there are more scenarios in the current level
       if (scenarioIndex < (scenarios?.length || 0) - 1) {
+        // Move to next scenario in current level
         setScenarioIndex((prev) => prev + 1);
+        console.log('[DEBUG] Moving to next scenario:', scenarioIndex + 1);
       } else if (level < (story?.levels.length || 0) - 1) {
-        // Move to the next level if scenarios are finished
-        setLevel((prev) => prev + 1);
-        setScenarioIndex(0); // Reset scenario index for the new level
+        // Show level complete screen
+        playCongratsSound();
+        setShowConfetti(true);
+        setGameState("level-complete");
+        console.log('[DEBUG] Level complete! Showing level-complete screen');
       } else {
         // Game end logic
         playCongratsSound();
@@ -345,9 +356,10 @@ export function StorylineGame() {
         if (scenarioIndex < (scenarios?.length || 0) - 1) {
           setScenarioIndex((prev) => prev + 1);
         } else if (level < (story?.levels.length || 0) - 1) {
-          // Move to the next level if scenarios are finished
-          setLevel((prev) => prev + 1);
-          setScenarioIndex(0); // Reset scenario index for the new level
+          // Show level complete screen even for incorrect action if it's the last scenario
+          playCongratsSound();
+          setShowConfetti(true);
+          setGameState("level-complete");
         } else {
           // Game end logic if no more levels
           setGameState("gameover");
@@ -372,6 +384,40 @@ export function StorylineGame() {
     setScore(0);    // Reset score when starting a new game
     setShowConfetti(false); // Stop confetti
     setGameState("playing");
+  }
+  
+  // Handler for continuing to next level
+  const handleContinueToNextLevel = async () => {
+    if (!story) return;
+    
+    console.log('[DEBUG] handleContinueToNextLevel');
+    console.log('[DEBUG] Current level:', level);
+    console.log('[DEBUG] Next level:', level + 1);
+    
+    const nextLevel = level + 1;
+    
+    if (nextLevel < story.levels.length) {
+      // Increment level and reset scenario index
+      setLevel(nextLevel);
+      setScenarioIndex(0);
+      setShowConfetti(false);
+      
+      // Fetch scenarios for the new level
+      try {
+        console.log('[DEBUG] Fetching scenarios for level ID:', story.levels[nextLevel].id);
+        const scenariosResponse = await axios.get<Scenarios[]>(`/api/game/stories/3/levels/${story.levels[nextLevel].id}/scenarios/`);
+        setScenarios(scenariosResponse.data);
+        console.log('[DEBUG] Fetched scenarios:', scenariosResponse.data);
+        
+        // Show level intro or go directly to playing
+        setGameState("playing");
+      } catch (error) {
+        console.error('Error fetching scenarios for next level:', error);
+      }
+    } else {
+      // No more levels, end the game
+      setGameState("end");
+    }
   };
 
   if (isLoading) {
@@ -669,6 +715,41 @@ export function StorylineGame() {
             )
           }
 
+          </motion.div>
+        )}
+
+        {gameState === "level-complete" && story && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5 }}
+            className="flex-grow flex items-center justify-center"
+          >
+            <div className="text-center p-8 bg-white rounded-lg shadow-md w-full max-w-2xl">
+              <h2 className="text-4xl font-bold mb-6 text-gray-900">Level {level + 1} Complete!</h2>
+              <p className="text-2xl mb-4 text-gray-800">Current Score: {score}</p>
+              <p className="text-lg mb-8 text-gray-600">Congratulations! You&apos;ve completed this level.</p>
+              
+              <div className="space-y-4">
+                <Button 
+                  onClick={handleContinueToNextLevel} 
+                  className="w-full max-w-xs mx-auto text-lg py-3 bg-green-600 hover:bg-green-700"
+                >
+                  Continue to Next Level
+                </Button>
+              </div>
+              
+              {/* Debug info in development mode */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="mt-6 p-4 bg-gray-100 rounded text-left text-sm">
+                  <p>Debug Info:</p>
+                  <p>Current Level: {level}</p>
+                  <p>Total Levels: {story.levels.length}</p>
+                  <p>Scenarios in Current Level: {scenarios?.length}</p>
+                </div>
+              )}
+            </div>
           </motion.div>
         )}
 
