@@ -18,7 +18,7 @@ class LevelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Level
-        fields = ['id', 'title', 'story', 'image', 'order']
+        fields = ['id', 'title', 'story', 'image', 'order', 'intro_text']
 
 class ScenarioSerializer(serializers.ModelSerializer):
     actions = ActionSerializer(many=True, read_only=True)

@@ -19,6 +19,7 @@ class Story(models.Model):
 class Level(models.Model):
     title = models.CharField(null=True, blank=True, max_length=200)
     story = models.ForeignKey(Story, related_name='levels', on_delete=models.CASCADE)
+    intro_text = models.TextField(null=True, blank=True)
     image = models.ImageField(upload_to='level_images/', null=True, blank=True)
     order = models.IntegerField()
 

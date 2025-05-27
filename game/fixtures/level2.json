@@ -1,0 +1,421 @@
+[
+    {
+        "model": "game.level",
+        "pk": 7,
+        "fields": {
+            "title": "Recognizing False Information",
+            "story": 3,
+            "intro_text": "Hello everyone! My name is Jay – Adwoa's older brother. I'm 14 years old and in Senior High School. I love social media, especially Twitter, so whenever I come home for vacation, I'm always on my phone! I'm always scrolling. But sometimes, I run into problems like these....",
+            "image": "",
+            "order": 2
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 11,
+        "fields": {
+            "story": 3,
+            "level": 7,
+            "description": "On one of Jay's free days, he was glued to his phone when a message from his uncle popped up: \"URGENT: Government is giving free laptops to all SHS students tomorrow at Independence Square! Share now before they finish!\" Jay felt excited but skeptical at the same time. What should Jay do?",
+            "image": "",
+            "order": 1
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 47,
+        "fields": {
+            "scenario": 11,
+            "text": "Ignore the message",
+            "is_correct": false,
+            "points": 1
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 47,
+        "fields": {
+            "action": 47,
+            "text": "Ignoring the message is not the best thing to do. Though you did not forward it, many other students went to Independence Square for nothing. Always verify and debunk before others get scammed.",
+            "created_at": "2025-05-25T15:23:50Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 48,
+        "fields": {
+            "scenario": 11,
+            "text": "Forward it to family and friends",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 48,
+        "fields": {
+            "action": 48,
+            "text": "Forwarding to family and friends will make many people fall prey to the message. This was a scam - no free laptops were being given at Independence Square. Fake news wastes time and hopes.",
+            "created_at": "2025-05-25T15:23:50Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 49,
+        "fields": {
+            "scenario": 11,
+            "text": "Check the Ministry of Education's Facebook page or call to ask a teacher.",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 49,
+        "fields": {
+            "action": 49,
+            "text": "Checking with the Ministry's page is the right thing to do. Verifying with the Ministry's page and realizing no such announcement has been made will allow you to warn friends not to fall for it.",
+            "created_at": "2025-05-25T15:23:50Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 12,
+        "fields": {
+            "story": 3,
+            "level": 7,
+            "description": "Jay decides to go on Facebook to catch up on what he missed while in school. He realizes he has been tagged many times in a message saying, 'MTN is hiring 500 workers TODAY! Click this link to apply fast!' Reading the comments under the post, he sees people asking, 'How?' and 'How do I do that?' Jay thinks of his favorite cousin who is seriously searching for a job. What should he do?",
+            "image": "",
+            "order": 2
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 50,
+        "fields": {
+            "scenario": 12,
+            "text": "Ignore it",
+            "is_correct": false,
+            "points": 1
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 50,
+        "fields": {
+            "action": 50,
+            "text": "Ignoring fake posts isn't enough! Silence allows scams to spread. Tag friends with a fact-check or report the post.",
+            "created_at": "2025-05-25T15:23:50Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 51,
+        "fields": {
+            "scenario": 12,
+            "text": "Click the link and apply",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 51,
+        "fields": {
+            "action": 51,
+            "text": "Fake job links often steal money or personal data. Reputable companies like MTN never ask for payments upfront!",
+            "created_at": "2025-05-25T15:23:50Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 52,
+        "fields": {
+            "scenario": 12,
+            "text": "Check MTN Ghana's official careers page",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 52,
+        "fields": {
+            "action": 52,
+            "text": "When you visit www.mtn.com.gh/careers and find no such jobs listed, you should report the fake post and share MTN's official hiring guidelines with friends.",
+            "created_at": "2025-05-25T15:23:50Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 13,
+        "fields": {
+            "story": 3,
+            "level": 7,
+            "description": "Jay's grandma often sends viral WhatsApp audios to the family group. This time, the audio she forwarded claims that boiling mango leaves with salt can cure diabetes in three days, with no need for hospital treatment. Jay's diabetic father is excited to try it. What advice would you give Jay to share with his father?",
+            "image": "",
+            "order": 3
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 53,
+        "fields": {
+            "scenario": 13,
+            "text": "Encourage him to try it",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 53,
+        "fields": {
+            "action": 53,
+            "text": "Encouraging your uncle to try this remedy could seriously harm his health.",
+            "created_at": "2025-05-25T15:23:50Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 54,
+        "fields": {
+            "scenario": 13,
+            "text": "Ignore it",
+            "is_correct": false,
+            "points": 1
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 54,
+        "fields": {
+            "action": 54,
+            "text": "Others may become victims of the fake news if we ignore it. Speaking up is the best course of action.",
+            "created_at": "2025-05-25T15:23:50Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 55,
+        "fields": {
+            "scenario": 13,
+            "text": "Fact-check with a doctor",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 55,
+        "fields": {
+            "action": 55,
+            "text": "Consulting a medical doctor will help you learn the facts about diabetes treatment. Only insulin can properly manage diabetes.",
+            "created_at": "2025-05-25T15:23:50Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 14,
+        "fields": {
+            "story": 3,
+            "level": 7,
+            "description": "Jay received a forwarded WhatsApp message claiming: '2025 WASSCE questions leaked! Click here to download PDF before it's deleted!' His classmates are excitedly sharing it. What should he do?",
+            "image": "",
+            "order": 4
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 56,
+        "fields": {
+            "scenario": 14,
+            "text": "Download and share",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 56,
+        "fields": {
+            "action": 56,
+            "text": "Downloading the questions especially from an unknown source could infect your phone with viruses or malware.",
+            "created_at": "2025-05-25T15:23:50Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 57,
+        "fields": {
+            "scenario": 14,
+            "text": "Report to WAEC's fraud hotline",
+            "is_correct": false,
+            "points": 1
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 57,
+        "fields": {
+            "action": 57,
+            "text": "Reporting to appropriate authorities will prevent others from falling for the scam. You can help by alerting WAEC through their official social media pages.",
+            "created_at": "2025-05-25T15:23:50Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 58,
+        "fields": {
+            "scenario": 14,
+            "text": "Check WAEC's official social media",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 58,
+        "fields": {
+            "action": 58,
+            "text": "Fact-checking on WAEC's official website and social media pages will confirm it's fake.",
+            "created_at": "2025-05-25T15:23:50Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 15,
+        "fields": {
+            "story": 3,
+            "level": 7,
+            "description": "A flier circulating on WhatsApp claims, 'Yesterday's flood in Kumasi killed 50 people,' using an image that actually shows a 2015 Kenya flood. What should you do when you encounter this misinformation?",
+            "image": "",
+            "order": 5
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 59,
+        "fields": {
+            "scenario": 15,
+            "text": "Forward to family groups",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 59,
+        "fields": {
+            "action": 59,
+            "text": "Forwarding the flier to others without verification can cause unnecessary fear and panic.",
+            "created_at": "2025-05-25T15:23:50Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 60,
+        "fields": {
+            "scenario": 15,
+            "text": "Reverse-image search on Google",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 60,
+        "fields": {
+            "action": 60,
+            "text": "A simple reverse image search would reveal the true source of the image.",
+            "created_at": "2025-05-25T15:23:50Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 61,
+        "fields": {
+            "scenario": 15,
+            "text": "Check Ghana Meteorological Agency",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 61,
+        "fields": {
+            "action": 61,
+            "text": "Checking with a credible agency like the Ghana Meteorological Agency would confirm whether there have been any recent floods.",
+            "created_at": "2025-05-25T15:23:50Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 16,
+        "fields": {
+            "story": 3,
+            "level": 7,
+            "description": "It's Freaky Friday. Jay logs on to X (formerly Twitter) and finds the hashtag #RIPSarkodie trending. A post appears with a link from a fake news site claiming, \"Rapper dies in USA car crash!\" Since Sarkodie is one of Jay's favorite rappers, what should he do about this?",
+            "image": "",
+            "order": 6
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 62,
+        "fields": {
+            "scenario": 16,
+            "text": "Retweet with crying emojis",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 62,
+        "fields": {
+            "action": 62,
+            "text": "Retweeting without verification spreads false news, causing unnecessary fear and panic.",
+            "created_at": "2025-05-25T15:23:50Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 63,
+        "fields": {
+            "scenario": 16,
+            "text": "Check Sarkodie's Social media pages",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 63,
+        "fields": {
+            "action": 63,
+            "text": "Checking Sarkodie's verified social media pages would allow you to get information on the issue",
+            "created_at": "2025-05-25T15:23:50Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 64,
+        "fields": {
+            "scenario": 16,
+            "text": "Search GhanaWeb/Pulse for confirmation",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 64,
+        "fields": {
+            "action": 64,
+            "text": "Check credible news platforms to see if they have reported same",
+            "created_at": "2025-05-25T15:23:50Z"
+        }
+    }
+]
