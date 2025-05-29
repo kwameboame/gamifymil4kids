@@ -1,0 +1,693 @@
+[
+    {
+        "model": "game.level",
+        "pk": 8,
+        "fields": {
+            "title": "The Fact-Checking Adventure",
+            "story": 3,
+            "intro_text": "Hey there! It's Jay again! After all the crazy things I've seen on social media, and learnt from my younger sister Adjoa, I've become super curious about what's true and what's fake. Now, I want to become a Fact Detective, someone who checks stories before sharing them. Want to join me on my next quest?",
+            "image": "",
+            "order": 3
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 17,
+        "fields": {
+            "story": 3,
+            "level": 8,
+            "description": "One morning, Jay finds a video of a talking dog on YouTube. The dog says full sentences like, \"Let's go for a walk!\" and \"I love ice cream!\" The video has millions of views, and everyone in the comments believes it is real. \"Wow! Can dogs really talk like humans?\" Jay wonders.",
+            "image": "",
+            "order": 1
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 65,
+        "fields": {
+            "scenario": 17,
+            "text": "Share the video with everyone because it looks amazing!",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 65,
+        "fields": {
+            "action": 65,
+            "text": "Everyone is amazed at first, but later his teacher explains it is edited using a special app. Jay feels a little tricked.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 66,
+        "fields": {
+            "scenario": 17,
+            "text": "Ask his class teacher or search online to find out if dogs can really talk",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 66,
+        "fields": {
+            "action": 66,
+            "text": "He learns that dogs cannot talk like humans and it was just clever video editing. Jay feels smart for checking first!",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 67,
+        "fields": {
+            "scenario": 17,
+            "text": "Leave a comment saying \"Is this real?\" and hope someone replies",
+            "is_correct": false,
+            "points": 1
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 67,
+        "fields": {
+            "action": 67,
+            "text": "Some people reply with jokes or say it's real, others say it's fake. He still feels unsure.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 18,
+        "fields": {
+            "story": 3,
+            "level": 8,
+            "description": "Jay sees a flyer shared in his class WhatsApp group. It has a photo of a cute puppy and says, \"Please help! Puppy lost in East Legon. Reward: GHS 500!\" But Jay notices something odd, the same flyer was shared last year too.",
+            "image": "",
+            "order": 2
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 68,
+        "fields": {
+            "scenario": 18,
+            "text": "Share it quickly so more people can help find the puppy",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 68,
+        "fields": {
+            "action": 68,
+            "text": "His friends feel sorry and keep sharing. Later, someone says it is an old fake message and there is no lost puppy.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 69,
+        "fields": {
+            "scenario": 18,
+            "text": "Look at the flyer closely to see if the contact number is still active",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 69,
+        "fields": {
+            "action": 69,
+            "text": "It doesn't work anymore. He asks around and learns, it is a recycled joke.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 70,
+        "fields": {
+            "scenario": 18,
+            "text": "Ask his brother if he remembers that the same flyer was shared some time ago",
+            "is_correct": false,
+            "points": 1
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 70,
+        "fields": {
+            "action": 70,
+            "text": "He remembers the same puppy story from before and warns him it might not be real.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 19,
+        "fields": {
+            "story": 3,
+            "level": 8,
+            "description": "A friend sends Jay a voice note: \"They say our school is closing next week because the headmaster was arrested!\" The message sounds real, and many students are whispering about it.",
+            "image": "",
+            "order": 3
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 71,
+        "fields": {
+            "scenario": 19,
+            "text": "Forward the voice note to all her classmates",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 71,
+        "fields": {
+            "action": 71,
+            "text": "Panic spreads. Parents begin calling the school. It turns out to be a lie. Jay feels bad.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 72,
+        "fields": {
+            "scenario": 19,
+            "text": "Go to the school's notice board or ask a teacher to confirm",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 72,
+        "fields": {
+            "action": 72,
+            "text": "The teacher says it is false and explains how rumors can hurt people. The school later sends a message to everyone to clear things up.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 73,
+        "fields": {
+            "scenario": 19,
+            "text": "Record his own voice note saying, \"I don't know if it is true, but here's what I heard\"",
+            "is_correct": false,
+            "points": 1
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 73,
+        "fields": {
+            "action": 73,
+            "text": "Some believe him, others get scared. Confusion grows. He later finds out it was false.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 20,
+        "fields": {
+            "story": 3,
+            "level": 8,
+            "description": "One of Jay's classmates shares an Instagram post claiming a famous Nigerian actress is secretly from Ghana and grew up in Kumasi. The post includes a picture of her wearing kente.",
+            "image": "",
+            "order": 4
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 74,
+        "fields": {
+            "scenario": 20,
+            "text": "Believe the story and post it on his Facebook page",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 74,
+        "fields": {
+            "action": 74,
+            "text": "Everyone is excited, until the actress posts on her verified page that she is not a Ghanaian and has never been to Ghana.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 75,
+        "fields": {
+            "scenario": 20,
+            "text": "Search for the actress's real biography on Google",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 75,
+        "fields": {
+            "action": 75,
+            "text": "He learns that the photo was from a movie the actress filmed with some Ghanaian actors but she's not Ghanaian. Nice work, Detective Jay!",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 76,
+        "fields": {
+            "scenario": 20,
+            "text": "Ask his parents if they've heard the story",
+            "is_correct": false,
+            "points": 1
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 76,
+        "fields": {
+            "action": 76,
+            "text": "They say it's possible, but they're not sure. Jay still feels unsure.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 21,
+        "fields": {
+            "story": 3,
+            "level": 8,
+            "description": "Jay sees an advert on Facebook offering free iPhones to the first 100 people who click a link. It looks real and says \"from Apple Ghana.\"",
+            "image": "",
+            "order": 5
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 77,
+        "fields": {
+            "scenario": 21,
+            "text": "Click the link to try and win",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 77,
+        "fields": {
+            "action": 77,
+            "text": "Her phone starts acting weird and her email gets spammed. His friend says it might be malware.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 78,
+        "fields": {
+            "scenario": 21,
+            "text": "Ask his tech-savvy friend if Apple has giveaways like that",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 78,
+        "fields": {
+            "action": 78,
+            "text": "His friend tells him that Apple doesn't do TikTok giveaways like that. It's a trick!",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 79,
+        "fields": {
+            "scenario": 21,
+            "text": "Share the post with his friends so they can also try",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 79,
+        "fields": {
+            "action": 79,
+            "text": "Some friends fall for the trick and get upset. Jay regrets it.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 22,
+        "fields": {
+            "story": 3,
+            "level": 8,
+            "description": "One rainy evening, Jay gets a message: \"Breaking: Accra Mall flooding badly. Avoid the area!\" He's about to message her aunt who works nearby.",
+            "image": "",
+            "order": 6
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 80,
+        "fields": {
+            "scenario": 22,
+            "text": "Call his aunt and tell her to leave now!",
+            "is_correct": false,
+            "points": 1
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 80,
+        "fields": {
+            "action": 80,
+            "text": "The aunt is confused. She's at the mall and everything is fine.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 81,
+        "fields": {
+            "scenario": 22,
+            "text": "Check if trusted news websites are reporting it too",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 81,
+        "fields": {
+            "action": 81,
+            "text": "No trusted source mentions it. The message is false.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 82,
+        "fields": {
+            "scenario": 22,
+            "text": "Forward the message on WhatsApp to warn others",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 82,
+        "fields": {
+            "action": 82,
+            "text": "Panic spreads. Later, it is revealed as an old photo from years ago.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 23,
+        "fields": {
+            "story": 3,
+            "level": 8,
+            "description": "While browsing through Facebook, Jay spots a meme showing a photo of a politician sleeping in parliament with the caption: \"He works too hard!\" Everyone is laughing and sharing.",
+            "image": "",
+            "order": 7
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 83,
+        "fields": {
+            "scenario": 23,
+            "text": "Laugh and share it because it's funny",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 83,
+        "fields": {
+            "action": 83,
+            "text": "It turns out the image was taken from a different event years ago. Jay feels bad for laughing at something that was fake.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 84,
+        "fields": {
+            "scenario": 23,
+            "text": "Do a reverse image search to see if the photo is real or edited",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 84,
+        "fields": {
+            "action": 84,
+            "text": "He finds the original photo and learns it has been photoshopped.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 85,
+        "fields": {
+            "scenario": 23,
+            "text": "Asks his social studies teacher what he thinks",
+            "is_correct": false,
+            "points": 1
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 85,
+        "fields": {
+            "action": 85,
+            "text": "His teacher says it is better to check things before sharing because memes can be misleading.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 24,
+        "fields": {
+            "story": 3,
+            "level": 8,
+            "description": "Jay sees a health tip on Facebook saying: \"Drinking 4 bottles of water before bed cures all sicknesses!\" The post has over 50,000 likes.",
+            "image": "",
+            "order": 8
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 86,
+        "fields": {
+            "scenario": 24,
+            "text": "Try it immediately and tell his friends",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 86,
+        "fields": {
+            "action": 86,
+            "text": "He wakes up too many times at night and doesn't feel well.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 87,
+        "fields": {
+            "scenario": 24,
+            "text": "Look it up on a health website or ask a doctor",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 87,
+        "fields": {
+            "action": 87,
+            "text": "He learns too much water at once isn't good. The tip was not safe.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 88,
+        "fields": {
+            "scenario": 24,
+            "text": "Save the post and ask his parents later",
+            "is_correct": false,
+            "points": 1
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 88,
+        "fields": {
+            "action": 88,
+            "text": "He still feels unsure and forgets to ask. The post keeps spreading.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 25,
+        "fields": {
+            "story": 3,
+            "level": 8,
+            "description": "A YouTube video warns: \"Delete WhatsApp now! It's spying on you!\" Jay panics. WhatsApp is the only way he chats with his siblings and Grandma!",
+            "image": "",
+            "order": 9
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 89,
+        "fields": {
+            "scenario": 25,
+            "text": "Delete the app right away",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 89,
+        "fields": {
+            "action": 89,
+            "text": "He loses all her chats. Later, he finds out it was fake.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 90,
+        "fields": {
+            "scenario": 25,
+            "text": "Look up WhatsApp's official statement online",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 90,
+        "fields": {
+            "action": 90,
+            "text": "He finds WhatsApp's page explaining that the video is false. He feels proud!",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 91,
+        "fields": {
+            "scenario": 25,
+            "text": "Ask his classmates if they saw the same video",
+            "is_correct": false,
+            "points": 1
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 91,
+        "fields": {
+            "action": 91,
+            "text": "They argue about it. Some delete the app. No one really knows.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 26,
+        "fields": {
+            "story": 3,
+            "level": 8,
+            "description": "Jay sees a post on Facebook about a fire at a nearby school. It includes a dramatic picture of burning classrooms. But when he zooms in, he sees a signboard from another country.",
+            "image": "",
+            "order": 10
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 92,
+        "fields": {
+            "scenario": 26,
+            "text": "Share the photo to warn people",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 92,
+        "fields": {
+            "action": 92,
+            "text": "The photo causes fear, but the school posts later that nothing happened. The picture is from a different country.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 93,
+        "fields": {
+            "scenario": 26,
+            "text": "Check if the photo is from Ghana or not",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 93,
+        "fields": {
+            "action": 93,
+            "text": "He finds out the photo is from a fire in Kenya, not Ghana. He avoids spreading fake news!",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 94,
+        "fields": {
+            "scenario": 26,
+            "text": "Ask his friend who goes to that school",
+            "is_correct": false,
+            "points": 1
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 94,
+        "fields": {
+            "action": 94,
+            "text": "His friend says the school is fine, but Jay still isn't 100% sure.",
+            "created_at": "2025-05-28T18:10:00Z"
+        }
+    }
+]

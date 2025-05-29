@@ -7,11 +7,12 @@ import { ProfileComponent } from '@/components/storyline-game'
 import { useAuth } from '@/contexts/AuthContext'
 
 interface UserProfile {
+  id: number;
   name: string;
   highScores: {
     [key: string]: number;
   };
-  badges: string[];
+  badges: { id: number; name: string; description: string; image: string }[];
 }
 
 export default function ProfilePage() {

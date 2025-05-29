@@ -1,0 +1,693 @@
+[
+    {
+        "model": "game.level",
+        "pk": 9,
+        "fields": {
+            "title": "Responsible Sharing",
+            "story": 3,
+            "intro_text": "Hello! I'm Kwaku, but you can call me the 'last killer.' I'm 16 years old and the eldest sibling to Adwoa and Jay. Those two are stubborn but I love them anyways. When I am not busy, I love watching music videos of my favorite musicians, playing video games and sometimes hanging out with friends after school. I love providing updates on my class What's App page but one day, something strange happened, one post I shared caused a big confusion in class. That was when I started learning that not everything we see online is okay to share. Some things can hurt others, spread lies, or even get us in trouble! So come with me on this exciting journey as I learn how to think before I click, ask questions before I post, and become a super smart sharer online! Let's find out together what it really means to be kind, safe, and honest on the internet.",
+            "image": "",
+            "order": 4
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 27,
+        "fields": {
+            "story": 3,
+            "level": 9,
+            "description": "Kweku gets a funny photo from his cousin on WhatsApp. The picture makes fun of a boy's big ears. Kweku giggles and wants to share it to all his friends on their class WhatsApp page",
+            "image": "",
+            "order": 1
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 95,
+        "fields": {
+            "scenario": 27,
+            "text": "Share it in the class WhatsApp group right away",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 95,
+        "fields": {
+            "action": 95,
+            "text": "The picture goes viral. The boy in the photo finds out and feels sad. Kwame gets called by his teacher for spreading hurtful content.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 96,
+        "fields": {
+            "scenario": 27,
+            "text": "Ask his cousin where the picture came from and if it's real or a joke",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 96,
+        "fields": {
+            "action": 96,
+            "text": "His cousin says it's from the internet and it's actually edited. Kwame decides not to share it.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 97,
+        "fields": {
+            "scenario": 27,
+            "text": "Think if the picture could hurt someone's feelings before sharing",
+            "is_correct": false,
+            "points": 1
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 97,
+        "fields": {
+            "action": 97,
+            "text": "Kwame imagines how he would feel if someone made fun of him. He chooses not to forward it.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 28,
+        "fields": {
+            "story": 3,
+            "level": 9,
+            "description": "A friend sends Kweku a document named \"leaked test answers\" before exams and tells him to forward them only to people he trusts.",
+            "image": "",
+            "order": 2
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 98,
+        "fields": {
+            "scenario": 28,
+            "text": "Share them with his best friends to help them too",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 98,
+        "fields": {
+            "action": 98,
+            "text": "His friends get caught, and Kweku is also punished for helping to cheat.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 99,
+        "fields": {
+            "scenario": 28,
+            "text": "Report it to his teacher or parent",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 99,
+        "fields": {
+            "action": 99,
+            "text": "The school thanks Kweku for being honest. The source of the leak is investigated.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 100,
+        "fields": {
+            "scenario": 28,
+            "text": "Keep it to himself to avoid trouble",
+            "is_correct": false,
+            "points": 1
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 100,
+        "fields": {
+            "action": 100,
+            "text": "Though Kweku avoids trouble, he still feels guilty for not doing the right thing.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 29,
+        "fields": {
+            "story": 3,
+            "level": 9,
+            "description": "Kweku sees a video on TikTok that says a popular musician has been arrested for stealing. It looks real, but there's no clear proof or evidence.",
+            "image": "",
+            "order": 3
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 101,
+        "fields": {
+            "scenario": 29,
+            "text": "Share it on his status to break the news first",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 101,
+        "fields": {
+            "action": 101,
+            "text": "Kweku's post spreads quickly, but later it turns out to be fake. People blame him for lying.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 102,
+        "fields": {
+            "scenario": 29,
+            "text": "Check if it is true by searching for it on official news sites",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 102,
+        "fields": {
+            "action": 102,
+            "text": "He finds out it is not true. It was made by a prankster. Kweku reports the video.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 103,
+        "fields": {
+            "scenario": 29,
+            "text": "Ask his friends if they've seen it too",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 103,
+        "fields": {
+            "action": 103,
+            "text": "His friends are also unsure. They remind him to always check facts first.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 30,
+        "fields": {
+            "story": 3,
+            "level": 9,
+            "description": "A voice note is going around school saying there's going to be a kidnapping in town. Everyone is scared.",
+            "image": "",
+            "order": 4
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 104,
+        "fields": {
+            "scenario": 30,
+            "text": "Forward the voice note to his family and classmates",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 104,
+        "fields": {
+            "action": 104,
+            "text": "Panic spreads in school, and classes are canceled for no reason.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 105,
+        "fields": {
+            "scenario": 30,
+            "text": "Tell a teacher or adult immediately",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 105,
+        "fields": {
+            "action": 105,
+            "text": "The teacher investigates and finds out it was a hoax.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 106,
+        "fields": {
+            "scenario": 30,
+            "text": "Ignore it and delete the message",
+            "is_correct": false,
+            "points": 1
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 106,
+        "fields": {
+            "action": 106,
+            "text": "Kwame stays calm, but the fear still spreads through others.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 31,
+        "fields": {
+            "story": 3,
+            "level": 9,
+            "description": "One of Kweku's friend uploads a video of a private fight between two classmates. Kweku is tempted to share it with others.",
+            "image": "",
+            "order": 5
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 107,
+        "fields": {
+            "scenario": 31,
+            "text": "Repost the video to get more likes",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 107,
+        "fields": {
+            "action": 107,
+            "text": "The video goes viral. The students in the video are embarrassed and cry.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 108,
+        "fields": {
+            "scenario": 31,
+            "text": "Message his friend to take it down",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 108,
+        "fields": {
+            "action": 108,
+            "text": "His friend agrees to delete it. They both feel proud for doing the right thing.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 109,
+        "fields": {
+            "scenario": 31,
+            "text": "Show it to others during break time",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 109,
+        "fields": {
+            "action": 109,
+            "text": "The students in the video find out and stop talking to Kweku.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 32,
+        "fields": {
+            "story": 3,
+            "level": 9,
+            "description": "Kwame sees a post saying, \"Ghana Commercial Bank is giving out free GHS1000. Get yours by clicking this link!\" He thinks it's cool and wants to tell his friends.",
+            "image": "",
+            "order": 6
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 110,
+        "fields": {
+            "scenario": 32,
+            "text": "Share the post on his school platform",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 110,
+        "fields": {
+            "action": 110,
+            "text": "The link is fake, and it steals his classmates' data.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 111,
+        "fields": {
+            "scenario": 32,
+            "text": "Check the website of Ghana Commercial Bank to verify if the post is really from them",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 111,
+        "fields": {
+            "action": 111,
+            "text": "Kweku finds out it's a scam. He reports it.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 112,
+        "fields": {
+            "scenario": 32,
+            "text": "Click the link to try it out himself",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 112,
+        "fields": {
+            "action": 112,
+            "text": "His phone gets a virus. His parents are not happy.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 33,
+        "fields": {
+            "story": 3,
+            "level": 9,
+            "description": "Kweku's sister, Adwoa sends him a funny voice note imitating their uncle's funny way of talking. It's really funny!",
+            "image": "",
+            "order": 7
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 113,
+        "fields": {
+            "scenario": 33,
+            "text": "Share it with his class for a laugh",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 113,
+        "fields": {
+            "action": 113,
+            "text": "The uncle hears about it and feels embarrassed.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 114,
+        "fields": {
+            "scenario": 33,
+            "text": "Ask his sister if Uncle knows about it",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 114,
+        "fields": {
+            "action": 114,
+            "text": "His sister says no, so Kweku deletes it.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 115,
+        "fields": {
+            "scenario": 33,
+            "text": "Keep it between family",
+            "is_correct": false,
+            "points": 1
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 115,
+        "fields": {
+            "action": 115,
+            "text": "Kweku decides not everything needs to be shared.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 34,
+        "fields": {
+            "story": 3,
+            "level": 9,
+            "description": "One of Kweku's friend posts a message on his WhatsApp status saying \"Goodbye everyone\" with crying emojis. It worries Kweku.",
+            "image": "",
+            "order": 8
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 116,
+        "fields": {
+            "scenario": 34,
+            "text": "Screenshot and share it with classmates",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 116,
+        "fields": {
+            "action": 116,
+            "text": "Others make fun of the post, and the friend feels worse.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 117,
+        "fields": {
+            "scenario": 34,
+            "text": "Talk to the friend privately and check if they are okay",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 117,
+        "fields": {
+            "action": 117,
+            "text": "The friend opens up. Kweku gets help from an adult.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 118,
+        "fields": {
+            "scenario": 34,
+            "text": "Ignore it. Maybe it's just drama",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 118,
+        "fields": {
+            "action": 118,
+            "text": "The friend feels alone and stays sad.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 35,
+        "fields": {
+            "story": 3,
+            "level": 9,
+            "description": "Kweku records a fun dance video with his friend and adds a funny filter to his friend's face without asking. He wants to post it online.",
+            "image": "",
+            "order": 9
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 119,
+        "fields": {
+            "scenario": 35,
+            "text": "Post it quickly for laughs",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 119,
+        "fields": {
+            "action": 119,
+            "text": "The friend gets teased by others and feels bad.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 120,
+        "fields": {
+            "scenario": 35,
+            "text": "Ask his friend if it's okay first",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 120,
+        "fields": {
+            "action": 120,
+            "text": "The friend says no, and Kweku respects that.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 121,
+        "fields": {
+            "scenario": 35,
+            "text": "Post it and tags the friend",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 121,
+        "fields": {
+            "action": 121,
+            "text": "The video gets shared, and the friend is upset with Kweku.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 36,
+        "fields": {
+            "story": 3,
+            "level": 9,
+            "description": "After all his experiences, Kwaku is about to share a new video he found online, but he remembers what he's learned.",
+            "image": "",
+            "order": 10
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 122,
+        "fields": {
+            "scenario": 36,
+            "text": "Ask: Is it kind? Is it true? Is it safe?",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 122,
+        "fields": {
+            "action": 122,
+            "text": "Kweku becomes a truth warrior, helping others learn too!",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 123,
+        "fields": {
+            "scenario": 36,
+            "text": "Forward it without thinking",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 123,
+        "fields": {
+            "action": 123,
+            "text": "He ends up in another misunderstanding.",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 124,
+        "fields": {
+            "scenario": 36,
+            "text": "Only share with best friends",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 124,
+        "fields": {
+            "action": 124,
+            "text": "His best friends warn him again, \"Not everything is for sharing!\"",
+            "created_at": "2025-05-28T21:31:10Z"
+        }
+    }
+]

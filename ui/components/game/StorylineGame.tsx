@@ -29,9 +29,11 @@ export interface Action {
 
 interface Level {
   id: number;
-  prompt: string;
-  image: string;
-  actions: Action[];
+  title: string;
+  intro_text?: string;
+  image?: string;
+  order: number;
+  story: number;
 }
 
 export interface Story {
@@ -374,16 +376,40 @@ export function StorylineGame() {
   };
 
   const handleBack = () => {
+    // Reset all game state when going back to start
+    setLevel(0);
+    setScenarioIndex(0);
+    setScore(0);
+    setLives(3);
+    setShowConfetti(false);
+    setShowOutcome(false);
+    setSelectedAction(null);
+    // Fetch initial level scenarios again
+    fetchInitialData();
+    // Finally, set game state back to start
     setGameState("start");
+    console.log('[DEBUG] Game reset to initial state');
   };
 
-  // Modified start game handler to enter fullscreen
+  // Modified start game handler to enter fullscreen and reset game state
   const handleStartGame = async () => {
     await enterFullscreen();
-    setLives(3);  // Reset lives when starting a new game
-    setScore(0);    // Reset score when starting a new game
-    setShowConfetti(false); // Stop confetti
+    // Reset all game state
+    setLevel(0);
+    setScenarioIndex(0);
+    setScore(0);
+    setLives(3);
+    setShowConfetti(false);
+    setShowOutcome(false);
+    setSelectedAction(null);
+    
+    // Fetch initial level scenarios again to ensure we're starting with level 1
+    fetchInitialData();
+    
+    // Set game state to playing
     setGameState("playing");
+    
+    console.log('[DEBUG] Game fully reset and started from beginning');
   }
   
   // Handler for continuing to next level
@@ -409,8 +435,9 @@ export function StorylineGame() {
         setScenarios(scenariosResponse.data);
         console.log('[DEBUG] Fetched scenarios:', scenariosResponse.data);
         
-        // Show level intro or go directly to playing
-        setGameState("playing");
+        // Show level intro before starting the level
+        setGameState("level-intro");
+        console.log('[DEBUG] Showing level intro for level:', nextLevel);
       } catch (error) {
         console.error('Error fetching scenarios for next level:', error);
       }
@@ -718,6 +745,58 @@ export function StorylineGame() {
           </motion.div>
         )}
 
+        {gameState === "level-intro" && story && level < story.levels.length && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5 }}
+            className="flex-grow flex items-center justify-center"
+          >
+            <div className="text-center p-8 bg-white rounded-lg shadow-md w-full max-w-2xl">
+              <h2 className="text-4xl font-bold mb-6 text-gray-900">Level {level + 1}: {story.levels[level].title}</h2>
+              
+              {/* Level Image if available */}
+              {story.levels[level].image && (
+                <div className="mb-6 flex justify-center">
+                  <Image
+                    src={story.levels[level].image}
+                    alt={`Level ${level + 1}`}
+                    width={400}
+                    height={250}
+                    className="rounded-lg shadow-md"
+                  />
+                </div>
+              )}
+              
+              {/* Level intro text */}
+              <div className="mb-8 text-lg text-left p-4 bg-gray-50 rounded-lg">
+                <p>{story.levels[level].intro_text || "Get ready for the next level!"}</p>
+              </div>
+              
+              <Button 
+                onClick={() => {
+                  setGameState("playing");
+                  console.log('[DEBUG] Starting level', level + 1);
+                }}
+                className="bg-orange-700 text-lg py-3"
+              >
+                Start Level
+              </Button>
+              
+              {/* Debug info in development mode */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="mt-6 p-4 bg-gray-100 rounded text-left text-sm">
+                  <p>Debug Info:</p>
+                  <p>Current Level: {level}</p>
+                  <p>Level ID: {story.levels[level].id}</p>
+                  <p>Scenarios Loaded: {scenarios?.length}</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
         {gameState === "level-complete" && story && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -734,7 +813,7 @@ export function StorylineGame() {
               <div className="space-y-4">
                 <Button 
                   onClick={handleContinueToNextLevel} 
-                  className="w-full max-w-xs mx-auto text-lg py-3 bg-green-600 hover:bg-green-700"
+                  className="bg-orange-700 text-lg py-3"
                 >
                   Continue to Next Level
                 </Button>

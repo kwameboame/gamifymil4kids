@@ -1,4 +1,5 @@
 from rest_framework import serializers
+import random
 from .models import Story, Level, Scenario, Action, LeaderboardEntry, Badge, GameSession, GameInvite, Outcome
 from accounts.models import UserProfile
 
@@ -21,11 +22,19 @@ class LevelSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'story', 'image', 'order', 'intro_text']
 
 class ScenarioSerializer(serializers.ModelSerializer):
-    actions = ActionSerializer(many=True, read_only=True)
+    actions = serializers.SerializerMethodField()
 
     class Meta:
         model = Scenario
         fields = ['id', 'story', 'level', 'description', 'image', 'order', 'actions']
+    
+    def get_actions(self, obj):
+        # Get all actions for this scenario
+        actions = list(obj.actions.all())
+        # Randomize the order
+        random.shuffle(actions)
+        # Serialize the shuffled actions
+        return ActionSerializer(actions, many=True).data
 
 class StorySerializer(serializers.ModelSerializer):
     levels = LevelSerializer(many=True, read_only=True)
