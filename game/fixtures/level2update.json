@@ -1,0 +1,274 @@
+[
+    {
+        "model": "game.scenario",
+        "pk": 93,
+        "fields": {
+            "story": 3,
+            "level": 7,
+            "description": "Jay has started enjoying TikTok. He goes there and sees a viral TikTok video claiming, \"Drinking hot lemon water every morning cures fever faster than medicine!\" Many comments say, \"This works! Doctors don't want you to know!\" Jay's younger sister has severe fever, and his mom wants to try this remedy. What should Jay do?",
+            "image": "",
+            "order": 7
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 95,
+        "fields": {
+            "scenario": 93,
+            "text": "Tell his mom to try it immediately",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 95,
+        "fields": {
+            "action": 95,
+            "text": "Trying unproven remedies can delay proper medical treatment, worsening the illness.",
+            "created_at": "2025-05-29T09:34:05Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 96,
+        "fields": {
+            "scenario": 93,
+            "text": "Ignore the video and hope his sister gets better",
+            "is_correct": false,
+            "points": 1
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 96,
+        "fields": {
+            "action": 96,
+            "text": "Ignoring misinformation means others may still believe it. Speaking up helps prevent harm.",
+            "created_at": "2025-05-29T09:34:05Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 97,
+        "fields": {
+            "scenario": 93,
+            "text": "Fact-check with a trusted health website",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 97,
+        "fields": {
+            "action": 97,
+            "text": "Checking with a trusted website confirms that hot lemon water does not cure fever. Only vaccines and medical treatment are effective.",
+            "created_at": "2025-05-29T09:34:05Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 94,
+        "fields": {
+            "story": 3,
+            "level": 7,
+            "description": "A WhatsApp message claims that government is arresting people who criticized President Akufo Addo on social media during his tenure. Jay's friends are panicking and deleting posts. What should he do?",
+            "image": "",
+            "order": 8
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 98,
+        "fields": {
+            "scenario": 94,
+            "text": "Delete all his old posts just in case",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 98,
+        "fields": {
+            "action": 98,
+            "text": "Deleting posts out of fear supports false intimidation tactics.",
+            "created_at": "2025-05-29T09:34:05Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 99,
+        "fields": {
+            "scenario": 94,
+            "text": "Forward the message to warn others",
+            "is_correct": false,
+            "points": 1
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 99,
+        "fields": {
+            "action": 99,
+            "text": "Forwarding unverified posts could be misinformation and such claims spreads panic unnecessarily.",
+            "created_at": "2025-05-29T09:34:05Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 100,
+        "fields": {
+            "scenario": 94,
+            "text": "Verify with a credible news source like MyJoyOnline",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 100,
+        "fields": {
+            "action": 100,
+            "text": "Checking trusted news sites reveals no such arrests are happening - it's a prank to silence free speech.",
+            "created_at": "2025-05-29T09:34:05Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 95,
+        "fields": {
+            "story": 3,
+            "level": 7,
+            "description": "A viral tweet claims, \"Free SHS has been canceled! Parents must pay fees starting next term! Jay is worried. What should Jay do?",
+            "image": "",
+            "order": 9
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 101,
+        "fields": {
+            "scenario": 95,
+            "text": "Tell his mother to prepare for school fees",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 101,
+        "fields": {
+            "action": 101,
+            "text": "Spreading unconfirmed rumors creates unnecessary stress and pressure for families.",
+            "created_at": "2025-05-29T09:34:05Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 102,
+        "fields": {
+            "scenario": 95,
+            "text": "Assume it's fake because Free SHS is popular",
+            "is_correct": false,
+            "points": 1
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 102,
+        "fields": {
+            "action": 102,
+            "text": "Assuming without verification isn't enough, fake news thrives when people don't fact-check.",
+            "created_at": "2025-05-29T09:34:05Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 103,
+        "fields": {
+            "scenario": 95,
+            "text": "Check the Ministry of Education's official website",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 103,
+        "fields": {
+            "action": 103,
+            "text": "The Ministry's website confirms Free SHS is still running, the tweet is a lie to cause panic and fear.",
+            "created_at": "2025-05-29T09:34:05Z"
+        }
+    },
+    {
+        "model": "game.scenario",
+        "pk": 96,
+        "fields": {
+            "story": 3,
+            "level": 7,
+            "description": "A YouTube video titled \"SECRET: How to Make ₵10,000 Daily from Your Phone!\" promises easy money if Jay pays ₵500 for a \"training webinar.\" His friends are registering. What should he do?",
+            "image": "",
+            "order": 10
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 104,
+        "fields": {
+            "scenario": 96,
+            "text": "Pay and join the webinar quickly",
+            "is_correct": false,
+            "points": 0
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 104,
+        "fields": {
+            "action": 104,
+            "text": "Paying for \"get-rich-quick\" schemes usually leads to losing money with no returns.",
+            "created_at": "2025-05-29T09:34:05Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 105,
+        "fields": {
+            "scenario": 96,
+            "text": "Ignore it because it's probably a scam",
+            "is_correct": false,
+            "points": 1
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 105,
+        "fields": {
+            "action": 105,
+            "text": "Ignoring scams doesn't stop others from falling victim, speaking up helps.",
+            "created_at": "2025-05-29T09:34:05Z"
+        }
+    },
+    {
+        "model": "game.action",
+        "pk": 106,
+        "fields": {
+            "scenario": 96,
+            "text": "Research online for scam reports about the scheme",
+            "is_correct": true,
+            "points": 3
+        }
+    },
+    {
+        "model": "game.outcome",
+        "pk": 106,
+        "fields": {
+            "action": 106,
+            "text": "A quick Google search shows others complaining it's a fraud, saving you and your friends from losing money.",
+            "created_at": "2025-05-29T09:34:05Z"
+        }
+    }
+]

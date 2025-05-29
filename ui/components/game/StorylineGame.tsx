@@ -527,7 +527,7 @@ export function StorylineGame() {
         {/* Scenario counter and mute button */}
         <div className="flex items-center gap-2">
   <div className="bg-gray-800 text-white px-3 py-1 rounded-md text-sm font-medium">
-    Scenario {scenarioIndex + 1}/{scenarios?.length || 1}
+    Level {level + 1} : Scenario {scenarioIndex + 1}/{scenarios?.length || 1}
   </div>
   {/* Fullscreen toggle button */}
   <Button
