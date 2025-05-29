@@ -790,7 +790,7 @@ export function StorylineGame() {
               
               {/* Level intro text */}
               <div className="mb-8 text-lg text-left p-4 bg-gray-50 rounded-lg">
-                <p>{story.levels[level].intro_text || "Get ready for the next level!"}</p>
+                <p className="text-gray-800">{story.levels[level].intro_text || "Get ready for the next level!"}</p>
               </div>
               
               <Button 
