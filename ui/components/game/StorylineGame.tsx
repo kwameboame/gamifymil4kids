@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Maximize2, Minimize2, Volume2, VolumeX } from "lucide-react";
+import { Loader2, Maximize2, Minimize2, Volume2, VolumeX, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { AudioControl } from "./AudioControl";
 import { LeaderboardComponent } from "./LeaderboardComponent";
 import { ProfileComponent } from "./ProfileComponent";
@@ -667,31 +667,50 @@ export function StorylineGame() {
             className="flex-grow flex items-center justify-center mt-1"
           >
             {showOutcome && selectedAction ? (
-              <Card className="w-full max-w-full">
-                <CardHeader className="pb-2">
-                  <CardTitle>
-                    {selectedAction.is_correct 
-                      ? (selectedAction.points < maxPointsForCurrentScenario ? "Partially Correct!" : "Correct Choice!") 
-                      : "Incorrect Choice!"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-col items-center pt-2">
-                  {/* Display the outcome text if available */}
-                  <div className="mb-4 text-center">
-                    <p className="text-lg">{selectedAction.outcome?.text || 
+              <Card className="w-full max-w-2xl shadow-2xl">
+                <CardContent className="p-8 md:p-12 text-center">
+                  <div className="flex items-center justify-center mb-6 space-x-4">
+                    <div className="w-24 h-36 bg-gray-300 rounded-md flex items-center justify-center">
+                      <span className="text-gray-500 text-sm">Character Placeholder</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      {selectedAction.is_correct 
+                        ? (selectedAction.points < maxPointsForCurrentScenario 
+                          ? <AlertCircle className="text-orange-500" size={48} /> 
+                          : <CheckCircle className="text-green-500" size={48} />) 
+                        : <XCircle className="text-red-500" size={48} />}
+                      <h1 className="text-3xl font-bold text-gray-800 mt-2">
+                        {selectedAction.is_correct 
+                          ? (selectedAction.points < maxPointsForCurrentScenario ? "Partially Correct!" : "Correct Choice!") 
+                          : "Incorrect Choice!"}
+                      </h1>
+                    </div>
+                  </div>
+                  <p className="text-gray-600 text-lg mb-6">
+                    {selectedAction.outcome?.text || 
                       (selectedAction.is_correct 
                         ? (selectedAction.points < maxPointsForCurrentScenario ? "Good try! You were partially correct." : "Good job! You made the right choice.") 
                         : "That wasn't the best choice.")}
-                    </p>
-                    <p className="mt-2">
-                      {selectedAction.is_correct 
-                        ? `You earned ${selectedAction.points || 0} points! Your score is now ${score}.` 
-                        : `You lost a life.`}
-                    </p>
-                  </div>
+                  </p>
+                  {selectedAction.is_correct 
+                    ? (
+                      <div className={`${selectedAction.points < maxPointsForCurrentScenario ? 'bg-orange-100 border-orange-500 text-orange-700' : 'bg-yellow-100 border-yellow-500 text-yellow-700'} border-l-4 p-4 rounded-lg mb-8`}>
+                        <p className="text-lg font-semibold">
+                          You earned {selectedAction.points || 0} points! Your score is now {score}.
+                        </p>
+                      </div>
+                    ) 
+                    : (
+                      <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-8">
+                        <p className="text-lg font-semibold">
+                          You earned 0 points. You lost a life.
+                        </p>
+                      </div>
+                    )
+                  }
                   <Button 
                     onClick={handleProceedToNextScenario} 
-                    className="mt-2 w-full max-w-md"
+                    className="bg-black hover:bg-gray-800 text-white font-bold py-3 px-8 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
                   >
                     Continue
                   </Button>

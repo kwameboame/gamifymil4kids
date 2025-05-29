@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Story, Scenario, Level, Action, LeaderboardEntry, Badge, GameSession, GameInvite
+from .models import Story, Scenario, Level, Action, LeaderboardEntry, Badge, GameSession, GameInvite, Animation
 from accounts.models import UserProfile
 from accounts.serializers import UserProfileSerializer
 from .serializers import (
@@ -12,7 +12,8 @@ from .serializers import (
     LeaderboardEntrySerializer,
     BadgeSerializer,
     GameSessionSerializer,
-    GameInviteSerializer
+    GameInviteSerializer,
+    AnimationSerializer
 )
 from django.db.models import Max
 from rest_framework.permissions import IsAuthenticated
@@ -145,3 +146,55 @@ class GameInviteViewSet(viewsets.ModelViewSet):
             return Response({'username': invite.inviter.username, 'highest_score': highest_score}, status=status.HTTP_200_OK)
         except GameInvite.DoesNotExist:
             return Response({'error': 'Invite does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+
+class AnimationViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for retrieving animations based on story and animation type.
+    Animations can be filtered by story_id and animation_type.
+    """
+    queryset = Animation.objects.filter(is_active=True)
+    serializer_class = AnimationSerializer
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        story_id = self.request.query_params.get('story_id')
+        animation_type = self.request.query_params.get('animation_type')
+        
+        if story_id:
+            queryset = queryset.filter(story_id=story_id)
+        if animation_type:
+            queryset = queryset.filter(animation_type=animation_type)
+            
+        return queryset
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        return context
+    
+    @action(detail=False, methods=['get'], url_path='by-type/(?P<animation_type>[^/.]+)')
+    def by_type(self, request, animation_type=None):
+        """
+        Get animations of a specific type for a story.
+        Required query parameter: story_id
+        """
+        story_id = request.query_params.get('story_id')
+        if not story_id:
+            return Response({'error': 'story_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            story = Story.objects.get(id=story_id)
+        except Story.DoesNotExist:
+            return Response({'error': 'Story not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        animation = Animation.objects.filter(
+            story_id=story_id, 
+            animation_type=animation_type,
+            is_active=True
+        ).first()
+        
+        if not animation:
+            return Response({'error': f'No {animation_type} animation found for this story'}, 
+                           status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = self.get_serializer(animation)
+        return Response(serializer.data)

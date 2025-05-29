@@ -1,6 +1,6 @@
 from rest_framework import serializers
 import random
-from .models import Story, Level, Scenario, Action, LeaderboardEntry, Badge, GameSession, GameInvite, Outcome
+from .models import Story, Level, Scenario, Action, LeaderboardEntry, Badge, GameSession, GameInvite, Outcome, Animation
 from accounts.models import UserProfile
 
 class OutcomeSerializer(serializers.ModelSerializer):
@@ -67,3 +67,34 @@ class GameInviteSerializer(serializers.ModelSerializer):
         model = GameInvite
         fields = ['id', 'inviter', 'story', 'token', 'created_at', 'expires_at']
         read_only_fields = ['id', 'inviter', 'token', 'created_at', 'expires_at']
+
+class AnimationSerializer(serializers.ModelSerializer):
+    file_url = serializers.SerializerMethodField()
+    file_type = serializers.SerializerMethodField()
+    animation_type_display = serializers.CharField(source='get_animation_type_display', read_only=True)
+    
+    class Meta:
+        model = Animation
+        fields = ['id', 'story', 'animation_type', 'animation_type_display', 'title', 
+                 'description', 'file_url', 'file_type', 'is_active', 'created_at']
+        read_only_fields = ['created_at', 'file_type']
+    
+    def get_file_url(self, obj):
+        if obj.gif_file:
+            request = self.context.get('request')
+            if request is not None:
+                return request.build_absolute_uri(obj.gif_file.url)
+            return obj.gif_file.url
+        elif obj.mp4_file:
+            request = self.context.get('request')
+            if request is not None:
+                return request.build_absolute_uri(obj.mp4_file.url)
+            return obj.mp4_file.url
+        return None
+    
+    def get_file_type(self, obj):
+        if obj.gif_file:
+            return 'gif'
+        elif obj.mp4_file:
+            return 'mp4'
+        return None

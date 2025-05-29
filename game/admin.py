@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Story, Scenario, Level, Action, LeaderboardEntry, Badge, GameSession, GameInvite, Outcome
+from .models import (Story, Scenario, Level, Action, LeaderboardEntry, Badge, 
+                    GameSession, GameInvite, Outcome, Animation, AnimationType)
 
 
 # Inline for Outcome within Action
@@ -72,6 +73,26 @@ class OutcomeAdmin(admin.ModelAdmin):
         return obj.action.text if obj.action else 'No Action'
     get_action_text.short_description = 'Action'
     get_action_text.admin_order_field = 'action__text'
+
+# Admin class for Animation
+@admin.register(Animation)
+class AnimationAdmin(admin.ModelAdmin):
+    list_display = ('title', 'story', 'animation_type', 'file_type', 'is_active', 'created_at')
+    list_filter = ('animation_type', 'story', 'is_active')
+    search_fields = ('title', 'description', 'story__title')
+    readonly_fields = ('created_at', 'updated_at', 'file_type')
+    fieldsets = (
+        (None, {
+            'fields': ('story', 'animation_type', 'title', 'description', 'is_active')
+        }),
+        ('Animation Files', {
+            'fields': ('gif_file', 'mp4_file')
+        }),
+        ('Metadata', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        })
+    )
 
 admin.site.register(LeaderboardEntry)
 admin.site.register(Badge)

@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (StoryViewSet, LeaderboardEntryViewSet, UserProfileViewSet, 
                     LevelViewSet, ActionViewSet, BadgeViewSet, ScenarioViewSet,
-                    GameSessionViewSet, GameInviteViewSet)
+                    GameSessionViewSet, GameInviteViewSet, AnimationViewSet)
 
 router = DefaultRouter()
 router.register(r'stories', StoryViewSet)
@@ -10,7 +10,8 @@ router.register(r'leaderboard', LeaderboardEntryViewSet)
 router.register(r'profiles', UserProfileViewSet)
 router.register(r'badges', BadgeViewSet)
 router.register(r'game-sessions', GameSessionViewSet)
-router.register(r'invites', GameInviteViewSet, basename='gameinvite')  # Added GameInviteViewSet
+router.register(r'invites', GameInviteViewSet, basename='gameinvite')
+router.register(r'animations', AnimationViewSet, basename='animation')
 
 urlpatterns = [
     path('', include(router.urls)),
