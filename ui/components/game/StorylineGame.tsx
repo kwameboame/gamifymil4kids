@@ -628,7 +628,7 @@ export function StorylineGame() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
             transition={{ duration: 0.5 }}
-            className="flex flex-col items-center justify-center flex-grow text-center"
+            className="flex flex-col items-center justify-center flex-grow text-center px-12 md:px-16"
           >
             <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
               <div className="md:w-3/4">
@@ -766,53 +766,53 @@ export function StorylineGame() {
 
         {gameState === "level-intro" && story && level < story.levels.length && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
             transition={{ duration: 0.5 }}
-            className="flex-grow flex items-center justify-center"
+            className="flex flex-col items-center justify-center flex-grow text-center px-6 md:px-12"
           >
-            <div className="text-center p-8 bg-white rounded-lg shadow-md w-full max-w-2xl">
-              <h2 className="text-4xl font-bold mb-6 text-gray-900">Level {level + 1}: {story.levels[level].title}</h2>
-              
-              {/* Level Image if available */}
-              {story.levels[level].image && (
-                <div className="mb-6 flex justify-center">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+              <div className="md:w-3/4">
+                <h1 className="text-4xl font-bold mb-4 text-white">Level {level + 1}: {story.levels[level].title}</h1>
+                <p className="mb-4 text-white">{story.levels[level].intro_text || "Get ready for the next level!"}</p>
+              </div>
+              <div className="md:w-1/4">
+                {story.levels[level].image ? (
                   <Image
                     src={story.levels[level].image}
                     alt={`Level ${level + 1}`}
-                    width={400}
-                    height={250}
-                    className="rounded-lg shadow-md"
+                    className="mb-4 w-full max-w-xl rounded-lg"
+                    width={300}
+                    height={175}
                   />
-                </div>
-              )}
-              
-              {/* Level intro text */}
-              <div className="mb-8 text-lg text-left p-4 bg-gray-50 rounded-lg">
-                <p className="text-gray-800">{story.levels[level].intro_text || "Get ready for the next level!"}</p>
+                ) : (
+                  <div className="mb-4 w-full max-w-xl rounded-lg bg-gray-600 flex items-center justify-center h-[175px]">
+                    <p className="text-white">No Image Available</p>
+                  </div>
+                )}
               </div>
-              
-              <Button 
-                onClick={() => {
-                  setGameState("playing");
-                  console.log('[DEBUG] Starting level', level + 1);
-                }}
-                className="bg-orange-700 text-lg py-3"
-              >
-                Start Level
-              </Button>
-              
-              {/* Debug info in development mode */}
-              {process.env.NODE_ENV === 'development' && (
-                <div className="mt-6 p-4 bg-gray-100 rounded text-left text-sm">
-                  <p>Debug Info:</p>
-                  <p>Current Level: {level}</p>
-                  <p>Level ID: {story.levels[level].id}</p>
-                  <p>Scenarios Loaded: {scenarios?.length}</p>
-                </div>
-              )}
             </div>
+
+            <Button 
+              className="bg-orange-700" 
+              onClick={() => {
+                setGameState("playing");
+                console.log('[DEBUG] Starting level', level + 1);
+              }}
+            >
+              Start Level
+            </Button>
+              
+            {/* Debug info in development mode */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mt-6 p-4 bg-gray-100 rounded text-left text-sm">
+                <p>Debug Info:</p>
+                <p>Current Level: {level}</p>
+                <p>Level ID: {story.levels[level].id}</p>
+                <p>Scenarios Loaded: {scenarios?.length}</p>
+              </div>
+            )}
           </motion.div>
         )}
 
