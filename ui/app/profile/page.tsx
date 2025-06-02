@@ -3,16 +3,19 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Layout from '@/components/layout'
-import { ProfileComponent } from '@/components/storyline-game'
+import { ProfileComponent } from '@/components/game/ProfileComponent'
 import { useAuth } from '@/contexts/AuthContext'
+import axios from 'axios'
 
 interface UserProfile {
   id: number;
-  name: string;
-  highScores: {
+  username?: string;
+  name?: string;
+  email?: string;
+  highScores?: {
     [key: string]: number;
   };
-  badges: { id: number; name: string; description: string; image: string }[];
+  badges?: { id: number; name: string; description: string; image: string }[];
 }
 
 export default function ProfilePage() {
@@ -29,21 +32,29 @@ export default function ProfilePage() {
 
     const fetchProfile = async () => {
       try {
-        const response = await fetch('/api/profile', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        })
-        if (response.ok) {
-          const data = await response.json()
-          setProfile(data)
-        } else {
-          console.error('Failed to fetch profile')
+        // Use the same backendBaseURL format as in AuthContext
+        const backendBaseURL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000/api';
+        const token = localStorage.getItem('authToken'); // Use the same token key as in AuthContext
+        
+        if (!token) {
+          console.error('No auth token found');
+          setLoading(false);
+          return;
         }
+        
+        const response = await axios.get(`${backendBaseURL}/accounts/user/`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+        
+        // Add type assertion to fix the type error
+        setProfile(response.data as UserProfile);
       } catch (error) {
-        console.error('Error fetching profile:', error)
+        console.error('Error fetching profile:', error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
 
