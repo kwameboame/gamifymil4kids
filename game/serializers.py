@@ -1,6 +1,6 @@
 from rest_framework import serializers
 import random
-from .models import Story, Level, Scenario, Action, LeaderboardEntry, Badge, GameSession, GameInvite, Outcome, Animation
+from .models import Story, Level, Scenario, Action, LeaderboardEntry, Badge, GameSession, GameInvite, Outcome, Animation, UserProgress
 from accounts.models import UserProfile
 
 class OutcomeSerializer(serializers.ModelSerializer):
@@ -98,3 +98,14 @@ class AnimationSerializer(serializers.ModelSerializer):
         elif obj.mp4_file:
             return 'mp4'
         return None
+
+
+class UserProgressSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    story_title = serializers.CharField(source='story.title', read_only=True)
+    
+    class Meta:
+        model = UserProgress
+        fields = ['id', 'user', 'username', 'story', 'story_title', 'level', 'score', 'lives', 
+                 'scenario_index', 'state_data', 'last_updated']
+        read_only_fields = ['id', 'user', 'username', 'story_title', 'last_updated']

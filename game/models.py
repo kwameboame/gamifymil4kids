@@ -89,6 +89,28 @@ class GameSession(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.story.title} - {self.start_time}"
 
+
+class UserProgress(models.Model):
+    """Model to store detailed game progress for users."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='game_progress')
+    story = models.ForeignKey(Story, on_delete=models.CASCADE)
+    level = models.IntegerField(default=0)
+    score = models.IntegerField(default=0)
+    lives = models.IntegerField(default=3)
+    scenario_index = models.IntegerField(default=0)
+    last_updated = models.DateTimeField(auto_now=True)
+    
+    # Additional state info stored as JSON
+    state_data = models.JSONField(default=dict, blank=True)
+    
+    class Meta:
+        unique_together = ('user', 'story')
+        verbose_name = 'User Progress'
+        verbose_name_plural = 'User Progress'
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.story.title} - Level {self.level}"
+
 class GameInvite(models.Model):
     inviter = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sent_invites', on_delete=models.CASCADE)
     token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)

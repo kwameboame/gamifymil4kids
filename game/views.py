@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Story, Scenario, Level, Action, LeaderboardEntry, Badge, GameSession, GameInvite, Animation
+from .models import Story, Scenario, Level, Action, LeaderboardEntry, Badge, GameSession, GameInvite, Animation, UserProgress
 from accounts.models import UserProfile
 from accounts.serializers import UserProfileSerializer
 from .serializers import (
@@ -13,7 +13,8 @@ from .serializers import (
     BadgeSerializer,
     GameSessionSerializer,
     GameInviteSerializer,
-    AnimationSerializer
+    AnimationSerializer,
+    UserProgressSerializer
 )
 from django.db.models import Max
 from rest_framework.permissions import IsAuthenticated
@@ -198,3 +199,80 @@ class AnimationViewSet(viewsets.ReadOnlyModelViewSet):
         
         serializer = self.get_serializer(animation)
         return Response(serializer.data)
+
+
+class UserProgressViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing user game progress.
+    Provides endpoints to save and retrieve detailed game state.
+    """
+    serializer_class = UserProgressSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return UserProgress.objects.filter(user=self.request.user)
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+    
+    @action(detail=False, methods=['post'], url_path='save-progress')
+    def save_progress(self, request):
+        """
+        Save the current game progress for the authenticated user.
+        Required: story_id, level, score, lives, scenario_index
+        Optional: state_data for additional game state
+        """
+        story_id = request.data.get('story_id')
+        if not story_id:
+            return Response({'error': 'story_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            story = Story.objects.get(id=story_id)
+        except Story.DoesNotExist:
+            return Response({'error': 'Story not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Required fields
+        level = request.data.get('level', 0)
+        score = request.data.get('score', 0)
+        lives = request.data.get('lives', 3)
+        scenario_index = request.data.get('scenario_index', 0)
+        
+        # Optional additional state
+        state_data = request.data.get('state_data', {})
+        
+        # Update or create progress
+        progress, created = UserProgress.objects.update_or_create(
+            user=request.user,
+            story=story,
+            defaults={
+                'level': level,
+                'score': score,
+                'lives': lives,
+                'scenario_index': scenario_index,
+                'state_data': state_data
+            }
+        )
+        
+        return Response(
+            UserProgressSerializer(progress).data, 
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        )
+    
+    @action(detail=False, methods=['get'], url_path='get-progress')
+    def get_progress(self, request):
+        """
+        Get the saved game progress for the authenticated user.
+        Required query parameter: story_id
+        """
+        story_id = request.query_params.get('story_id')
+        if not story_id:
+            return Response({'error': 'story_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            progress = UserProgress.objects.get(user=request.user, story_id=story_id)
+            return Response(UserProgressSerializer(progress).data)
+        except UserProgress.DoesNotExist:
+            return Response(
+                {'message': 'No saved progress found for this story'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )

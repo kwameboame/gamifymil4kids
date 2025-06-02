@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import (Story, Scenario, Level, Action, LeaderboardEntry, Badge, 
-                    GameSession, GameInvite, Outcome, Animation, AnimationType)
+                    GameSession, GameInvite, Outcome, Animation, AnimationType,
+                    UserProgress)
 
 
 # Inline for Outcome within Action
@@ -91,6 +92,25 @@ class AnimationAdmin(admin.ModelAdmin):
         ('Metadata', {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
+        })
+    )
+
+# Admin class for UserProgress
+@admin.register(UserProgress)
+class UserProgressAdmin(admin.ModelAdmin):
+    list_display = ('user', 'story', 'level', 'score', 'lives', 'scenario_index', 'last_updated')
+    list_filter = ('story', 'level')
+    search_fields = ('user__username', 'story__title')
+    readonly_fields = ('last_updated',)
+    fieldsets = (
+        (None, {
+            'fields': ('user', 'story')
+        }),
+        ('Game State', {
+            'fields': ('level', 'score', 'lives', 'scenario_index')
+        }),
+        ('Additional Data', {
+            'fields': ('state_data', 'last_updated')
         })
     )
 

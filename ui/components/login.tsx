@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, Loader2 } from 'lucide-react'
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useAuth } from "@/contexts/AuthContext"
 
 export type LoginProps = {
   onSubmit: (username_or_email: string, password: string) => void;
@@ -16,6 +17,8 @@ export default function Login({ onSubmit }: LoginProps) {
   const [usernameOrEmail, setUsernameOrEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const { isLoading: authLoading } = useAuth()
   // const router = useRouter()
   const [isMounted, setIsMounted] = useState(false)
 
@@ -27,6 +30,7 @@ export default function Login({ onSubmit }: LoginProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setIsLoading(true)
 
     if (!isMounted) return // Prevent running on server-side
 
@@ -37,6 +41,8 @@ export default function Login({ onSubmit }: LoginProps) {
       // Specify a more precise type for error
       console.error('Login error:', (error as { response?: { data?: { detail?: string } } })?.response?.data || (error as Error).message)
       setError((error as { response?: { data?: { detail?: string } } })?.response?.data?.detail || 'An error occurred during login')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -75,7 +81,16 @@ export default function Login({ onSubmit }: LoginProps) {
             </Alert>
           )}
           <br />
-          <Button type="submit">Log In</Button>
+          <Button type="submit" disabled={isLoading || authLoading}>
+            {(isLoading || authLoading) ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Logging in...
+              </>
+            ) : (
+              'Log In'
+            )}
+          </Button>
         </form>
       </CardContent>
     </Card>

@@ -25,7 +25,9 @@ export default function LoginPage() {
     if (!isMounted) return;
 
     try {
+      // Login function has been updated to handle loading state internally
       await login(username_or_email, password);
+      console.log('Login successful, redirecting to:', next);
       router.push(next);
     } catch (error) {
       console.error('Login attempt failed:', error);

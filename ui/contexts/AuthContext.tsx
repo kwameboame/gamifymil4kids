@@ -6,6 +6,7 @@ import axios from 'axios'
 
 type AuthContextType = {
   isAuthenticated: boolean
+  isLoading: boolean
   login: (username_or_email: string, password: string) => Promise<void>
   logout: () => Promise<void>
   signup: (username: string, email: string, password: string) => Promise<void>
@@ -15,8 +16,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   // const router = useRouter()
-  const backendBaseURL = process.env.NEXT_PUBLIC_BACKEND_URL; // Add this line
+  // Use a default URL if environment variable is not set (for local development)
+  const backendBaseURL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000/api';
 
   useEffect(() => {
     checkAuthStatus()
@@ -27,7 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const token = localStorage.getItem('authToken')
     if (token) {
       try {
-        await axios.get(`${backendBaseURL}/accounts/user/`, { // Updated to use backendBaseURL
+        await axios.get(`${backendBaseURL}/accounts/user/`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'X-Requested-With': 'XMLHttpRequest'
@@ -45,8 +48,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   const login = async (username_or_email: string, password: string): Promise<void> => {
+    setIsLoading(true)
     try {
-      const response = await axios.post(`${backendBaseURL}/accounts/login-user/`, { username_or_email, password }, { // Updated to use backendBaseURL
+      const response = await axios.post(`${backendBaseURL}/accounts/login-user/`, { username_or_email, password }, {
         headers: {
           'X-Requested-With': 'XMLHttpRequest',
           'Content-Type': 'application/json'
@@ -58,12 +62,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error) {
       console.error('Login error:', error)
       throw error
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const logout = async () => {
     try {
-      await axios.post(`${backendBaseURL}/accounts/logout/`, {}, { // Updated to use backendBaseURL
+      await axios.post(`${backendBaseURL}/accounts/logout/`, {}, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
           'X-Requested-With': 'XMLHttpRequest'
@@ -79,7 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signup = async (username: string, email: string, password: string) => {
     try {
-      const response = await axios.post(`${backendBaseURL}/accounts/register/`, { username, email, password }, { // Updated to use backendBaseURL
+      const response = await axios.post(`${backendBaseURL}/accounts/register/`, { username, email, password }, {
         headers: {
           'X-Requested-With': 'XMLHttpRequest',
           'Content-Type': 'application/json'
@@ -95,7 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout, signup }}>
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout, signup }}>
       {children}
     </AuthContext.Provider>
   )

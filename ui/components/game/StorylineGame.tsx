@@ -3,8 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Maximize2, Minimize2, Volume2, VolumeX, CheckCircle, XCircle, AlertCircle } from "lucide-react";
-import { AudioControl } from "./AudioControl";
+import { Loader2, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { LeaderboardComponent } from "./LeaderboardComponent";
 import { ProfileComponent } from "./ProfileComponent";
 import Confetti from "react-confetti";
@@ -12,6 +11,11 @@ import Image from "next/image";
 import axios from "@/lib/axios";
 import { useAuth } from "@/contexts/AuthContext";
 import './Game.module.css';
+import { GameAuthButtons } from "./GameAuthButtons";
+import { GameState } from "./types";
+// Import Material Symbols font for icons
+import "material-symbols";
+import "@/styles/material-symbols.css";
 
 
 export interface Outcome {
@@ -75,19 +79,26 @@ interface GameInviteResponse {
   expires_at: string;
 }
 
+export interface UserProgressResponse {
+  id: number;
+  user: number;
+  username: string;
+  story: number;
+  story_title: string;
+  level: number;
+  score: number;
+  lives: number;
+  scenario_index: number;
+  state_data: {
+    advanceToNextLevel?: boolean;
+    returnPath?: string;
+    variant?: string;
+  };
+  last_updated: string;
+}
+
 export function StorylineGame() {
-  const [gameState, setGameState] = useState<
-    | "start"
-    | "playing"
-    | "end"
-    | "gameover"
-    | "leaderboard"
-    | "profile"
-    | "login"
-    | "signup"
-    | "level-complete"
-    | "level-intro"
-  >("start");
+  const [gameState, setGameState] = useState<GameState>("start");
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(0);
   const [story, setStory] = useState<Story | null>(null);
@@ -121,9 +132,246 @@ export function StorylineGame() {
   const { isAuthenticated } = useAuth();
   const [vsMode, setVsMode] = useState<boolean>(false);
   const [inviterScore, setInviterScore] = useState<number | null>(null);
-  // const [isMuted, setIsMuted] = useState<boolean>(false);
 
-  // const gameAreaRef = useRef<HTMLDivElement>(null);
+  // Function to save game progress to backend
+  const saveGameProgressToBackend = async () => {
+    if (!isAuthenticated || !story?.id) return false;
+    
+    try {
+      const stateData = {
+        variant: gameState,
+        advanceToNextLevel: gameState === 'level-complete',
+        returnPath: window.location.pathname
+      };
+      
+      const response = await axios.post('/api/game/user-progress/save-progress/', {
+        story_id: story.id,
+        level: gameState === 'level-complete' ? level + 1 : level,
+        score: score,
+        lives: lives,
+        scenario_index: gameState === 'level-complete' ? 0 : scenarioIndex,
+        state_data: stateData
+      });
+      
+      console.log('Game progress saved to backend:', response.data);
+      return true;
+    } catch (error) {
+      console.error('Error saving game progress to backend:', error instanceof Error ? error.message : String(error));
+      return false;
+    }
+  };
+  
+  // Function to fetch game progress from backend
+  const fetchGameProgressFromBackend = async () => {
+    if (!isAuthenticated || !story?.id) return null;
+    
+    try {
+      const response = await axios.get<UserProgressResponse>(`/api/game/user-progress/get-progress/?story_id=${story.id}`);
+      console.log('Retrieved game progress from backend:', response.data);
+      return response.data;
+    } catch (error) {
+      // 404 is expected when no progress exists yet
+      // Using type checking for axios error response
+      if (error && typeof error === 'object' && 'response' in error && error.response && typeof error.response === 'object' && 'status' in error.response) {
+        const errorResponse = error.response as {status: number};
+        if (errorResponse.status !== 404) {
+          console.error('Error fetching game progress from backend:', error instanceof Error ? error.message : String(error));
+        }
+      } else {
+        console.error('Unexpected error fetching game progress:', error instanceof Error ? error.message : String(error));
+      }
+      return null;
+    }
+  };
+
+  // Function to restore saved game state
+  const restoreSavedGameState = async () => {
+    try {
+      // First try to restore from backend if user is authenticated
+      if (isAuthenticated && story?.id) {
+        const backendProgress = await fetchGameProgressFromBackend();
+        if (backendProgress) {
+          console.log('Restoring game state from backend:', backendProgress);
+          
+          // Restore game state variables from backend
+          const restoredLevel = backendProgress.level || 0;
+          setLevel(restoredLevel);
+          setScore(backendProgress.score || 0);
+          setLives(backendProgress.lives || 3);
+          setScenarioIndex(backendProgress.scenario_index || 0);
+          
+          // Skip the start screen and go directly to level intro or gameplay
+          setGameState('level-intro');
+          
+          // Fetch scenarios for the restored level
+          if (story?.id && story.levels && story.levels.length > restoredLevel) {
+            try {
+              const levelId = story.levels[restoredLevel].id;
+              const scenariosResponse = await axios.get<Scenarios[]>(`/api/game/stories/${story.id}/levels/${levelId}/scenarios/`);
+              setScenarios(scenariosResponse.data);
+              console.log(`Fetched ${scenariosResponse.data.length} scenarios for level ${levelId}`);
+            } catch (error) {
+              console.error('Error fetching scenarios for restored level:', error instanceof Error ? error.message : String(error));
+            }
+          }
+          
+          // Determine game state based on saved progress
+          const stateData = backendProgress.state_data || {};
+          if (stateData.advanceToNextLevel) {
+            console.log('Advancing to next level from backend progress, showing level intro for level:', restoredLevel);
+            setGameState('level-intro');
+          } else if (stateData.variant === 'game-end') {
+            setGameState('start');
+          } else {
+            setGameState('level-intro');
+          }
+          
+          return true;
+        }
+      }
+      
+      // Fallback to localStorage if backend restoration failed or user is not authenticated
+      const savedGameStateStr = localStorage.getItem('gamify_saved_game_state');
+      if (savedGameStateStr) {
+        const savedGameState = JSON.parse(savedGameStateStr);
+        console.log('Restoring saved game state from localStorage:', savedGameState);
+        
+        // Restore game state variables
+        const restoredLevel = savedGameState.level || 0;
+        setLevel(restoredLevel);
+        setScore(savedGameState.score || 0);
+        setLives(savedGameState.lives || 3);
+        setScenarioIndex(savedGameState.scenarioIndex || 0);
+        
+        // Fetch scenarios for the next level
+        const fetchScenariosForNextLevel = async () => {
+          if (story) {
+            try {
+              const nextLevelId = story.levels[level + 1].id;
+              const response = await axios.get<Scenarios[]>(`/api/game/stories/${story.id}/levels/${nextLevelId}/scenarios/`);
+              setScenarios(response.data);
+              setGameState('level-intro');
+              console.log(`Fetched ${response.data.length} scenarios for next level (${nextLevelId})`);
+              
+              // Save progress to backend if user is authenticated
+              if (isAuthenticated) {
+                saveGameProgressToBackend();
+              }
+            } catch (error) {
+              console.error('Error fetching scenarios for next level:', error instanceof Error ? error.message : String(error));
+            }
+          }
+        };
+        
+        // Determine game state based on saved progress
+        if (savedGameState.advanceToNextLevel) {
+          console.log('Advancing to next level after login, showing level intro for level:', restoredLevel);
+          fetchScenariosForNextLevel();
+        } else if (savedGameState.variant === 'game-end') {
+          setGameState('start');
+        } else {
+          setGameState('level-intro');
+        }
+        
+        // If user is authenticated, sync the localStorage progress to the backend
+        if (isAuthenticated && story) {
+          try {
+            await axios.post('/api/game/user-progress/save-progress/', {
+              story_id: story.id,
+              level: savedGameState.advanceToNextLevel ? savedGameState.level : savedGameState.level,
+              score: savedGameState.score || 0,
+              lives: savedGameState.lives || 3,
+              scenario_index: savedGameState.advanceToNextLevel ? 0 : savedGameState.scenarioIndex || 0,
+              state_data: {
+                variant: savedGameState.variant,
+                advanceToNextLevel: savedGameState.advanceToNextLevel,
+                returnPath: savedGameState.returnPath
+              }
+            });
+            console.log('Synced localStorage progress to backend');
+          } catch (error) {
+            console.error('Error syncing localStorage progress to backend:', error instanceof Error ? error.message : String(error));
+          }
+        }
+        
+        localStorage.removeItem('gamify_saved_game_state');
+        return true;
+      }
+      
+      // First try to sync existing localStorage state to backend if user just logged in
+      if (isAuthenticated && localStorage.getItem('gameState')) {
+        try {
+          const localState = JSON.parse(localStorage.getItem('gameState') || '{}');
+          if (story?.id && localState.storyId === story.id) {
+            // Sync localStorage progress to backend
+            await axios.post('/api/game/user-progress/save-progress/', {
+              story_id: story.id,
+              level: localState.level,
+              score: localState.score,
+              lives: localState.lives,
+              scenario_index: localState.scenarioIndex,
+              state_data: {
+                advanceToNextLevel: localState.advanceToNextLevel,
+              }
+            });
+            console.log('Synced localStorage progress to backend');
+          }
+        } catch (error) {
+          console.error('Error syncing localStorage progress to backend:', error instanceof Error ? error.message : String(error));
+        }
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error restoring game state:', error instanceof Error ? error.message : String(error));
+      return false;
+    }
+  };
+
+  // Check if we should skip the start screen by looking for existing progress
+  const shouldSkipStartScreen = async () => {
+    // If there is backend progress or localStorage progress, we should skip the start screen
+    if (isAuthenticated && story?.id) {
+      const backendProgress = await fetchGameProgressFromBackend();
+      if (backendProgress) {
+        return true;
+      }
+    }
+    
+    // Check localStorage
+    const localGameState = localStorage.getItem('gameState');
+    if (localGameState && story?.id) {
+      try {
+        const localState = JSON.parse(localGameState);
+        return localState.storyId === story.id;
+      } catch (e) {
+        return false;
+      }
+    }
+    
+    return false;
+  };
+
+  // Function to check for saved state and handle game continuation
+  const checkForSavedState = async () => {
+    try {
+      // First try to restore from backend or localStorage
+      const wasStateRestored = await restoreSavedGameState();
+      
+      // If no progress was restored, check if we should still skip the start screen
+      if (!wasStateRestored) {
+        const shouldSkip = await shouldSkipStartScreen();
+        if (shouldSkip) {
+          console.log('Progress exists but could not be fully restored. Showing level intro.');
+          setGameState('level-intro'); // Skip to level intro if progress exists but couldn't be fully restored
+        } else {
+          console.log('No saved game state found. Showing start screen.');
+        }
+      }
+    } catch (error) {
+      console.error('Error checking for saved game state:', error instanceof Error ? error.message : String(error));
+    }
+  };
 
   useEffect(() => {
     const { invite } = getQueryParams();
@@ -132,6 +380,9 @@ export function StorylineGame() {
       fetchInviterInfo(invite);
     } else {
       fetchInitialData();
+      
+      // Check for saved game state after login/signup or when returning to the game page
+      checkForSavedState();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
@@ -167,7 +418,7 @@ export function StorylineGame() {
 
         // Fetch the authenticated user's profile if not in VS Mode
         if (!vsMode) {
-          const profileResponse = await axios.get<UserProfile>("/accounts/user/", {
+          const profileResponse = await axios.get<UserProfile>("/api/accounts/user/", {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("authToken")}`,
             },
@@ -327,7 +578,7 @@ export function StorylineGame() {
     // Debug info
     console.log('[DEBUG] handleProceedToNextScenario');
     console.log('[DEBUG] scenarioIndex:', scenarioIndex, 'total scenarios:', scenarios?.length);
-    console.log('[DEBUG] level:', level, 'total levels:', story?.levels.length);
+    console.log('[DEBUG] level:', level, 'total levels:', story?.levels?.length);
     
     if (selectedAction.is_correct) {
       // Check if there are more scenarios in the current level
@@ -335,12 +586,22 @@ export function StorylineGame() {
         // Move to next scenario in current level
         setScenarioIndex((prev) => prev + 1);
         console.log('[DEBUG] Moving to next scenario:', scenarioIndex + 1);
-      } else if (level < (story?.levels.length || 0) - 1) {
+        
+        // Save progress to backend if authenticated
+        if (isAuthenticated && story) {
+          saveGameProgressToBackend();
+        }
+      } else if (level < (story?.levels?.length || 0) - 1) {
         // Show level complete screen
         playCongratsSound();
         setShowConfetti(true);
         setGameState("level-complete");
         console.log('[DEBUG] Level complete! Showing level-complete screen');
+        
+        // Save progress to backend if authenticated
+        if (isAuthenticated && story) {
+          saveGameProgressToBackend();
+        }
       } else {
         // Game end logic
         playCongratsSound();
@@ -353,11 +614,16 @@ export function StorylineGame() {
       if (lives - 1 <= 0) {
         playGameOverSound();
         setGameState("gameover");
+        
+        // Save game over state to backend if authenticated
+        if (isAuthenticated && story?.id) {
+          saveGameProgressToBackend();
+        }
       } else {
         // Move to the next scenario after deducting a life
         if (scenarioIndex < (scenarios?.length || 0) - 1) {
           setScenarioIndex((prev) => prev + 1);
-        } else if (level < (story?.levels.length || 0) - 1) {
+        } else if (level < (story?.levels?.length || 0) - 1) {
           // Show level complete screen even for incorrect action if it's the last scenario
           playCongratsSound();
           setShowConfetti(true);
@@ -365,6 +631,11 @@ export function StorylineGame() {
         } else {
           // Game end logic if no more levels
           setGameState("gameover");
+        }
+        
+        // Save progress to backend if authenticated
+        if (isAuthenticated && story) {
+          saveGameProgressToBackend();
         }
       }
     }
@@ -411,6 +682,21 @@ export function StorylineGame() {
     
     console.log('[DEBUG] Game fully reset and started from beginning');
   }
+
+  // Function to start playing the current level from its intro screen
+  const playCurrentLevel = async () => {
+    await enterFullscreen(); // Maintain fullscreen consistency
+    // We don't reset score, lives, or level here.
+    // Scenario index should be 0 if coming from a fresh level intro or restored state.
+    setShowConfetti(false);   // Ensure confetti is off
+    setShowOutcome(false);    // Ensure no lingering outcome from a previous action
+    setSelectedAction(null); // Ensure no lingering action
+
+    // Set game state to playing for the current level
+    setGameState("playing");
+    
+    console.log(`[DEBUG] Starting to play current level: ${level}, scenario: ${scenarioIndex}. Score: ${score}, Lives: ${lives}`);
+  };
   
   // Handler for continuing to next level
   const handleContinueToNextLevel = async () => {
@@ -474,116 +760,98 @@ export function StorylineGame() {
 
       {/* Game Controls */}
       <div className="flex justify-between items-center mb-4">
-      {isAuthenticated && (
-        <>
+      {/* Removed redundant fullscreen controls - now handled in the game header */}
 
-        {/* Only show exit fullscreen button when in fullscreen mode */}
-        {isFullscreen && (
-          <Button
-            onClick={exitFullscreen}
-            className="absolute top-4 right-4 bg-orange-700"
-          >
-            <Minimize2 className="mr-2 h-4 w-4" />
-            
-          </Button>
-        )}
-
-        </>
-      )}
-
-  {isAuthenticated && !vsMode && (
-    <Button className="bg-orange-700 text-xs" onClick={createInvite}>
-      Create Invite
-    </Button>
-  )}
-
-  {isAuthenticated && (
-    <Button className="bg-orange-700 text-sm" onClick={() => setGameState("leaderboard")}>
-      Leaderboard
-    </Button>
-  )}
+  {/* Controls have been moved to the game state UI */}
 
   {gameState === "playing" && (
     <div className="flex flex-col my-1 w-full">
-  <div className="flex flex-wrap items-center justify-between mb-1 w-full bg-black px-4 py-2 rounded-md">
-        {/* Game score with game-like UI */}
+      <div className="flex items-center justify-between mb-1 w-full bg-black px-4 py-2 rounded-md">
+        {/* Game score with icon - left side */}
         <div className="flex items-center">
-          <div className="bg-gradient-to-r from-indigo-600 to-blue-500 px-4 py-2 rounded-lg shadow-lg flex items-center">
-            <svg className="w-5 h-5 mr-2 text-yellow-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <div className="flex items-center">
+            <svg className="w-5 h-5 mr-1 text-amber-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
               <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
               <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
             </svg>
-            <span className="text-xl font-bold text-white">{score}</span>
+            <span className="text-amber-400 text-sm font-bold mr-1">Score:</span>
+            <span className="text-amber-400 text-xl font-mono font-bold">{score}</span>
           </div>
-          
-          {/* Lives with animated heart icons */}
-          <div className="ml-4 flex items-center">
-            {[...Array(lives)].map((_, index) => (
-              <span key={index} className="text-red-500 text-xl mx-1 animate-pulse">❤️</span>
-            ))}
-          </div>
+          {isAuthenticated && !vsMode && (
+            <Button 
+              className="bg-orange-700 text-xs ml-4" 
+              onClick={createInvite}
+            >
+              Create Invite
+            </Button>
+          )}
+          {isAuthenticated && (
+            <Button 
+              className="bg-orange-700 text-xs ml-2" 
+              onClick={() => setGameState("leaderboard")}
+            >
+              Leaderboard
+            </Button>
+          )}
         </div>
 
-        {/* Scenario counter and mute button */}
-        <div className="flex items-center gap-2">
-  <div className="bg-gray-800 text-white px-3 py-1 rounded-md text-sm font-medium">
-    Level {level + 1} : Scenario {scenarioIndex + 1}/{scenarios?.length || 1}
-  </div>
-  {/* Fullscreen toggle button */}
-  <Button
-    variant="ghost"
-    size="icon"
-    aria-label={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
-    className="ml-2 group hover:bg-gray-700 focus:bg-gray-700 transition"
-    onClick={() => {
-      if (isFullscreen) {
-        exitFullscreen();
-      } else {
-        enterFullscreen();
-      }
-    }}
-  >
-    {isFullscreen ? (
-      <Minimize2 className="w-5 h-5 text-gray-200 group-hover:text-yellow-300 group-focus:text-yellow-300 transition" />
-    ) : (
-      <Maximize2 className="w-5 h-5 text-gray-200 group-hover:text-yellow-300 group-focus:text-yellow-300 transition" />
-    )}
-  </Button>
-  {/* Mute button */}
-  <Button
-    variant="ghost"
-    size="icon"
-    aria-label={isMuted ? 'Unmute' : 'Mute'}
-    className="ml-2 group hover:bg-gray-700 focus:bg-gray-700 transition"
-    onClick={() => {
-      setIsMuted((prev) => !prev);
-      // Mute/unmute all audio refs
-      if (mainMusicRef.current) mainMusicRef.current.muted = !isMuted;
-      if (congratsSoundRef.current) congratsSoundRef.current.muted = !isMuted;
-      if (gameOverSoundRef.current) gameOverSoundRef.current.muted = !isMuted;
-    }}
-  >
-    {isMuted ? (
-      <VolumeX className="w-5 h-5 text-gray-200 group-hover:text-yellow-300 group-focus:text-yellow-300 transition" />
-    ) : (
-      <Volume2 className="w-5 h-5 text-gray-200 group-hover:text-yellow-300 group-focus:text-yellow-300 transition" />
-    )}
-  </Button>
-</div>
+        {/* Hearts/Lives in center */}
+        <div className="flex items-center">
+          {[...Array(3)].map((_, index) => (
+            <span key={index} className={`mx-1 ${index < lives ? 'text-red-500' : 'text-gray-600'}`}>
+              {index < lives ? '❤️' : '🖤'}
+            </span>
+          ))}
+        </div>
+
+        {/* Level indicator and controls - right side */}
+        <div className="flex items-center space-x-3 justify-end">
+          <div className="bg-slate-800 text-orange-300 px-4 py-2 rounded-md text-xs sm:text-sm font-semibold orbitron shadow-inner">
+            LVL {level + 1} : {scenarioIndex + 1}/{scenarios?.length || 1}
+          </div>
+          {/* Fullscreen toggle button */}
+          <button 
+            className="text-slate-400 hover:text-orange-400 transition-colors duration-300 p-2 rounded-full hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500"
+            onClick={() => {
+              if (isFullscreen) {
+                exitFullscreen();
+              } else {
+                enterFullscreen();
+              }
+            }}
+          >
+            <span className="material-symbols-outlined">
+              {isFullscreen ? 'fullscreen_exit' : 'fullscreen'}
+            </span>
+          </button>
+          {/* Mute button */}
+          <button 
+            className="bg-slate-700 p-2 rounded-full text-orange-400 hover:bg-slate-600 hover:text-orange-300 transition-all duration-300 shadow-md focus:outline-none focus:ring-2 focus:ring-slate-500"
+            onClick={() => {
+              setIsMuted((prev) => !prev);
+              // Mute/unmute all audio refs
+              if (mainMusicRef.current) mainMusicRef.current.muted = !isMuted;
+              if (congratsSoundRef.current) congratsSoundRef.current.muted = !isMuted;
+              if (gameOverSoundRef.current) gameOverSoundRef.current.muted = !isMuted;
+            }}
+          >
+            <span className="material-symbols-outlined">
+              {isMuted ? 'volume_off' : 'volume_up'}
+            </span>
+          </button>
+        </div>
       </div>
 
       {/* Progress Bar */}
-      <div className="w-full bg-gray-300 rounded-full h-2 mb-1">
+      <div className="w-full bg-gray-800 rounded-full h-1 mb-1">
         <div 
-          className="bg-gradient-to-r from-green-400 to-blue-500 h-2 rounded-full transition-all duration-500 ease-in-out" 
+          className="bg-orange-500 h-1 rounded-full transition-all duration-500 ease-in-out" 
           style={{ width: `${(scenarioIndex / (scenarios?.length || 1)) * 100}%` }}
         ></div>
       </div>
     </div>
   )}
-  {isAuthenticated && (
-    <AudioControl isGameStarted={gameState === "playing"} />
-  )}
+  {/* Audio control removed to prevent duplication */}
   
 </div>
 
@@ -628,7 +896,7 @@ export function StorylineGame() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
             transition={{ duration: 0.5 }}
-            className="flex flex-col items-center justify-center flex-grow text-center px-12 md:px-16"
+            className="flex flex-col items-center justify-center flex-grow text-center px-6 md:px-12"
           >
             <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
               <div className="md:w-3/4">
@@ -650,7 +918,7 @@ export function StorylineGame() {
               className="bg-orange-700" 
               onClick={handleStartGame}
             >
-              <Maximize2 className="mr-2 h-4 w-4" />
+              <span className="material-symbols-outlined mr-2">play_arrow</span>
               Start Game
             </Button>
 
@@ -796,10 +1064,7 @@ export function StorylineGame() {
 
             <Button 
               className="bg-orange-700" 
-              onClick={() => {
-                setGameState("playing");
-                console.log('[DEBUG] Starting level', level + 1);
-              }}
+              onClick={playCurrentLevel}
             >
               Start Level
             </Button>
@@ -836,6 +1101,16 @@ export function StorylineGame() {
                 >
                   Continue to Next Level
                 </Button>
+                
+                {!isAuthenticated && (
+                  <GameAuthButtons 
+                    level={level}
+                    score={score}
+                    lives={lives}
+                    scenarioIndex={scenarioIndex}
+                    variant="level-complete"
+                  />
+                )}
               </div>
               
               {/* Debug info in development mode */}
@@ -879,6 +1154,16 @@ export function StorylineGame() {
                 <Button onClick={handleEndGame} className="w-full max-w-xs mx-auto text-lg py-3">
                   View Leaderboard
                 </Button>
+              
+                {!isAuthenticated && (
+                  <GameAuthButtons 
+                    level={level}
+                    score={score}
+                    lives={lives}
+                    scenarioIndex={scenarioIndex}
+                    variant="game-end"
+                  />
+                )}
               </div>
             </div>
             {gameState === "end" && <Confetti />}
