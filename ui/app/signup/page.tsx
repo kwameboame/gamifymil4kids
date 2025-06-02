@@ -1,18 +1,44 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Layout from '@/components/layout'
 import Signup from '@/components/signup'
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function SignupPage() {
-  const handleSubmit = (username: string, email: string, password: string) => {
-    // Handle form submission logic here
-    console.log('Form submitted:', { username, email, password });
+  const { signup } = useAuth();
+  const [isMounted, setIsMounted] = useState(false);
+  const router = useRouter();
+  const [next, setNext] = useState<string>('/game');
+  
+  useEffect(() => {
+    setIsMounted(true);
+    const params = new URLSearchParams(window.location.search);
+    const nextParam = params.get('next');
+    if (nextParam) {
+      setNext(nextParam);
+    }
+  }, []);
+
+  const handleSubmit = async (username: string, email: string, password: string) => {
+    if (!isMounted) return;
+    
+    try {
+      await signup(username, email, password);
+      console.log('Signup successful, redirecting to:', next);
+      router.push(next);
+    } catch (error) {
+      console.error('Signup attempt failed:', error);
+      throw error; // Pass the error back to the component for display
+    }
   };
 
+  if (!isMounted) return null;
+  
   return (
     <Layout>
       <div className="max-w-md mx-auto">
-        <h1 className="text-2xl font-bold mb-4">Create an Account</h1>
         <Signup onSubmit={handleSubmit} />
       </div>
     </Layout>
