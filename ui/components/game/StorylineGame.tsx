@@ -587,20 +587,21 @@ export function StorylineGame() {
 
     // Play appropriate sound based on outcome
     if (!isMuted) {
-      if (action.is_correct && correctSoundRef.current) {
-        // Play correct sound
-        correctSoundRef.current.currentTime = 0;
-        correctSoundRef.current.play();
-      } else if (isPartiallyCorrect && partiallySoundRef.current) {
-        // Play partially correct sound
+      if (isPartiallyCorrect && partiallySoundRef.current) {
+        // Partially correct answer
         partiallySoundRef.current.currentTime = 0;
         partiallySoundRef.current.play();
+      } else if (action.is_correct && correctSoundRef.current) {
+        // Fully correct answer
+        correctSoundRef.current.currentTime = 0;
+        correctSoundRef.current.play();
       } else if (!action.is_correct && wrongSoundRef.current) {
-        // Play wrong sound
+        // Incorrect answer
         wrongSoundRef.current.currentTime = 0;
         wrongSoundRef.current.play();
       }
     }
+    
   
     if (action.is_correct) {
       setScore(prev => prev + (action.points || 0));
