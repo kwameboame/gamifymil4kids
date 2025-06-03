@@ -172,6 +172,9 @@ export function StorylineGame() {
   const congratsSoundRef = useRef<HTMLAudioElement>(null);
   const gameOverSoundRef = useRef<HTMLAudioElement>(null);
   const powerUpSoundRef = useRef<HTMLAudioElement>(null);
+  const correctSoundRef = useRef<HTMLAudioElement>(null);
+  const partiallySoundRef = useRef<HTMLAudioElement>(null);
+  const wrongSoundRef = useRef<HTMLAudioElement>(null);
   const { isAuthenticated } = useAuth();
   // Get token from localStorage
   const getToken = () => localStorage.getItem('authToken');
@@ -578,12 +581,39 @@ export function StorylineGame() {
   const handleAction = (action: Action) => {
     setSelectedAction(action);
     setShowOutcome(true);
+  
+    // Determine if the action is partially correct (has some points but is not marked as correct)
+    const isPartiallyCorrect = action.is_correct && (action.points || 0) < maxPointsForCurrentScenario;
+
+    // Play appropriate sound based on outcome
+    if (!isMuted) {
+      if (action.is_correct && correctSoundRef.current) {
+        // Play correct sound
+        correctSoundRef.current.currentTime = 0;
+        correctSoundRef.current.play();
+      } else if (isPartiallyCorrect && partiallySoundRef.current) {
+        // Play partially correct sound
+        partiallySoundRef.current.currentTime = 0;
+        partiallySoundRef.current.play();
+      } else if (!action.is_correct && wrongSoundRef.current) {
+        // Play wrong sound
+        wrongSoundRef.current.currentTime = 0;
+        wrongSoundRef.current.play();
+      }
+    }
+  
     if (action.is_correct) {
       setScore(prev => prev + (action.points || 0));
       setCorrectAnswerCount(count => count + 1);
       console.log('[DEBUG] Consecutive correct answers increased to:', correctAnswerCount + 1);
     } else {
-      setLives(prevLives => Math.max(0, prevLives - 1));
+      // Still add points if partially correct
+      if (action.points && action.points > 0) {
+        setScore(prev => prev + action.points);
+      }
+      
+
+      
       // Reset consecutive correct answer count when user answers incorrectly
       setCorrectAnswerCount(0);
       console.log('[DEBUG] Consecutive correct answers reset to 0 due to incorrect answer');
@@ -594,85 +624,57 @@ export function StorylineGame() {
   const handleProceedToNextScenario = () => {
     setShowOutcome(false);
     setSelectedAction(null);
-
-    // Check if the most recent answer was correct
+  
     if (selectedAction?.is_correct) {
-      console.log('[DEBUG] Correct answer given! Correct count:', correctAnswerCount);
-      
-      // Always check for power-up eligibility after correct answer, regardless of auth status
       checkForPowerUp();
     }
-
-    // If the player has no lives left, go to game over
-    if (lives <= 0) {
+  
+    let newLives = lives;
+  
+    // Only reduce lives here, based on previous action
+    if (selectedAction && !selectedAction.is_correct && selectedAction.points === 0) {
+      newLives = lives - 1;
+      setLives(newLives);
+    }
+  
+    if (newLives <= 0) {
       setGameState("gameover");
       playGameOverSound();
+      if (isAuthenticated && story?.id) {
+        saveGameProgressToBackend();
+      }
       return;
     }
-
-    // Debug info
-    console.log('[DEBUG] handleProceedToNextScenario');
-    console.log('[DEBUG] scenarioIndex:', scenarioIndex, 'total scenarios:', scenarios?.length);
-    console.log('[DEBUG] level:', level, 'total levels:', story?.levels?.length);
-    
-    if (selectedAction && selectedAction.is_correct) {
-      // Check if there are more scenarios in the current level
+  
+    if (selectedAction?.is_correct) {
       if (scenarioIndex < (scenarios?.length || 0) - 1) {
-        // Move to next scenario in current level
-        setScenarioIndex((prev) => prev + 1);
-        console.log('[DEBUG] Moving to next scenario:', scenarioIndex + 1);
-        
-        // Save progress to backend if authenticated
-        if (isAuthenticated && story) {
-          saveGameProgressToBackend();
-        }
+        setScenarioIndex(prev => prev + 1);
       } else if (level < (story?.levels?.length || 0) - 1) {
-        // Show level complete screen
         playCongratsSound();
         setShowConfetti(true);
         setGameState("level-complete");
-        console.log('[DEBUG] Level complete! Showing level-complete screen');
-        
-        // Save progress to backend if authenticated
-        if (isAuthenticated && story) {
-          saveGameProgressToBackend();
-        }
       } else {
-        // Game end logic
         playCongratsSound();
         setShowConfetti(true);
         setGameState("end");
       }
     } else {
-      // Handle incorrect action - Deduct a life
-      const newLives = lives - 1;
-      if (newLives <= 0) {
-        playGameOverSound();
-        setGameState("gameover");
-        if (isAuthenticated && story?.id) {
-          saveGameProgressToBackend();
-        }
+      if (scenarioIndex < (scenarios?.length || 0) - 1) {
+        setScenarioIndex(prev => prev + 1);
+      } else if (level < (story?.levels?.length || 0) - 1) {
+        playCongratsSound();
+        setShowConfetti(true);
+        setGameState("level-complete");
       } else {
-        // Move to the next scenario after deducting a life
-        if (scenarioIndex < (scenarios?.length || 0) - 1) {
-          setScenarioIndex((prev) => prev + 1);
-        } else if (level < (story?.levels?.length || 0) - 1) {
-          // Show level complete screen even for incorrect action if it's the last scenario
-          playCongratsSound();
-          setShowConfetti(true);
-          setGameState("level-complete");
-        } else {
-          // Game end logic if no more levels
-          setGameState("gameover");
-        }
-        
-        // Save progress to backend if authenticated
-        if (isAuthenticated && story) {
-          saveGameProgressToBackend();
-        }
+        setGameState("gameover");
       }
     }
+  
+    if (isAuthenticated && story) {
+      saveGameProgressToBackend();
+    }
   };
+  
 
   const handleEndGame = () => {
     // Reset game state or perform other end game actions
@@ -804,6 +806,9 @@ export function StorylineGame() {
       <audio ref={congratsSoundRef} src="/audio/congrats.wav" />
       <audio ref={gameOverSoundRef} src="/audio/gameover.wav" />
       <audio ref={powerUpSoundRef} src="/audio/powerup.wav" />
+      <audio ref={correctSoundRef} src="/audio/correct.mp3" />
+      <audio ref={partiallySoundRef} src="/audio/partially.mp3" />
+      <audio ref={wrongSoundRef} src="/audio/wrong.mp3" />
 
       {/* Game Controls */}
       <div className="flex justify-between items-center mb-4">
@@ -854,34 +859,6 @@ export function StorylineGame() {
               {lives > MAX_LIVES && <span className="ml-2 text-green-500 font-bold">+1</span>}
           </div>
           
-          {/* Active power-ups display
-          {activePowerUps.length > 0 && (
-            <div className="flex items-center ml-3">
-              <span className="text-xs font-bold text-yellow-300 mr-1">Power-ups Earned:</span>
-              <div className="flex items-center">
-                {activePowerUps.map(powerUp => (
-                  <div
-                    key={powerUp.id}
-                    className="bg-white dark:bg-gray-800 p-1 rounded-full shadow-md transition-all flex items-center justify-center ml-1"
-                    title={`Earned: ${powerUp.name} - ${powerUp.description}`}
-                    ref={(el) => {
-                      if (el) {
-                        powerUpIconsRef.current.set(powerUp.id, el);
-                      }
-                    }}
-                  >
-                    {powerUp.image ? (
-                      <Image src={powerUp.image} alt={powerUp.name} width={16} height={16} className="w-4 h-4" />
-                    ) : (
-                      <div className="w-4 h-4 flex items-center justify-center bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full">
-                        <span className="text-xs">{powerUp.name.charAt(0)}</span>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )} */}
         </div>
 
         {/* Level indicator and controls - right side */}
@@ -914,6 +891,9 @@ export function StorylineGame() {
               if (congratsSoundRef.current) congratsSoundRef.current.muted = !isMuted;
               if (gameOverSoundRef.current) gameOverSoundRef.current.muted = !isMuted;
               if (powerUpSoundRef.current) powerUpSoundRef.current.muted = !isMuted;
+              if (correctSoundRef.current) correctSoundRef.current.muted = !isMuted;
+              if (partiallySoundRef.current) partiallySoundRef.current.muted = !isMuted;
+              if (wrongSoundRef.current) wrongSoundRef.current.muted = !isMuted;
             }}
           >
             <span className="material-symbols-outlined">
