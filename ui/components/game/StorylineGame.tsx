@@ -171,6 +171,7 @@ export function StorylineGame() {
   const mainMusicRef = useRef<HTMLAudioElement>(null);
   const congratsSoundRef = useRef<HTMLAudioElement>(null);
   const gameOverSoundRef = useRef<HTMLAudioElement>(null);
+  const powerUpSoundRef = useRef<HTMLAudioElement>(null);
   const { isAuthenticated } = useAuth();
   // Get token from localStorage
   const getToken = () => localStorage.getItem('authToken');
@@ -256,6 +257,12 @@ export function StorylineGame() {
       if (powerUp) {
         const source = token && isAuthenticated ? 'backend' : 'local game logic';
         console.log(`[DEBUG] Earned power-up from ${source}:`, powerUp.name);
+        
+        // Play power-up sound
+        if (powerUpSoundRef.current && !isMuted) {
+          powerUpSoundRef.current.currentTime = 0;
+          powerUpSoundRef.current.play();
+        }
         
         // Show the modal
         setEarnedPowerUp(powerUp);
@@ -794,8 +801,9 @@ export function StorylineGame() {
 
       {/* Audio Elements */}
       <audio ref={mainMusicRef} src="/audio/sound.mp3" loop />
-      <audio ref={congratsSoundRef} src="/audio/congrats.mp3" />
-      <audio ref={gameOverSoundRef} src="/audio/GameOver.wav" />
+      <audio ref={congratsSoundRef} src="/audio/congrats.wav" />
+      <audio ref={gameOverSoundRef} src="/audio/gameover.wav" />
+      <audio ref={powerUpSoundRef} src="/audio/powerup.wav" />
 
       {/* Game Controls */}
       <div className="flex justify-between items-center mb-4">
@@ -905,6 +913,7 @@ export function StorylineGame() {
               if (mainMusicRef.current) mainMusicRef.current.muted = !isMuted;
               if (congratsSoundRef.current) congratsSoundRef.current.muted = !isMuted;
               if (gameOverSoundRef.current) gameOverSoundRef.current.muted = !isMuted;
+              if (powerUpSoundRef.current) powerUpSoundRef.current.muted = !isMuted;
             }}
           >
             <span className="material-symbols-outlined">
