@@ -162,7 +162,8 @@ export function StorylineGame() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [lives, setLives] = useState(3);
+  const MAX_LIVES = 3;
+  const [lives, setLives] = useState(MAX_LIVES);
   const gameContainerRef = useRef<HTMLDivElement>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
@@ -267,6 +268,9 @@ export function StorylineGame() {
           console.log('[DEBUG] Applied extra life:', powerUp.bonus_lives);
         } else if (powerUp.power_up_type === 'score_booster' || powerUp.power_up_type === 'score_boost') {
           setScore(prev => prev * powerUp.score_multiplier);
+
+          // reset correct‐answer streak so the same booster can’t fire again immediately
+          setCorrectAnswerCount(0);
           // clear/reset the multiplier so it doesn’t apply again
           setActivePowerUps(p => p.filter(pu => pu.id !== powerUp.id));
           console.log('[DEBUG] Applied score multiplier:', powerUp.score_multiplier);
@@ -834,14 +838,12 @@ export function StorylineGame() {
         <div className="flex items-center">
           {/* Lives display */}
           <div className="flex items-center">
-            {[...Array(3)].map((_, index) => (
-              <span key={index} className={`mx-1 ${index < lives ? 'text-red-500' : 'text-gray-600'}`}>
-                {index < lives ? '❤️' : '🖤'}
-              </span>
-            ))}
-            {activePowerUps.some(p => p.power_up_type === 'extra_life') && (
-              <span className="ml-2 text-green-500 font-bold">+1</span>
-            )}
+             {[...Array(MAX_LIVES)].map((_, i) => (
+                <span key={i} className={`mx-1 ${i < lives ? 'text-red-500' : 'text-gray-600'}`}>
+                  {i < lives ? '❤️' : '🖤'}
+                </span>
+              ))}
+              {lives > MAX_LIVES && <span className="ml-2 text-green-500 font-bold">+1</span>}
           </div>
           
           {/* Active power-ups display
