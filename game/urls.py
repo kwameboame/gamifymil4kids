@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (StoryViewSet, LeaderboardEntryViewSet, UserProfileViewSet, 
                     LevelViewSet, ActionViewSet, BadgeViewSet, ScenarioViewSet,
                     GameSessionViewSet, GameInviteViewSet, AnimationViewSet,
-                    UserProgressViewSet)
+                    UserProgressViewSet, PowerUpViewSet, UserPowerUpViewSet)
 
 router = DefaultRouter()
 router.register(r'stories', StoryViewSet)
@@ -14,6 +14,8 @@ router.register(r'game-sessions', GameSessionViewSet)
 router.register(r'invites', GameInviteViewSet, basename='gameinvite')
 router.register(r'animations', AnimationViewSet, basename='animation')
 router.register(r'user-progress', UserProgressViewSet, basename='user-progress')
+router.register(r'power-ups', PowerUpViewSet, basename='power-up')
+router.register(r'user-power-ups', UserPowerUpViewSet, basename='user-power-up')
 
 urlpatterns = [
     path('', include(router.urls)),

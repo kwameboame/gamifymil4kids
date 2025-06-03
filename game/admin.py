@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (Story, Scenario, Level, Action, LeaderboardEntry, Badge, 
                     GameSession, GameInvite, Outcome, Animation, AnimationType,
-                    UserProgress)
+                    UserProgress, PowerUp, PowerUpType, UserPowerUp)
 
 
 # Inline for Outcome within Action
@@ -113,6 +113,31 @@ class UserProgressAdmin(admin.ModelAdmin):
             'fields': ('state_data', 'last_updated')
         })
     )
+    
+@admin.register(UserPowerUp)
+class UserPowerUpAdmin(admin.ModelAdmin):
+    list_display = ('user', 'power_up', 'is_active', 'used_at')
+    list_filter = ('is_active', 'used_at')
+    search_fields = ('user__username', 'power_up__name')
+    readonly_fields = ('used_at',)
+    fieldsets = (
+        (None, {
+            'fields': ('user', 'power_up')
+        }),
+        ('Power Up Status', {
+            'fields': ('is_active', 'used_at')
+        })
+    )
+    
+@admin.register(PowerUp)
+class PowerUpAdmin(admin.ModelAdmin):
+    list_display = ('name', 'story', 'power_up_type', 'is_active', 'created_at')
+    list_filter = ('power_up_type', 'is_active')
+    search_fields = ('name', 'story__title')
+    readonly_fields = ('created_at',)
+    
+# PowerUpType is a TextChoices enum, not a Django model
+# It cannot be registered with the admin site
 
 admin.site.register(LeaderboardEntry)
 admin.site.register(Badge)

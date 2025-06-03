@@ -1,15 +1,18 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import React, { useState, useEffect, useRef } from 'react';
+import gsap from 'gsap';
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { LeaderboardComponent } from "./LeaderboardComponent";
 import { ProfileComponent } from "./ProfileComponent";
+import PowerUpModal, { PowerUp } from "./PowerUpModal";
 import Confetti from "react-confetti";
 import Image from "next/image";
 import axios from "@/lib/axios";
 import { useAuth } from "@/contexts/AuthContext";
+import PowerUpService from "@/services/PowerUpService";
 import './Game.module.css';
 import { GameAuthButtons } from "./GameAuthButtons";
 import { GameState } from "./types";
@@ -110,6 +113,44 @@ export function StorylineGame() {
   const [isMuted, setIsMuted] = useState(false);
   const selectedScenario = scenarios ? scenarios[scenarioIndex] : null;
   
+  // PowerUp related states
+  const [earnedPowerUp, setEarnedPowerUp] = useState<PowerUp | null>(null); // Used in the PowerUpModal and checkForPowerUp
+  const [showPowerUpModal, setShowPowerUpModal] = useState(false);
+  const [correctAnswerCount, setCorrectAnswerCount] = useState(0); // Used to determine power-up eligibility
+  const [activePowerUps, setActivePowerUps] = useState<PowerUp[]>([]);
+  const powerUpIconsRef = useRef<Map<number, HTMLDivElement>>(new Map());
+  
+  // Animate power-up icons when they're added
+  useEffect(() => {
+    // Get the latest power-up that was added
+    if (activePowerUps.length > 0) {
+      const latestPowerUp = activePowerUps[activePowerUps.length - 1];
+      const powerUpElement = powerUpIconsRef.current.get(latestPowerUp.id);
+      
+      if (powerUpElement) {
+        // Initial animation when power-up is added
+        gsap.fromTo(powerUpElement,
+          { scale: 0, opacity: 0 },
+          { 
+            scale: 1, 
+            opacity: 1, 
+            duration: 0.5,
+            ease: "back.out(1.7)"
+          }
+        );
+        
+        // Add a subtle continuous pulse animation
+        gsap.to(powerUpElement, {
+          scale: 1.1,
+          repeat: -1,
+          yoyo: true,
+          duration: 1,
+          delay: 0.5
+        });
+      }
+    }
+  }, [activePowerUps]);
+  
   // Calculate maximum points available for the current scenario
   useEffect(() => {
     if (selectedScenario && selectedScenario.actions && selectedScenario.actions.length > 0) {
@@ -130,8 +171,115 @@ export function StorylineGame() {
   const congratsSoundRef = useRef<HTMLAudioElement>(null);
   const gameOverSoundRef = useRef<HTMLAudioElement>(null);
   const { isAuthenticated } = useAuth();
+  // Get token from localStorage
+  const getToken = () => localStorage.getItem('authToken');
   const [vsMode, setVsMode] = useState<boolean>(false);
   const [inviterScore, setInviterScore] = useState<number | null>(null);
+
+  // Function to check if player earned a power-up and apply it automatically
+  const checkForPowerUp = async () => {
+    console.log('[DEBUG] Checking for power-up with correct answers:', correctAnswerCount);
+    
+    try {
+      // Skip if no story
+      if (!story) {
+        console.log('[DEBUG] Skipping power-up check - no story available');
+        return;
+      }
+      
+      let powerUp = null;
+      
+      // For authenticated users, fetch from backend
+      const token = localStorage.getItem('authToken');
+      if (token && isAuthenticated) {
+        console.log(`[DEBUG] Authenticated user: Checking power-ups for story ID: ${story.id}`);
+        
+        // Fetch power-up from backend based on current story and correct answers
+        powerUp = await PowerUpService.checkEarnPowerUp(
+          token,
+          story.id,
+          correctAnswerCount
+        );
+      } else {
+        // For non-authenticated users, use local power-up logic
+        console.log('[DEBUG] Non-authenticated user: Using local power-up logic');
+        
+        // Define local power-ups that match the structure expected by the PowerUp interface
+        const localPowerUps: (PowerUp & { required_correct_answers: number })[] = [
+          {
+            id: 1,
+            name: 'Extra Life',
+            description: 'Gives you an extra life!',
+            power_up_type: 'extra_life',
+            power_up_type_display: 'Extra Life',
+            bonus_lives: 1,
+            required_correct_answers: 3,
+            score_multiplier: 1,
+            time_extension_seconds: 0,
+            user_power_up_id: 0
+          },
+          {
+            id: 2,
+            name: 'Score Booster',
+            description: 'Doubles your current score!',
+            power_up_type: 'score_booster',
+            power_up_type_display: 'Score Booster',
+            bonus_lives: 0,
+            required_correct_answers: 4,
+            score_multiplier: 2,
+            time_extension_seconds: 0,
+            user_power_up_id: 0
+          }
+        ];
+        
+        // Filter eligible power-ups
+        const eligiblePowerUps = localPowerUps.filter(
+          p => correctAnswerCount >= p.required_correct_answers
+        );
+        
+        // Find the best match (highest required_correct_answers)
+        if (eligiblePowerUps.length > 0) {
+          const bestMatchPowerUp = eligiblePowerUps.reduce((best, current) => {
+            if (!best) return current;
+            return current.required_correct_answers > best.required_correct_answers ? current : best;
+          }, eligiblePowerUps[0]);
+          
+          // Create a new power-up object with a unique ID
+          powerUp = {
+            ...bestMatchPowerUp,
+            user_power_up_id: Date.now() // Use timestamp as a unique ID
+          };
+        }
+      }
+      
+      if (powerUp) {
+        const source = token && isAuthenticated ? 'backend' : 'local game logic';
+        console.log(`[DEBUG] Earned power-up from ${source}:`, powerUp.name);
+        
+        // Show the modal
+        setEarnedPowerUp(powerUp);
+        setShowPowerUpModal(true);
+        setActivePowerUps(prev => [...prev, powerUp]);
+        
+        // Apply power-up effects immediately
+        if (powerUp.power_up_type === 'extra_life') {
+          setLives(prev => prev + powerUp.bonus_lives);
+          console.log('[DEBUG] Applied extra life:', powerUp.bonus_lives);
+        } else if (powerUp.power_up_type === 'score_booster' || powerUp.power_up_type === 'score_boost') {
+          setScore(prev => prev * powerUp.score_multiplier);
+          // clear/reset the multiplier so it doesn’t apply again
+          setActivePowerUps(p => p.filter(pu => pu.id !== powerUp.id));
+          console.log('[DEBUG] Applied score multiplier:', powerUp.score_multiplier);
+        }
+      } else {
+        console.log('[DEBUG] No power-up earned for', correctAnswerCount, 'correct answers');
+      }
+    } catch (error) {
+      console.error('[ERROR] Failed to check for power-ups:', error);
+    }
+  };
+  
+  // We don't need a separate function to handle using power-ups since they're automatically applied
 
   // Function to save game progress to backend
   const saveGameProgressToBackend = async () => {
@@ -161,7 +309,7 @@ export function StorylineGame() {
     }
   };
   
-  // Function to fetch game progress from backend
+  /* This function is not currently used but is kept for potential future use
   const fetchGameProgressFromBackend = async () => {
     if (!isAuthenticated || !story?.id) return null;
     
@@ -183,194 +331,56 @@ export function StorylineGame() {
       return null;
     }
   };
+  */
 
-  // Function to restore saved game state
-  const restoreSavedGameState = async () => {
-    try {
-      // First try to restore from backend if user is authenticated
-      if (isAuthenticated && story?.id) {
-        const backendProgress = await fetchGameProgressFromBackend();
-        if (backendProgress) {
-          console.log('Restoring game state from backend:', backendProgress);
+  /**
+   * Function to restore saved game state
+   */
+  const restoreSavedGameState = async (progress: UserProgressResponse) => {
+    // Set game state and variables from the saved progress
+    setScore(progress.score);
+    setLives(progress.lives);
+    setLevel(progress.level);
+    // Load active power-ups if user is authenticated
+    if (isAuthenticated && story) {
+      const token = getToken();
+      if (token) {
+        try {
+          const userPowerUps = await PowerUpService.getUserActivePowerUps(token, progress.story);
+          setActivePowerUps(userPowerUps);
+        } catch (error) {
+          console.error("Error loading power-ups:", error);
+        }
+      }
+    }
+  };
+
+  /**
+   * Function to check for saved state and handle game continuation
+   */
+  const checkForSavedState = async () => {
+    if (isAuthenticated && story) {
+      try {
+        const response = await axios.get<UserProgressResponse[]>(`/api/user-progress/?story=${story.id}`);
+        const progressData = response.data as UserProgressResponse[];
+
+        if (progressData && progressData.length > 0) {
+          const latestProgress = progressData[0]; // Assuming it's sorted by last_updated
+          await restoreSavedGameState(latestProgress);
           
-          // Restore game state variables from backend
-          const restoredLevel = backendProgress.level || 0;
-          setLevel(restoredLevel);
-          setScore(backendProgress.score || 0);
-          setLives(backendProgress.lives || 3);
-          setScenarioIndex(backendProgress.scenario_index || 0);
-          
-          // Skip the start screen and go directly to level intro or gameplay
-          setGameState('level-intro');
-          
-          // Fetch scenarios for the restored level
-          if (story?.id && story.levels && story.levels.length > restoredLevel) {
-            try {
-              const levelId = story.levels[restoredLevel].id;
-              const scenariosResponse = await axios.get<Scenarios[]>(`/api/game/stories/${story.id}/levels/${levelId}/scenarios/`);
-              setScenarios(scenariosResponse.data);
-              console.log(`Fetched ${scenariosResponse.data.length} scenarios for level ${levelId}`);
-            } catch (error) {
-              console.error('Error fetching scenarios for restored level:', error instanceof Error ? error.message : String(error));
-            }
-          }
-          
-          // Determine game state based on saved progress
-          const stateData = backendProgress.state_data || {};
-          if (stateData.advanceToNextLevel) {
-            console.log('Advancing to next level from backend progress, showing level intro for level:', restoredLevel);
-            setGameState('level-intro');
-          } else if (stateData.variant === 'game-end') {
-            setGameState('start');
-          } else {
-            setGameState('level-intro');
+          // Set correct answer count based on score (approximation)
+          if (latestProgress.score > 0) {
+            // Assume average of 10 points per correct answer (adjust as needed)
+            setCorrectAnswerCount(Math.floor(latestProgress.score / 10));
           }
           
           return true;
         }
-      }
-      
-      // Fallback to localStorage if backend restoration failed or user is not authenticated
-      const savedGameStateStr = localStorage.getItem('gamify_saved_game_state');
-      if (savedGameStateStr) {
-        const savedGameState = JSON.parse(savedGameStateStr);
-        console.log('Restoring saved game state from localStorage:', savedGameState);
-        
-        // Restore game state variables
-        const restoredLevel = savedGameState.level || 0;
-        setLevel(restoredLevel);
-        setScore(savedGameState.score || 0);
-        setLives(savedGameState.lives || 3);
-        setScenarioIndex(savedGameState.scenarioIndex || 0);
-        
-        // Fetch scenarios for the next level
-        const fetchScenariosForNextLevel = async () => {
-          if (story) {
-            try {
-              const nextLevelId = story.levels[level + 1].id;
-              const response = await axios.get<Scenarios[]>(`/api/game/stories/${story.id}/levels/${nextLevelId}/scenarios/`);
-              setScenarios(response.data);
-              setGameState('level-intro');
-              console.log(`Fetched ${response.data.length} scenarios for next level (${nextLevelId})`);
-              
-              // Save progress to backend if user is authenticated
-              if (isAuthenticated) {
-                saveGameProgressToBackend();
-              }
-            } catch (error) {
-              console.error('Error fetching scenarios for next level:', error instanceof Error ? error.message : String(error));
-            }
-          }
-        };
-        
-        // Determine game state based on saved progress
-        if (savedGameState.advanceToNextLevel) {
-          console.log('Advancing to next level after login, showing level intro for level:', restoredLevel);
-          fetchScenariosForNextLevel();
-        } else if (savedGameState.variant === 'game-end') {
-          setGameState('start');
-        } else {
-          setGameState('level-intro');
-        }
-        
-        // If user is authenticated, sync the localStorage progress to the backend
-        if (isAuthenticated && story) {
-          try {
-            await axios.post('/api/game/user-progress/save-progress/', {
-              story_id: story.id,
-              level: savedGameState.advanceToNextLevel ? savedGameState.level : savedGameState.level,
-              score: savedGameState.score || 0,
-              lives: savedGameState.lives || 3,
-              scenario_index: savedGameState.advanceToNextLevel ? 0 : savedGameState.scenarioIndex || 0,
-              state_data: {
-                variant: savedGameState.variant,
-                advanceToNextLevel: savedGameState.advanceToNextLevel,
-                returnPath: savedGameState.returnPath
-              }
-            });
-            console.log('Synced localStorage progress to backend');
-          } catch (error) {
-            console.error('Error syncing localStorage progress to backend:', error instanceof Error ? error.message : String(error));
-          }
-        }
-        
-        localStorage.removeItem('gamify_saved_game_state');
-        return true;
-      }
-      
-      // First try to sync existing localStorage state to backend if user just logged in
-      if (isAuthenticated && localStorage.getItem('gameState')) {
-        try {
-          const localState = JSON.parse(localStorage.getItem('gameState') || '{}');
-          if (story?.id && localState.storyId === story.id) {
-            // Sync localStorage progress to backend
-            await axios.post('/api/game/user-progress/save-progress/', {
-              story_id: story.id,
-              level: localState.level,
-              score: localState.score,
-              lives: localState.lives,
-              scenario_index: localState.scenarioIndex,
-              state_data: {
-                advanceToNextLevel: localState.advanceToNextLevel,
-              }
-            });
-            console.log('Synced localStorage progress to backend');
-          }
-        } catch (error) {
-          console.error('Error syncing localStorage progress to backend:', error instanceof Error ? error.message : String(error));
-        }
-      }
-      
-      return false;
-    } catch (error) {
-      console.error('Error restoring game state:', error instanceof Error ? error.message : String(error));
-      return false;
-    }
-  };
-
-  // Check if we should skip the start screen by looking for existing progress
-  const shouldSkipStartScreen = async () => {
-    // If there is backend progress or localStorage progress, we should skip the start screen
-    if (isAuthenticated && story?.id) {
-      const backendProgress = await fetchGameProgressFromBackend();
-      if (backendProgress) {
-        return true;
+      } catch (error) {
+        console.error("Error fetching saved game state:", error);
       }
     }
-    
-    // Check localStorage
-    const localGameState = localStorage.getItem('gameState');
-    if (localGameState && story?.id) {
-      try {
-        const localState = JSON.parse(localGameState);
-        return localState.storyId === story.id;
-      } catch (e) {
-        return false;
-      }
-    }
-    
     return false;
-  };
-
-  // Function to check for saved state and handle game continuation
-  const checkForSavedState = async () => {
-    try {
-      // First try to restore from backend or localStorage
-      const wasStateRestored = await restoreSavedGameState();
-      
-      // If no progress was restored, check if we should still skip the start screen
-      if (!wasStateRestored) {
-        const shouldSkip = await shouldSkipStartScreen();
-        if (shouldSkip) {
-          console.log('Progress exists but could not be fully restored. Showing level intro.');
-          setGameState('level-intro'); // Skip to level intro if progress exists but couldn't be fully restored
-        } else {
-          console.log('No saved game state found. Showing start screen.');
-        }
-      }
-    } catch (error) {
-      console.error('Error checking for saved game state:', error instanceof Error ? error.message : String(error));
-    }
   };
 
   useEffect(() => {
@@ -543,44 +553,58 @@ export function StorylineGame() {
   };
 
   useEffect(() => {
-    if (gameState === "playing") {
+    // Play whenever we’re “playing” or in-between levels
+    if (gameState === "playing" || gameState === "level-intro" || gameState === "level-complete") {
       playMainMusic();
-    } else {
+    }
+    // Only pause when the game is over or truly stopped
+    if (gameState === "gameover" || gameState === "end") {
       pauseMainMusic();
     }
-
-    return () => {
-      pauseMainMusic();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState]);
 
+
   const handleAction = (action: Action) => {
-    // Calculate new score immediately
-    const pointsToAdd = action.points || 0;
-    const newScore = score + pointsToAdd;
-    setScore(Math.max(0, newScore));
-    
-    // Store the selected action to display its outcome
     setSelectedAction(action);
-    // Show the outcome screen
     setShowOutcome(true);
+    if (action.is_correct) {
+      setScore(prev => prev + (action.points || 0));
+      setCorrectAnswerCount(count => count + 1);
+      console.log('[DEBUG] Consecutive correct answers increased to:', correctAnswerCount + 1);
+    } else {
+      setLives(prevLives => Math.max(0, prevLives - 1));
+      // Reset consecutive correct answer count when user answers incorrectly
+      setCorrectAnswerCount(0);
+      console.log('[DEBUG] Consecutive correct answers reset to 0 due to incorrect answer');
+    }
   };
 
   // Handle proceeding to the next scenario after showing the outcome
   const handleProceedToNextScenario = () => {
-    // Hide the outcome screen
     setShowOutcome(false);
     setSelectedAction(null);
-    
-    if (!selectedAction) return;
-    
+
+    // Check if the most recent answer was correct
+    if (selectedAction?.is_correct) {
+      console.log('[DEBUG] Correct answer given! Correct count:', correctAnswerCount);
+      
+      // Always check for power-up eligibility after correct answer, regardless of auth status
+      checkForPowerUp();
+    }
+
+    // If the player has no lives left, go to game over
+    if (lives <= 0) {
+      setGameState("gameover");
+      playGameOverSound();
+      return;
+    }
+
     // Debug info
     console.log('[DEBUG] handleProceedToNextScenario');
     console.log('[DEBUG] scenarioIndex:', scenarioIndex, 'total scenarios:', scenarios?.length);
     console.log('[DEBUG] level:', level, 'total levels:', story?.levels?.length);
     
-    if (selectedAction.is_correct) {
+    if (selectedAction && selectedAction.is_correct) {
       // Check if there are more scenarios in the current level
       if (scenarioIndex < (scenarios?.length || 0) - 1) {
         // Move to next scenario in current level
@@ -610,12 +634,10 @@ export function StorylineGame() {
       }
     } else {
       // Handle incorrect action - Deduct a life
-      setLives((prevLives) => prevLives - 1);
-      if (lives - 1 <= 0) {
+      const newLives = lives - 1;
+      if (newLives <= 0) {
         playGameOverSound();
         setGameState("gameover");
-        
-        // Save game over state to backend if authenticated
         if (isAuthenticated && story?.id) {
           saveGameProgressToBackend();
         }
@@ -676,6 +698,12 @@ export function StorylineGame() {
     
     // Fetch initial level scenarios again to ensure we're starting with level 1
     fetchInitialData();
+
+    // Reset all power-up state here:
+    setActivePowerUps([]);
+    setCorrectAnswerCount(0);
+    setEarnedPowerUp(null);
+    setShowPowerUpModal(false);
     
     // Set game state to playing
     setGameState("playing");
@@ -709,6 +737,13 @@ export function StorylineGame() {
     const nextLevel = level + 1;
     
     if (nextLevel < story.levels.length) {
+      // reset power-ups and consecutive answer tracking for the new level:
+      setActivePowerUps([]);
+      setCorrectAnswerCount(0); // Reset consecutive correct answers
+      console.log('[DEBUG] Consecutive correct answers reset to 0 for new level');
+      setEarnedPowerUp(null);
+      setShowPowerUpModal(false);
+
       // Increment level and reset scenario index
       setLevel(nextLevel);
       setScenarioIndex(0);
@@ -795,13 +830,48 @@ export function StorylineGame() {
           )}
         </div>
 
-        {/* Hearts/Lives in center */}
+        {/* Hearts/Lives and Power-ups in center */}
         <div className="flex items-center">
-          {[...Array(3)].map((_, index) => (
-            <span key={index} className={`mx-1 ${index < lives ? 'text-red-500' : 'text-gray-600'}`}>
-              {index < lives ? '❤️' : '🖤'}
-            </span>
-          ))}
+          {/* Lives display */}
+          <div className="flex items-center">
+            {[...Array(3)].map((_, index) => (
+              <span key={index} className={`mx-1 ${index < lives ? 'text-red-500' : 'text-gray-600'}`}>
+                {index < lives ? '❤️' : '🖤'}
+              </span>
+            ))}
+            {activePowerUps.some(p => p.power_up_type === 'extra_life') && (
+              <span className="ml-2 text-green-500 font-bold">+1</span>
+            )}
+          </div>
+          
+          {/* Active power-ups display
+          {activePowerUps.length > 0 && (
+            <div className="flex items-center ml-3">
+              <span className="text-xs font-bold text-yellow-300 mr-1">Power-ups Earned:</span>
+              <div className="flex items-center">
+                {activePowerUps.map(powerUp => (
+                  <div
+                    key={powerUp.id}
+                    className="bg-white dark:bg-gray-800 p-1 rounded-full shadow-md transition-all flex items-center justify-center ml-1"
+                    title={`Earned: ${powerUp.name} - ${powerUp.description}`}
+                    ref={(el) => {
+                      if (el) {
+                        powerUpIconsRef.current.set(powerUp.id, el);
+                      }
+                    }}
+                  >
+                    {powerUp.image ? (
+                      <Image src={powerUp.image} alt={powerUp.name} width={16} height={16} className="w-4 h-4" />
+                    ) : (
+                      <div className="w-4 h-4 flex items-center justify-center bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full">
+                        <span className="text-xs">{powerUp.name.charAt(0)}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )} */}
         </div>
 
         {/* Level indicator and controls - right side */}
@@ -1178,6 +1248,19 @@ export function StorylineGame() {
           <ProfileComponent profile={userProfile} />
         )}
       </AnimatePresence>
+      
+      {/* PowerUp Modal - Auto-applied (placed outside AnimatePresence for reliability) */}
+      <AnimatePresence>
+        {showPowerUpModal && earnedPowerUp && (
+          <PowerUpModal
+            powerUp={earnedPowerUp}
+            isOpen={true}
+            onClose={() => setShowPowerUpModal(false)}
+          />
+        )}
+      </AnimatePresence>
+      
+      {/* Power-ups are now shown next to the lives indicator */}
     </div>
   );
 }

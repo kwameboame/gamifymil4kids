@@ -1,6 +1,6 @@
 from rest_framework import serializers
 import random
-from .models import Story, Level, Scenario, Action, LeaderboardEntry, Badge, GameSession, GameInvite, Outcome, Animation, UserProgress
+from .models import Story, Level, Scenario, Action, LeaderboardEntry, Badge, GameSession, GameInvite, Outcome, Animation, UserProgress, PowerUp, UserPowerUp, PowerUpType
 from accounts.models import UserProfile
 
 class OutcomeSerializer(serializers.ModelSerializer):
@@ -109,3 +109,31 @@ class UserProgressSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'username', 'story', 'story_title', 'level', 'score', 'lives', 
                  'scenario_index', 'state_data', 'last_updated']
         read_only_fields = ['id', 'user', 'username', 'story_title', 'last_updated']
+
+
+class PowerUpSerializer(serializers.ModelSerializer):
+    story_title = serializers.CharField(source='story.title', read_only=True)
+    power_up_type_display = serializers.CharField(source='get_power_up_type_display', read_only=True)
+    
+    class Meta:
+        model = PowerUp
+        fields = ['id', 'name', 'story', 'story_title', 'power_up_type', 'power_up_type_display',
+                 'description', 'image', 'required_correct_answers', 'bonus_lives',
+                 'score_multiplier', 'time_extension_seconds', 'is_active', 'created_at']
+        read_only_fields = ['id', 'story_title', 'created_at']
+
+
+class UserPowerUpSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    power_up_name = serializers.CharField(source='power_up.name', read_only=True)
+    power_up_type = serializers.CharField(source='power_up.power_up_type', read_only=True)
+    power_up_description = serializers.CharField(source='power_up.description', read_only=True)
+    power_up_image = serializers.ImageField(source='power_up.image', read_only=True)
+    
+    class Meta:
+        model = UserPowerUp
+        fields = ['id', 'user', 'username', 'power_up', 'power_up_name', 'power_up_type',
+                'power_up_description', 'power_up_image', 'game_session', 'is_active',
+                'earned_at', 'used_at', 'earned_level', 'earned_scenario', 'correct_answer_count']
+        read_only_fields = ['id', 'user', 'username', 'earned_at', 'power_up_name',
+                           'power_up_type', 'power_up_description', 'power_up_image']

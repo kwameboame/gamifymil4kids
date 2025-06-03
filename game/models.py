@@ -198,3 +198,90 @@ class Animation(models.Model):
         if self.gif_file:
             return 'gif'
         return 'mp4'
+
+
+class PowerUpType(models.TextChoices):
+    EXTRA_LIFE = 'extra_life', 'Extra Life'
+    SCORE_BOOST = 'score_boost', 'Score Boost'
+    TIME_EXTENSION = 'time_extension', 'Time Extension'
+    HINT = 'hint', 'Hint'
+
+
+class PowerUp(models.Model):
+    """
+    Model to represent different types of power-ups in the game.
+    Each power-up can be associated with a specific story and has different effects.
+    """
+    name = models.CharField(max_length=100)
+    story = models.ForeignKey(Story, related_name='power_ups', on_delete=models.CASCADE)
+    power_up_type = models.CharField(
+        max_length=20,
+        choices=PowerUpType.choices,
+        default=PowerUpType.EXTRA_LIFE
+    )
+    description = models.TextField()
+    image = models.ImageField(upload_to='powerup_images/', null=True, blank=True)
+    
+    # Conditions to earn the power-up
+    required_correct_answers = models.IntegerField(default=5, 
+        help_text='Number of correct answers needed to earn this power-up')
+    
+    # Effects of the power-up
+    bonus_lives = models.IntegerField(default=0,
+        help_text='Number of extra lives this power-up grants')
+    score_multiplier = models.FloatField(default=1.0, 
+        help_text='Multiplier for score (e.g., 2.0 doubles the score)')
+    time_extension_seconds = models.IntegerField(default=0,
+        help_text='Additional time in seconds this power-up grants')
+    
+    # Control whether this power-up is active
+    is_active = models.BooleanField(default=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Power-up'
+        verbose_name_plural = 'Power-ups'
+        ordering = ['name']
+    
+    def __str__(self):
+        return f"{self.name} for {self.story.title}"
+
+
+class UserPowerUp(models.Model):
+    """
+    Model to track which power-ups a user has earned or used.
+    """
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='power_ups', on_delete=models.CASCADE)
+    power_up = models.ForeignKey(PowerUp, related_name='user_power_ups', on_delete=models.CASCADE)
+    game_session = models.ForeignKey(GameSession, related_name='power_ups', null=True, blank=True, on_delete=models.CASCADE)
+    
+    is_active = models.BooleanField(default=True, 
+        help_text='Whether the power-up is currently active (false if used)')
+    earned_at = models.DateTimeField(auto_now_add=True)
+    used_at = models.DateTimeField(null=True, blank=True)
+    
+    # Track the context in which this power-up was earned (level, scenario)
+    earned_level = models.IntegerField(default=0)
+    earned_scenario = models.IntegerField(default=0)
+    correct_answer_count = models.IntegerField(default=0, 
+        help_text='How many correct answers the user had when earning this')
+    
+    class Meta:
+        verbose_name = 'User Power-up'
+        verbose_name_plural = 'User Power-ups'
+        ordering = ['-earned_at']
+    
+    def __str__(self):
+        status = "Active" if self.is_active else "Used"
+        return f"{self.user.username} - {self.power_up.name} ({status})"
+    
+    def use(self):
+        """
+        Mark this power-up as used and apply its effects.
+        """
+        self.is_active = False
+        self.used_at = timezone.now()
+        self.save()
+        return True

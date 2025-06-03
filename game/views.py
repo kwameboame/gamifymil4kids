@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Story, Scenario, Level, Action, LeaderboardEntry, Badge, GameSession, GameInvite, Animation, UserProgress
+from .models import Story, Scenario, Level, Action, LeaderboardEntry, Badge, GameSession, GameInvite, Animation, UserProgress, PowerUp, UserPowerUp, PowerUpType
 from accounts.models import UserProfile
 from accounts.serializers import UserProfileSerializer
 from .serializers import (
@@ -14,7 +14,9 @@ from .serializers import (
     GameSessionSerializer,
     GameInviteSerializer,
     AnimationSerializer,
-    UserProgressSerializer
+    UserProgressSerializer,
+    PowerUpSerializer,
+    UserPowerUpSerializer
 )
 from django.db.models import Max
 from rest_framework.permissions import IsAuthenticated
@@ -276,3 +278,148 @@ class UserProgressViewSet(viewsets.ModelViewSet):
                 {'message': 'No saved progress found for this story'}, 
                 status=status.HTTP_404_NOT_FOUND
             )
+
+
+class PowerUpViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing power-ups in the game.
+    Provides CRUD operations for power-ups, with filtering by story.
+    """
+    queryset = PowerUp.objects.all()
+    serializer_class = PowerUpSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        queryset = PowerUp.objects.filter(is_active=True)
+        story_id = self.request.query_params.get('story_id')
+        power_up_type = self.request.query_params.get('type')
+        
+        if story_id:
+            queryset = queryset.filter(story_id=story_id)
+        
+        if power_up_type:
+            queryset = queryset.filter(power_up_type=power_up_type)
+            
+        return queryset
+    
+    @action(detail=False, methods=['get'], url_path='by-story/(?P<story_id>[^/.]+)')
+    def by_story(self, request, story_id=None):
+        """
+        Get all power-ups for a specific story.
+        """
+        try:
+            story = Story.objects.get(id=story_id)
+        except Story.DoesNotExist:
+            return Response({'error': 'Story not found'}, status=status.HTTP_404_NOT_FOUND)
+            
+        power_ups = PowerUp.objects.filter(story_id=story_id, is_active=True)
+        serializer = self.get_serializer(power_ups, many=True)
+        return Response(serializer.data)
+
+
+class UserPowerUpViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing user's power-ups.
+    Provides endpoints to earn, use, and view power-ups for a user.
+    """
+    serializer_class = UserPowerUpSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return UserPowerUp.objects.filter(user=self.request.user)
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+    
+    @action(detail=False, methods=['post'], url_path='earn')
+    def earn_power_up(self, request):
+        """
+        Earn a power-up based on the number of correct answers.
+        Required: story_id, power_up_id, correct_answer_count, level, scenario
+        """
+        story_id = request.data.get('story_id')
+        power_up_id = request.data.get('power_up_id')
+        correct_answer_count = request.data.get('correct_answer_count', 0)
+        level = request.data.get('level', 0)
+        scenario = request.data.get('scenario', 0)
+        game_session_id = request.data.get('game_session_id')
+        
+        if not story_id or not power_up_id:
+            return Response({'error': 'story_id and power_up_id are required'}, 
+                           status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            power_up = PowerUp.objects.get(id=power_up_id, is_active=True)
+        except PowerUp.DoesNotExist:
+            return Response({'error': 'Power-up not found or inactive'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Check if user has enough correct answers to earn this power-up
+        if correct_answer_count < power_up.required_correct_answers:
+            return Response(
+                {'error': f'Not enough correct answers. Required: {power_up.required_correct_answers}'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Prepare game_session if provided
+        game_session = None
+        if game_session_id:
+            try:
+                game_session = GameSession.objects.get(id=game_session_id, user=request.user)
+            except GameSession.DoesNotExist:
+                return Response({'error': 'Game session not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Create the user power-up
+        user_power_up = UserPowerUp.objects.create(
+            user=request.user,
+            power_up=power_up,
+            game_session=game_session,
+            earned_level=level,
+            earned_scenario=scenario,
+            correct_answer_count=correct_answer_count
+        )
+        
+        return Response(UserPowerUpSerializer(user_power_up).data, status=status.HTTP_201_CREATED)
+    
+    @action(detail=True, methods=['post'], url_path='use')
+    def use_power_up(self, request, pk=None):
+        """
+        Use a power-up that the user has earned.
+        """
+        try:
+            user_power_up = UserPowerUp.objects.get(pk=pk, user=request.user, is_active=True)
+        except UserPowerUp.DoesNotExist:
+            return Response({'error': 'Power-up not found or already used'}, 
+                           status=status.HTTP_404_NOT_FOUND)
+        
+        # Mark as used
+        user_power_up.use()
+        
+        # Return the power-up's effects
+        power_up = user_power_up.power_up
+        effects = {
+            'bonus_lives': power_up.bonus_lives,
+            'score_multiplier': power_up.score_multiplier,
+            'time_extension_seconds': power_up.time_extension_seconds,
+            'type': power_up.power_up_type
+        }
+        
+        return Response({
+            'message': f'Successfully used "{power_up.name}" power-up',
+            'effects': effects,
+            'power_up': UserPowerUpSerializer(user_power_up).data
+        })
+    
+    @action(detail=False, methods=['get'], url_path='active')
+    def active_power_ups(self, request):
+        """
+        Get all active (unused) power-ups for the user.
+        Optional query parameter: story_id to filter by story
+        """
+        story_id = request.query_params.get('story_id')
+        queryset = UserPowerUp.objects.filter(user=request.user, is_active=True)
+        
+        if story_id:
+            queryset = queryset.filter(power_up__story_id=story_id)
+            
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
