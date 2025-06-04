@@ -219,7 +219,7 @@ export function StorylineGame() {
             power_up_type: 'extra_life',
             power_up_type_display: 'Extra Life',
             bonus_lives: 1,
-            required_correct_answers: 3,
+            required_correct_answers: 5,
             score_multiplier: 1,
             time_extension_seconds: 0,
             user_power_up_id: 0
@@ -231,7 +231,7 @@ export function StorylineGame() {
             power_up_type: 'score_booster',
             power_up_type_display: 'Score Booster',
             bonus_lives: 0,
-            required_correct_answers: 4,
+            required_correct_answers: 7,
             score_multiplier: 2,
             time_extension_seconds: 0,
             user_power_up_id: 0

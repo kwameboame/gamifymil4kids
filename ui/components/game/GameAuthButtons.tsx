@@ -49,12 +49,12 @@ export function GameAuthButtons({
       <h3 className="text-lg font-semibold text-blue-800 mb-2">
         {variant === 'level-complete' 
           ? "Save Your Progress!" 
-          : "Don't Lose Your Progress!"}
+          : "Don&apos;t Lose Your Progress!"}
       </h3>
       <p className="text-blue-600 mb-3">
         {variant === 'level-complete'
           ? `You've completed level ${level}! Sign up or log in to save your progress and continue to level ${level + 1} after logging in.`
-          : `Your score of ${score} points isn't saved! Create an account or log in to save your achievements and continue playing later.`}
+          : `Your score of ${score} points isn&apos;t saved! Create an account or log in to save your achievements and continue playing later.`}
       </p>
       <p className="text-sm text-blue-500 mb-3">
         {variant === 'level-complete'
