@@ -54,11 +54,11 @@ export default function StorylineGame() {
                   <>
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">The Social Media Dilemma</h1>
                     <p className="text-base md:text-lg leading-relaxed text-gray-700 mb-8">
-                      <One Saturday afternoon, Adjoa took her sister's phone to check what's happening on Facebook. While
+                      One Saturday afternoon, Adjoa took her sister&apos;s phone to check what&apos;s happening on Facebook. While
                       scrolling through her feed, Adjoa comes across a post that catches her attention. One of her
-                      favourites and a popular celebrity had posted: "Drinking ginger tea every morning will keep you
-                      from getting sick forever!" The post had over 10k likes and shares, and it seems everyone is
-                      talking about it.>
+                      favourites and a popular celebrity had posted: &quot;Drinking ginger tea every morning will keep you
+                      from getting sick forever!&quot; The post had over 10k likes and shares, and it seems everyone is
+                      talking about it.
                     </p>
 
                     <Button
@@ -96,7 +96,7 @@ export default function StorylineGame() {
                         className="w-full h-auto p-4 md:p-6 text-sm md:text-base font-medium text-white bg-black hover:bg-gray-800 transition-colors duration-200 rounded-lg whitespace-normal"
                       >
                         <span className="text-center leading-relaxed break-words">
-                          Ask her elder sister and look it up online to see if it's true.
+                          Ask her elder sister and look it up online to see if it&apos;s true.
                         </span>
                       </Button>
 
