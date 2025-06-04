@@ -36,7 +36,7 @@ export default function MobileUi({ selectedScenario, onActionSelected }: MobileU
 
   return (
       <div className="mx-auto max-w-6xl">
-      <div className="grid grid-cols-2 gap-0 items-stretch">
+      <div className="grid grid-cols-[1fr_2fr] gap-0 items-stretch">
           {/* Story Image */}
           <div className="order-1">
             <div className="relative h-full">
@@ -68,7 +68,7 @@ export default function MobileUi({ selectedScenario, onActionSelected }: MobileU
               <CardContent className="p-6 md:p-8 h-full flex flex-col justify-center">
                 {!showActions ? (
                   <>
-                    <p className="text-xs md:text-sm leading-relaxed text-gray-700 mb-8">
+                    <p className="text-sm md:text-sm font-bold leading-relaxed text-gray-700 mb-8">
                       {selectedScenario.description}
                     </p>
 
