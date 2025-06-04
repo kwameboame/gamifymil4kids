@@ -35,13 +35,12 @@ export default function MobileUi({ selectedScenario, onActionSelected }: MobileU
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 md:p-8">
       <div className="mx-auto max-w-6xl">
       <div className="grid grid-cols-2 gap-0 items-stretch">
           {/* Story Image */}
           <div className="order-1">
             <div className="relative h-full">
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-2xl blur-xl opacity-30"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 to-purple-400 blur-xl opacity-30"></div>
               <Card className="relative shadow-2xl border-0 overflow-hidden h-full">
                 <div className="h-full relative">
                   {selectedScenario.image ? (
@@ -69,7 +68,7 @@ export default function MobileUi({ selectedScenario, onActionSelected }: MobileU
               <CardContent className="p-6 md:p-8 h-full flex flex-col justify-center">
                 {!showActions ? (
                   <>
-                    <p className="text-base md:text-sm leading-relaxed text-gray-700 mb-8">
+                    <p className="text-xs md:text-sm leading-relaxed text-gray-700 mb-8">
                       {selectedScenario.description}
                     </p>
 
@@ -113,6 +112,5 @@ export default function MobileUi({ selectedScenario, onActionSelected }: MobileU
           </div>
         </div>
       </div>
-    </div>
   )
 }
