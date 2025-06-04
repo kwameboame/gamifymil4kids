@@ -884,14 +884,14 @@ export function StorylineGame() {
       <audio ref={wrongSoundRef} src="/audio/wrong.mp3" />
 
       {/* Game Controls */}
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center">
       {/* Removed redundant fullscreen controls - now handled in the game header */}
 
   {/* Controls have been moved to the game state UI */}
 
   {gameState === "playing" && (
     <div className="flex flex-col my-1 w-full">
-      <div className="flex items-center justify-between mb-1 w-full bg-black px-4 py-2 rounded-md">
+      <div className="flex items-center justify-between mb-1 w-full bg-black px-4 rounded-md">
         {/* Game score with icon - left side */}
         <div className="flex items-center">
           <div className="flex items-center">

@@ -69,7 +69,7 @@ export default function MobileUi({ selectedScenario, onActionSelected }: MobileU
               <CardContent className="p-6 md:p-8 h-full flex flex-col justify-center">
                 {!showActions ? (
                   <>
-                    <p className="text-base md:text-lg leading-relaxed text-gray-700 mb-8">
+                    <p className="text-base md:text-sm leading-relaxed text-gray-700 mb-8">
                       {selectedScenario.description}
                     </p>
 
