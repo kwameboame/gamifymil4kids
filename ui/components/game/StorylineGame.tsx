@@ -238,8 +238,6 @@ export function StorylineGame() {
 
   // Function to check if player earned a power-up and apply it automatically
   const checkForPowerUp = async () => {
-    const alreadyUsedExtra = activePowerUps.some(pu => pu.power_up_type === 'extra_life');
-    if (alreadyUsedExtra) return;
     console.log('[DEBUG] Checking for power-up with correct answers:', correctAnswerCount);
     
     try {
@@ -312,6 +310,14 @@ export function StorylineGame() {
             user_power_up_id: Date.now() // Use timestamp as a unique ID
           };
         }
+      }
+
+      // If it’s an extra_life and we’ve already granted one this level, drop it:
+      if (
+        powerUp?.power_up_type === 'extra_life' &&
+        activePowerUps.some(pu => pu.power_up_type === 'extra_life')
+      ) {
+        powerUp = null;
       }
       
       if (powerUp) {
