@@ -4,7 +4,8 @@ import gsap from 'gsap';
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import ActionOutcome from "./ActionOutcome";
 import { LeaderboardComponent } from "./LeaderboardComponent";
 import { ProfileComponent } from "./ProfileComponent";
 import PowerUpModal, { PowerUp } from "./PowerUpModal";
@@ -583,8 +584,8 @@ export function StorylineGame() {
     setShowOutcome(true);
   
     // Determine if the action is partially correct (has some points but is not marked as correct)
-    const isPartiallyCorrect = action.is_correct && (action.points || 0) < maxPointsForCurrentScenario;
-
+    const isPartiallyCorrect = !action.is_correct && (action.points && action.points > 0);
+  
     // Play appropriate sound based on outcome
     if (!isMuted) {
       if (isPartiallyCorrect && partiallySoundRef.current) {
@@ -612,8 +613,6 @@ export function StorylineGame() {
       if (action.points && action.points > 0) {
         setScore(prev => prev + action.points);
       }
-      
-
       
       // Reset consecutive correct answer count when user answers incorrectly
       setCorrectAnswerCount(0);
@@ -860,6 +859,34 @@ export function StorylineGame() {
               {lives > MAX_LIVES && <span className="ml-2 text-green-500 font-bold">+1</span>}
           </div>
           
+          {/* Active power-ups display
+          {activePowerUps.length > 0 && (
+            <div className="flex items-center ml-3">
+              <span className="text-xs font-bold text-yellow-300 mr-1">Power-ups Earned:</span>
+              <div className="flex items-center">
+                {activePowerUps.map(powerUp => (
+                  <div
+                    key={powerUp.id}
+                    className="bg-white dark:bg-gray-800 p-1 rounded-full shadow-md transition-all flex items-center justify-center ml-1"
+                    title={`Earned: ${powerUp.name} - ${powerUp.description}`}
+                    ref={(el) => {
+                      if (el) {
+                        powerUpIconsRef.current.set(powerUp.id, el);
+                      }
+                    }}
+                  >
+                    {powerUp.image ? (
+                      <Image src={powerUp.image} alt={powerUp.name} width={16} height={16} className="w-4 h-4" />
+                    ) : (
+                      <div className="w-4 h-4 flex items-center justify-center bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full">
+                        <span className="text-xs">{powerUp.name.charAt(0)}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )} */}
         </div>
 
         {/* Level indicator and controls - right side */}
@@ -997,55 +1024,24 @@ export function StorylineGame() {
             className="flex-grow flex items-center justify-center mt-1"
           >
             {showOutcome && selectedAction ? (
-              <Card className="w-full max-w-2xl shadow-2xl">
-                <CardContent className="p-8 md:p-12 text-center">
-                  <div className="flex items-center justify-center mb-6 space-x-4">
-                    <div className="w-24 h-36 bg-gray-300 rounded-md flex items-center justify-center">
-                      <span className="text-gray-500 text-sm">Character Placeholder</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                      {selectedAction.is_correct 
-                        ? (selectedAction.points < maxPointsForCurrentScenario 
-                          ? <AlertCircle className="text-orange-500" size={48} /> 
-                          : <CheckCircle className="text-green-500" size={48} />) 
-                        : <XCircle className="text-red-500" size={48} />}
-                      <h1 className="text-3xl font-bold text-gray-800 mt-2">
-                        {selectedAction.is_correct 
-                          ? (selectedAction.points < maxPointsForCurrentScenario ? "Partially Correct!" : "Correct Choice!") 
-                          : "Incorrect Choice!"}
-                      </h1>
-                    </div>
-                  </div>
-                  <p className="text-gray-600 text-lg mb-6">
-                    {selectedAction.outcome?.text || 
-                      (selectedAction.is_correct 
-                        ? (selectedAction.points < maxPointsForCurrentScenario ? "Good try! You were partially correct." : "Good job! You made the right choice.") 
-                        : "That wasn't the best choice.")}
-                  </p>
-                  {selectedAction.is_correct 
-                    ? (
-                      <div className={`${selectedAction.points < maxPointsForCurrentScenario ? 'bg-orange-100 border-orange-500 text-orange-700' : 'bg-yellow-100 border-yellow-500 text-yellow-700'} border-l-4 p-4 rounded-lg mb-8`}>
-                        <p className="text-lg font-semibold">
-                          You earned {selectedAction.points || 0} points! Your score is now {score}.
-                        </p>
-                      </div>
-                    ) 
-                    : (
-                      <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-8">
-                        <p className="text-lg font-semibold">
-                          You earned 0 points. You lost a life.
-                        </p>
-                      </div>
-                    )
-                  }
-                  <Button 
-                    onClick={handleProceedToNextScenario} 
-                    className="bg-black hover:bg-gray-800 text-white font-bold py-3 px-8 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
-                  >
-                    Continue
-                  </Button>
-                </CardContent>
-              </Card>
+              <ActionOutcome
+                type={selectedAction.is_correct 
+                  ? (selectedAction.points < maxPointsForCurrentScenario ? 'partially' : 'correct')
+                  : 'wrong'
+                }
+                points={selectedAction.points || 0}
+                currentScore={score}
+                level={level}
+                explanation={selectedAction.outcome?.text || 
+                  (selectedAction.is_correct 
+                    ? (selectedAction.points < maxPointsForCurrentScenario 
+                        ? "Good try! You were partially correct."
+                        : "Good job! You made the right choice.")
+                    : "That wasn't the best choice."
+                  )
+                }
+                onContinue={handleProceedToNextScenario}
+              />
             ) : (
               <Card className="w-full max-w-full">
                 <CardHeader className="pb-2">
