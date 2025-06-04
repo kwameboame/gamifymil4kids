@@ -223,7 +223,7 @@ const PowerUpModal: React.FC<PowerUpModalProps> = ({
           onClick={onClose}
         >
           <motion.div
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6 m-4"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md mx-4 my-6 p-6 max-h-[90vh] overflow-y-auto"
             initial={{ scale: 0.9, y: 20 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.9, y: 20 }}

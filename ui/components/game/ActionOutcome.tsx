@@ -144,8 +144,8 @@ export default function ActionOutcome({
   const config = getOutcomeConfig();
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg bg-white shadow-2xl border-0 overflow-hidden">
+    <div className="fixed inset-x-0 top-4 bottom-4 bg-black/50 flex items-center justify-center px-4">
+      <Card className="w-full max-w-sm bg-white shadow-2xl border-0">
         {/* Header Bar */}
         <div className={`bg-gradient-to-r ${config.gradientClass} px-6 py-4`}>
           <div className="flex items-center justify-between text-white">
