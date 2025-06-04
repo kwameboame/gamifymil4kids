@@ -119,8 +119,62 @@ export function StorylineGame() {
   const [showPowerUpModal, setShowPowerUpModal] = useState(false);
   const [correctAnswerCount, setCorrectAnswerCount] = useState(0); // Used to determine power-up eligibility
   const [activePowerUps, setActivePowerUps] = useState<PowerUp[]>([]);
+  // Track if audio was playing before tab visibility changed
+  const [wasMusicPlaying, setWasMusicPlaying] = useState(false);
   const powerUpIconsRef = useRef<Map<number, HTMLDivElement>>(new Map());
   
+  // Handle tab visibility changes (pause audio when tab not visible)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // User switched to another tab - save music play state and pause all sounds
+        const wasPlaying = mainMusicRef.current?.paused === false;
+        setWasMusicPlaying(wasPlaying);
+        
+        // Pause all audio elements
+        if (mainMusicRef.current && !mainMusicRef.current.paused) {
+          mainMusicRef.current.pause();
+        }
+        if (congratsSoundRef.current && !congratsSoundRef.current.paused) {
+          congratsSoundRef.current.pause();
+        }
+        if (gameOverSoundRef.current && !gameOverSoundRef.current.paused) {
+          gameOverSoundRef.current.pause();
+        }
+        if (powerUpSoundRef.current && !powerUpSoundRef.current.paused) {
+          powerUpSoundRef.current.pause();
+        }
+        if (correctSoundRef.current && !correctSoundRef.current.paused) {
+          correctSoundRef.current.pause();
+        }
+        if (partiallySoundRef.current && !partiallySoundRef.current.paused) {
+          partiallySoundRef.current.pause();
+        }
+        if (wrongSoundRef.current && !wrongSoundRef.current.paused) {
+          wrongSoundRef.current.pause();
+        }
+        
+        console.log('[DEBUG] Tab hidden - paused all game audio');
+      } else {
+        // User returned to this tab - resume music if it was playing and not muted
+        if (wasMusicPlaying && !isMuted && mainMusicRef.current) {
+          mainMusicRef.current.play().catch(err => {
+            console.log('[DEBUG] Could not resume audio:', err);
+          });
+          console.log('[DEBUG] Tab visible again - resumed music');
+        }
+      }
+    };
+
+    // Add event listener
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Cleanup
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [wasMusicPlaying, isMuted]);
+
   // Animate power-up icons when they're added
   useEffect(() => {
     // Get the latest power-up that was added
@@ -546,12 +600,14 @@ export function StorylineGame() {
   const playMainMusic = () => {
     if (mainMusicRef.current) {
       mainMusicRef.current.play();
+      setWasMusicPlaying(true);
     }
   };
 
   const pauseMainMusic = () => {
     if (mainMusicRef.current) {
       mainMusicRef.current.pause();
+      setWasMusicPlaying(false);
     }
   };
 
@@ -632,7 +688,7 @@ export function StorylineGame() {
     let newLives = lives;
   
     // Only reduce lives here, based on previous action
-    if (selectedAction && !selectedAction.is_correct && selectedAction.points === 0) {
+    if (selectedAction && !selectedAction.is_correct) {
       newLives = lives - 1;
       setLives(newLives);
     }
