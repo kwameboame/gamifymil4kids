@@ -17,6 +17,7 @@ import PowerUpService from "@/services/PowerUpService";
 import './Game.module.css';
 import { GameAuthButtons } from "./GameAuthButtons";
 import { GameState } from "./types";
+import MobileUi from "./MobileUi";
 // Import Material Symbols font for icons
 import "material-symbols";
 import "@/styles/material-symbols.css";
@@ -112,6 +113,7 @@ export function StorylineGame() {
   const [selectedAction, setSelectedAction] = useState<Action | null>(null);
   const [maxPointsForCurrentScenario, setMaxPointsForCurrentScenario] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const selectedScenario = scenarios ? scenarios[scenarioIndex] : null;
   
   // PowerUp related states
@@ -122,6 +124,13 @@ export function StorylineGame() {
   // Track if audio was playing before tab visibility changed
   const [wasMusicPlaying, setWasMusicPlaying] = useState(false);
   const powerUpIconsRef = useRef<Map<number, HTMLDivElement>>(new Map());
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   
   // Handle tab visibility changes (pause audio when tab not visible)
   useEffect(() => {
@@ -1079,80 +1088,89 @@ export function StorylineGame() {
           </motion.div>
         )}
 
-        {gameState === "playing" && story && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.5 }}
-            className="flex-grow flex items-center justify-center mt-1"
-          >
-            {showOutcome && selectedAction ? (
-              <ActionOutcome
-                type={selectedAction.is_correct 
-                  ? (selectedAction.points < maxPointsForCurrentScenario ? 'partially' : 'correct')
-                  : 'wrong'
-                }
-                points={selectedAction.points || 0}
-                currentScore={score}
-                level={level}
-                explanation={selectedAction.outcome?.text || 
-                  (selectedAction.is_correct 
-                    ? (selectedAction.points < maxPointsForCurrentScenario 
-                        ? "Good try! You were partially correct."
-                        : "Good job! You made the right choice.")
-                    : "That wasn't the best choice."
-                  )
-                }
-                onContinue={handleProceedToNextScenario}
-              />
-            ) : (
-              <Card className="w-full max-w-full">
-                <CardHeader className="pb-2">
-  <CardTitle>
-    <span style={{ fontSize: '0.9rem' }}>{selectedScenario?.description}</span>
-  </CardTitle>
-</CardHeader>
-                <CardContent className="p-3">
-                  <div className="flex flex-col gap-4 items-center">
-                    {/* Scenario Image on top */}
-                    <div className="w-full flex justify-center">
-  {selectedScenario?.image ? (
-    <Image
-      src={selectedScenario.image}
-      alt="Level Image"
-      className="w-full max-w-xs rounded-lg" // Reduced width
-      width={350}
-      height={210}
-    />
-                      ) : (
-                        <div className="w-full max-w-md rounded-lg bg-gray-200 flex items-center justify-center h-48">
-                          <p>No Image Available</p>
-                        </div>
-                      )}
-                    </div>
-                    {/* Actions below image */}
-                    <div className="w-full grid grid-cols-2 gap-4 justify-items-center">
-  {selectedScenario?.actions.map((action) => (
-    <Button
-      key={action.id}
-      onClick={() => handleAction(action)}
-      className="w-[95%] min-h-[3rem] py-2 px-2 whitespace-normal text-center text-sm flex items-center justify-center"
-      variant="default"
-      size="sm"
-    >
-      {action.text}
-    </Button>
-  ))}
-</div>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          }
+{gameState === "playing" && story && (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    transition={{ duration: 0.5 }}
+    className="flex-grow flex items-center justify-center mt-1"
+  >
+    {showOutcome && selectedAction ? (
+      <ActionOutcome
+        type={
+          selectedAction.is_correct
+            ? selectedAction.points < maxPointsForCurrentScenario
+              ? "partially"
+              : "correct"
+            : "wrong"
+        }
+        points={selectedAction.points || 0}
+        currentScore={score}
+        level={level}
+        explanation={
+          selectedAction.outcome?.text ||
+          (selectedAction.is_correct
+            ? selectedAction.points < maxPointsForCurrentScenario
+              ? "Good try! You were partially correct."
+              : "Good job! You made the right choice."
+            : "That wasn't the best choice.")
+        }
+        onContinue={handleProceedToNextScenario}
+      />
+    ) : isMobile ? (
+      <MobileUi
+        selectedScenario={selectedScenario}
+        onActionSelected={handleAction}
+      />
+    ) : (
+      <Card className="w-full max-w-full">
+        <CardHeader className="pb-2">
+          <CardTitle>
+            <span style={{ fontSize: "0.9rem" }}>
+              {selectedScenario?.description}
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-3">
+          <div className="flex flex-col gap-4 items-center">
+            {/* Scenario Image */}
+            <div className="w-full flex justify-center">
+              {selectedScenario?.image ? (
+                <Image
+                  src={selectedScenario.image}
+                  alt="Level Image"
+                  className="w-full max-w-xs rounded-lg"
+                  width={350}
+                  height={210}
+                />
+              ) : (
+                <div className="w-full max-w-md rounded-lg bg-gray-200 flex items-center justify-center h-48">
+                  <p>No Image Available</p>
+                </div>
+              )}
+            </div>
+            {/* Actions below image */}
+            <div className="w-full grid grid-cols-2 gap-4 justify-items-center">
+              {selectedScenario?.actions.map((action) => (
+                <Button
+                  key={action.id}
+                  onClick={() => handleAction(action)}
+                  className="w-[95%] min-h-[3rem] py-2 px-2 whitespace-normal text-center text-sm flex items-center justify-center"
+                  variant="default"
+                  size="sm"
+                >
+                  {action.text}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )}
+  </motion.div>
+)}
 
-          </motion.div>
-        )}
 
         {gameState === "level-intro" && story && level < story.levels.length && (
           <motion.div

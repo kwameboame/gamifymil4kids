@@ -5,14 +5,19 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft } from "lucide-react"
+import type { Action, Scenarios } from "./StorylineGame"
 
-export default function StorylineGame() {
+interface MobileUiProps {
+  selectedScenario: Scenarios | null;
+  onActionSelected: (action: Action) => void;
+}
+
+export default function MobileUi({ selectedScenario, onActionSelected }: MobileUiProps) {
   const [showActions, setShowActions] = useState(false)
 
-  const handleChoice = (choice: string) => {
-    console.log(`Player chose: ${choice}`)
-    // Handle the player's choice here - could advance to next scenario
-    setShowActions(false) // Reset for demo purposes
+  const handleChoice = (action: Action) => {
+    onActionSelected(action);
+    setShowActions(false);
   }
 
   const handleTakeAction = () => {
@@ -23,23 +28,35 @@ export default function StorylineGame() {
     setShowActions(false)
   }
 
+  if (!selectedScenario) {
+    return <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 flex items-center justify-center">
+      <div>Loading scenario...</div>
+    </div>
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 md:p-8">
       <div className="mx-auto max-w-6xl">
-        <div className="grid lg:grid-cols-2 gap-0 items-stretch">
+      <div className="grid grid-cols-2 gap-0 items-stretch">
           {/* Story Image */}
           <div className="order-1">
             <div className="relative h-full">
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-2xl blur-xl opacity-30"></div>
               <Card className="relative shadow-2xl border-0 overflow-hidden h-full">
                 <div className="h-full relative">
-                  <Image
-                    src="/placeholder.svg?height=600&width=800"
-                    alt="Adjoa looking at her phone with a social media post visible on the screen"
-                    fill
-                    className="object-cover"
-                    priority
-                  />
+                  {selectedScenario.image ? (
+                    <Image
+                      src={selectedScenario.image}
+                      alt="Scenario illustration"
+                      fill
+                      className="object-cover"
+                      priority
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full bg-gray-200">
+                      <span className="text-gray-500">No image available</span>
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                 </div>
               </Card>
@@ -52,13 +69,8 @@ export default function StorylineGame() {
               <CardContent className="p-6 md:p-8 h-full flex flex-col justify-center">
                 {!showActions ? (
                   <>
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">The Social Media Dilemma</h1>
                     <p className="text-base md:text-lg leading-relaxed text-gray-700 mb-8">
-                      One Saturday afternoon, Adjoa took her sister&apos;s phone to check what&apos;s happening on Facebook. While
-                      scrolling through her feed, Adjoa comes across a post that catches her attention. One of her
-                      favourites and a popular celebrity had posted: &quot;Drinking ginger tea every morning will keep you
-                      from getting sick forever!&quot; The post had over 10k likes and shares, and it seems everyone is
-                      talking about it.
+                      {selectedScenario.description}
                     </p>
 
                     <Button
@@ -82,30 +94,17 @@ export default function StorylineGame() {
                     </Button>
 
                     <div className="space-y-4">
-                      <Button
-                        onClick={() => handleChoice("share")}
-                        className="w-full h-auto p-4 md:p-6 text-sm md:text-base font-medium text-white bg-black hover:bg-gray-800 transition-colors duration-200 rounded-lg whitespace-normal"
-                      >
-                        <span className="text-center leading-relaxed break-words">
-                          Share it with your friends because it sounds helpful and would save lives.
-                        </span>
-                      </Button>
-
-                      <Button
-                        onClick={() => handleChoice("research")}
-                        className="w-full h-auto p-4 md:p-6 text-sm md:text-base font-medium text-white bg-black hover:bg-gray-800 transition-colors duration-200 rounded-lg whitespace-normal"
-                      >
-                        <span className="text-center leading-relaxed break-words">
-                          Ask her elder sister and look it up online to see if it&apos;s true.
-                        </span>
-                      </Button>
-
-                      <Button
-                        onClick={() => handleChoice("ignore")}
-                        className="w-full h-auto p-4 md:p-6 text-sm md:text-base font-medium text-white bg-black hover:bg-gray-800 transition-colors duration-200 rounded-lg whitespace-normal"
-                      >
-                        <span className="text-center leading-relaxed break-words">Ignore it and keep scrolling.</span>
-                      </Button>
+                      {selectedScenario.actions.map((action) => (
+                        <Button
+                          key={action.id}
+                          onClick={() => handleChoice(action)}
+                          className="w-full h-auto p-4 md:p-6 text-sm md:text-base font-medium text-white bg-black hover:bg-gray-800 transition-colors duration-200 rounded-lg whitespace-normal"
+                        >
+                          <span className="text-center leading-relaxed break-words">
+                            {action.text}
+                          </span>
+                        </Button>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -113,7 +112,6 @@ export default function StorylineGame() {
             </Card>
           </div>
         </div>
-
       </div>
     </div>
   )
