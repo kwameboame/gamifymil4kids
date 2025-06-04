@@ -238,6 +238,8 @@ export function StorylineGame() {
 
   // Function to check if player earned a power-up and apply it automatically
   const checkForPowerUp = async () => {
+    const alreadyUsedExtra = activePowerUps.some(pu => pu.power_up_type === 'extra_life');
+    if (alreadyUsedExtra) return;
     console.log('[DEBUG] Checking for power-up with correct answers:', correctAnswerCount);
     
     try {
