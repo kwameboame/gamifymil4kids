@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import Image from 'next/image';
 import gsap from 'gsap';
+import ExtraLifeModal from './ExtraLife';
+import ScoreBoosterModal from './ScoreBoost';
 
 export interface PowerUp {
   id: number;
@@ -28,6 +30,9 @@ const PowerUpModal: React.FC<PowerUpModalProps> = ({
   isOpen, 
   onClose
 }) => {
+  // Determine if this is an extra life or score booster powerup
+  const isExtraLife = powerUp && powerUp.bonus_lives && powerUp.bonus_lives > 0;
+  const isScoreBooster = powerUp && powerUp.score_multiplier && powerUp.score_multiplier > 1;
   // Create refs for the elements we want to animate
   const iconRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -197,10 +202,20 @@ const PowerUpModal: React.FC<PowerUpModalProps> = ({
     }
   };
 
+  // Use specialized components for specific power-up types
+  if (isOpen && powerUp && isExtraLife) {
+    return <ExtraLifeModal onClose={onClose} />;
+  }
+
+  if (isOpen && powerUp && isScoreBooster) {
+    return <ScoreBoosterModal onClose={onClose} />;
+  }
+  
+  // Default power-up modal for other types
   return (
     <AnimatePresence>
-      {isOpen && (
-        <motion.div
+      {isOpen && powerUp && (
+        <motion.div 
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
