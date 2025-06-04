@@ -584,7 +584,7 @@ export function StorylineGame() {
     setShowOutcome(true);
   
     // Determine if the action is partially correct (has some points but is not marked as correct)
-    const isPartiallyCorrect = !action.is_correct && (action.points && action.points > 0);
+    const isPartiallyCorrect = action.is_correct && (action.points || 0) < maxPointsForCurrentScenario;
   
     // Play appropriate sound based on outcome
     if (!isMuted) {
