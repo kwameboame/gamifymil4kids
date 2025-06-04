@@ -65,7 +65,7 @@ export default function MobileUi({ selectedScenario, onActionSelected }: MobileU
           {/* Scenario Text / Action Buttons */}
           <div className="order-2">
             <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm h-full">
-              <CardContent className="p-6 md:p-8 h-full flex flex-col justify-center">
+              <CardContent className="p-4 h-full flex flex-col justify-center">
                 {!showActions ? (
                   <>
                     <p className="text-sm md:text-sm font-bold leading-relaxed text-gray-700 mb-8">
@@ -86,13 +86,13 @@ export default function MobileUi({ selectedScenario, onActionSelected }: MobileU
                     <Button
                       onClick={handleBack}
                       variant="outline"
-                      className="mb-4 bg-white text-gray-900 hover:bg-gray-100 border-gray-300"
+                      className="bg-white text-gray-900 hover:bg-gray-100 border-gray-300"
                     >
                       <ArrowLeft className="w-4 h-4 mr-2" />
                       Back
                     </Button>
 
-                    <div className="space-y-4">
+                    <div className="space-y-2">
                       {selectedScenario.actions.map((action) => (
                         <Button
                           key={action.id}
