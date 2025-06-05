@@ -34,10 +34,10 @@ export default function ExtraLifeModal({ onClose }: ExtraLifeModalProps = {}) {
           {/* Main Content */}
           <div className="px-6 py-8 text-center">
             <h2 className="text-2xl font-bold text-gray-800 mb-3 animate-slide-in-left">Extra Life</h2>
-            <p className="text-gray-600 mb-6 animate-fade-in">Gives you an extra life!</p>
+            <p className="text-gray-600 mb-6 animate-fade-in">Five correct actions in a row!</p>
 
             {/* Power-up Badge */}
-            <div className="bg-gray-100 rounded-lg p-4 mb-6 animate-slide-in-up">
+            <div className="bg-gray-100 hidden md:block rounded-lg p-4 mb-6 animate-slide-in-up">
               <div className="flex items-center justify-center gap-2">
                 <Sparkles className="w-5 h-5 text-green-600 animate-spin-slow" />
                 <span className="text-lg font-semibold text-green-600">+1 Extra Life</span>

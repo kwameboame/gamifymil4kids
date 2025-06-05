@@ -264,7 +264,7 @@ const PowerUpModal: React.FC<PowerUpModalProps> = ({
                 {powerUp.description}
               </p>
               
-              <div className="mt-4 p-3 powerupearned hidden md:block bg-gray-100 dark:bg-gray-700 rounded-lg w-full" ref={effectsRef}>
+              <div className="mt-4 p-3 powerupearned bg-gray-100 dark:bg-gray-700 rounded-lg w-full" ref={effectsRef}>
               <ul className="space-y-1">
                   {powerUp.bonus_lives > 0 && (
                     <li ref={bonusLivesRef} className="text-green-700 dark:text-gray-300 opacity-0">
