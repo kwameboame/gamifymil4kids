@@ -243,7 +243,7 @@ const PowerUpModal: React.FC<PowerUpModalProps> = ({
               </button>
             </div>
             
-            <div className="flex flex-col items-center mb-6">
+            <div className="flex flex-col items-center mb-4">
               <div className="text-6xl mb-4" ref={iconRef}>
                 {powerUp.image ? (
                   <Image 
@@ -264,8 +264,8 @@ const PowerUpModal: React.FC<PowerUpModalProps> = ({
                 {powerUp.description}
               </p>
               
-              <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg w-full" ref={effectsRef}>
-                <ul className="space-y-1">
+              <div className="mt-4 p-3 powerupearned hidden md:block bg-gray-100 dark:bg-gray-700 rounded-lg w-full" ref={effectsRef}>
+              <ul className="space-y-1">
                   {powerUp.bonus_lives > 0 && (
                     <li ref={bonusLivesRef} className="text-green-700 dark:text-gray-300 opacity-0">
                       {`+${powerUp.bonus_lives} Extra ${powerUp.bonus_lives === 1 ? 'Life' : 'Lives'}`.split('').map((char, index) => (
