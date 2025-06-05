@@ -103,7 +103,7 @@ export default function ActionOutcome({
           badgeClass: 'bg-red-200 text-red-900 border-red-300',
           accentColor: 'red',
           icon: <X className="w-6 h-6" />,
-          title: 'Not Quite!',
+          title: 'You\'ve lost a life!',
           subtitle: 'Let\'s learn together',
           scoreSubtitle: 'Learning opportunity',
           accentTextClass: 'text-red-100',
@@ -144,176 +144,118 @@ export default function ActionOutcome({
   const config = getOutcomeConfig();
 
   return (
-    <div className="fixed inset-x-0 top-4 bottom-4 bg-black/50 flex items-center justify-center px-4">
-      <Card className="w-full max-w-sm bg-white shadow-2xl border-0">
-        {/* Header Bar */}
-        <div className={`bg-gradient-to-r ${config.gradientClass} px-6 py-4`}>
-          <div className="flex items-center justify-between text-white">
+    <Card className="max-w-lg h-screen sm:h-auto sm:w-full bg-white shadow-2xl border-0 overflow-hidden">
+    {/* Header Bar */}
+       <div className={`bg-gradient-to-r ${config.gradientClass} px-6 py-4`}>
+         <div className="flex items-center justify-between text-white">
+           <div className="flex items-center gap-3">
+             <div className={`w-10 h-10 ${config.accentBgClass} rounded-full flex items-center justify-center animate-bounce`}>
+               {config.icon}
+             </div>
+             <div>
+               <h2 className="text-xl font-bold animate-slide-in-left">{config.title}</h2>
+               <p className={`${config.accentTextClass} text-sm animate-fade-in`}>{config.subtitle}</p>
+             </div>
+           </div>
+           <div className="text-right animate-slide-in-right">
+             <div className="text-2xl font-bold">{config.pointsDisplay}</div>
+             <div className={`${config.accentTextClass} text-xs`}>Points</div>
+           </div>
+         </div>
+       </div>
+
+       <CardContent className="p-0">
+        {/* Enhanced Score Section */}
+        <div className={`scoresec hidden md:flex bg-gradient-to-r ${config.scoreGradientClass} border-b px-6 py-4`}>
+        <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 ${config.accentBgClass} rounded-full flex items-center justify-center animate-bounce`}>
-                {config.icon}
+              <div className={`w-8 h-8 ${config.iconBgClass} rounded-full flex items-center justify-center animate-bounce-slow`}>
+                {config.iconAccent}
               </div>
               <div>
-                <h2 className="text-xl font-bold animate-slide-in-left">{config.title}</h2>
-                <p className={`${config.accentTextClass} text-sm animate-fade-in`}>{config.subtitle}</p>
+                <div className="font-semibold text-gray-800 animate-slide-in-left">Current Score</div>
+                <div className={`text-xs ${config.scoreSmallTextClass} animate-fade-in`}>{config.scoreSubtitle}</div>
               </div>
             </div>
-            <div className="text-right animate-slide-in-right">
-              <div className="text-2xl font-bold">{config.pointsDisplay}</div>
-              <div className={`${config.accentTextClass} text-xs`}>Points</div>
+            <div className="flex items-center gap-3">
+              <div className="text-right animate-slide-in-right">
+                <div className={`text-lg font-bold ${config.scoreTextClass} tabular-nums`}>{animatedScore}</div>
+                <div className={`text-xs ${config.scoreSmallTextClass}`}>Total</div>
+              </div>
+              <Badge className={`${config.badgeClass} animate-pulse-scale px-3 py-1`}>
+                <Star className="w-3 h-3 mr-1 animate-spin-slow" />
+                Level {level + 1}
+              </Badge>
             </div>
           </div>
         </div>
 
-        <CardContent className="p-0">
-          {/* Enhanced Score Section */}
-          <div className={`bg-gradient-to-r ${config.scoreGradientClass} border-b px-6 py-4`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 ${config.iconBgClass} rounded-full flex items-center justify-center animate-bounce-slow`}>
-                  {config.iconAccent}
-                </div>
-                <div>
-                  <div className="font-semibold text-gray-800 animate-slide-in-left">Current Score</div>
-                  <div className={`text-xs ${config.scoreSmallTextClass} animate-fade-in`}>{config.scoreSubtitle}</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="text-right animate-slide-in-right">
-                  <div className={`text-lg font-bold ${config.scoreTextClass} tabular-nums`}>{animatedScore}</div>
-                  <div className={`text-xs ${config.scoreSmallTextClass}`}>Total</div>
-                </div>
-                <Badge className={`${config.badgeClass} animate-pulse-scale px-3 py-1`}>
-                  <Star className="w-3 h-3 mr-1 animate-spin-slow" />
-                  Level {level + 1}
-                </Badge>
-              </div>
-            </div>
+        {/* Content Section */}
+        <div className="p-2 space-y-2">
+          <div className={`${config.explanationBg} rounded-lg p-4 border-l-4 ${config.explanationBorder} animate-fade-in-up`}>
+            <h3 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+              <div className={`w-2 h-2 ${config.iconBgClass} rounded-full`}></div>
+              {config.explanationTitle}
+            </h3>
+            <p className="text-sm text-gray-700 leading-relaxed">
+              {explanation || "No additional explanation available."}
+            </p>
           </div>
 
-          {/* Content Section */}
-          <div className="p-6 space-y-4">
-            <div className={`${config.explanationBg} rounded-lg p-4 border-l-4 ${config.explanationBorder} animate-fade-in-up`}>
-              <h3 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
-                <div className={`w-2 h-2 ${config.iconBgClass} rounded-full`}></div>
-                {config.explanationTitle}
-              </h3>
-              <p className="text-sm text-gray-700 leading-relaxed">
-                {explanation || "No additional explanation available."}
-              </p>
-            </div>
-
-            {/* Action Area */}
-            <div className="flex justify-end pt-2">
-              <Button 
-                onClick={onContinue} 
-                className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-2 rounded-lg transition-all duration-200 hover:scale-105 animate-slide-in-right group">
-                Continue
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </div>
+          {/* Action Area */}
+          <div className="flex justify-end pt-2">
+            <Button 
+              onClick={onContinue} 
+              className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-2 rounded-lg transition-all duration-200 hover:scale-105 animate-slide-in-right group">
+              Continue
+              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </CardContent>
 
       <style jsx>{`
         @keyframes slide-in-left {
-          from {
-            opacity: 0;
-            transform: translateX(-15px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
+          from { opacity: 0; transform: translateX(-15px); }
+          to   { opacity: 1; transform: translateX(0); }
         }
-
         @keyframes slide-in-right {
-          from {
-            opacity: 0;
-            transform: translateX(15px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
+          from { opacity: 0; transform: translateX(15px); }
+          to   { opacity: 1; transform: translateX(0); }
         }
 
         @keyframes fade-in {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
+          from { opacity: 0; }
+          to   { opacity: 1; }
         }
 
         @keyframes fade-in-up {
-          from {
-            opacity: 0;
-            transform: translateY(15px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(15px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes bounce-slow {
-          0%, 100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-3px);
-          }
+          0%, 100% { transform: translateY(0); }
+          50%      { transform: translateY(-3px); }
         }
 
         @keyframes pulse-scale {
-          0%, 100% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.05);
-          }
+          0%, 100% { transform: scale(1); }
+          50%      { transform: scale(1.05); }
         }
 
         @keyframes spin-slow {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
         }
-
-        .animate-slide-in-left {
-          animation: slide-in-left 0.5s ease-out;
-        }
-
-        .animate-slide-in-right {
-          animation: slide-in-right 0.5s ease-out 0.2s both;
-        }
-
-        .animate-fade-in {
-          animation: fade-in 0.6s ease-out 0.3s both;
-        }
-
-        .animate-fade-in-up {
-          animation: fade-in-up 0.6s ease-out 0.5s both;
-        }
-
-        .animate-bounce-slow {
-          animation: bounce-slow 2s ease-in-out infinite;
-        }
-
-        .animate-pulse-scale {
-          animation: pulse-scale 2s ease-in-out infinite;
-        }
-
-        .animate-spin-slow {
-          animation: spin-slow 3s linear infinite;
-        }
+        .animate-slide-in-left  { animation: slide-in-left  0.5s ease-out; }
+        .animate-slide-in-right { animation: slide-in-right 0.5s ease-out 0.2s both; }
+        .animate-fade-in        { animation: fade-in 0.6s ease-out 0.3s both; }
+        .animate-fade-in-up     { animation: fade-in-up 0.6s ease-out 0.5s both; }
+        .animate-bounce-slow    { animation: bounce-slow 2s ease-in-out infinite; }
+        .animate-pulse-scale    { animation: pulse-scale 2s ease-in-out infinite; }
+        .animate-spin-slow      { animation: spin-slow 3s linear infinite; }
       `}</style>
-    </div>
-  )
-}
+      </Card>
+    )
+     }  

@@ -37,7 +37,7 @@ export default function MobileUi({ selectedScenario, onActionSelected }: MobileU
     }
   
     return (
-      <div className="flex-1 flex flex-col mx-auto max-w-6xl h-full">
+      <div className="flex-1 flex flex-col gamecard mx-auto max-w-6xl h-full">
         <div className="grid grid-cols-[1fr_2fr] h-full">
           {/* Story Image */}
           <div className="relative h-full">

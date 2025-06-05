@@ -1221,50 +1221,61 @@ export function StorylineGame() {
           </motion.div>
         )}
 
-        {gameState === "level-complete" && story && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.5 }}
-            className="flex-grow flex items-center justify-center"
-          >
-            <div className="text-center p-8 bg-white rounded-lg shadow-md w-full max-w-2xl">
-              <h2 className="text-4xl font-bold mb-6 text-gray-900">Level {level + 1} Complete!</h2>
-              <p className="text-2xl mb-4 text-gray-800">Current Score: {score}</p>
-              <p className="text-lg mb-8 text-gray-600">Congratulations! You&apos;ve completed this level.</p>
-              
-              <div className="space-y-4">
-                <Button 
-                  onClick={handleContinueToNextLevel} 
-                  className="bg-orange-700 text-lg py-3"
-                >
-                  Continue to Next Level
-                </Button>
-                
-                {!isAuthenticated && (
-                  <GameAuthButtons 
-                    level={level}
-                    score={score}
-                    lives={lives}
-                    scenarioIndex={scenarioIndex}
-                    variant="level-complete"
-                  />
-                )}
-              </div>
-              
-              {/* Debug info in development mode */}
-              {process.env.NODE_ENV === 'development' && (
-                <div className="mt-6 p-4 bg-gray-100 rounded text-left text-sm">
-                  <p>Debug Info:</p>
-                  <p>Current Level: {level}</p>
-                  <p>Total Levels: {story.levels.length}</p>
-                  <p>Scenarios in Current Level: {scenarios?.length}</p>
-                </div>
-              )}
+    {gameState === "level-complete" && story && (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.5 }}
+        className="flex-grow flex items-center justify-center overflow-auto"
+      >
+        <div className="grid grid-cols-2 gap-6 p-8 bg-white rounded-lg shadow-md w-full max-w-2xl max-h-screen overflow-y-auto">
+          {/* Left column: text */}
+          <div>
+            <h2 className="text-2xl md:text-4xl font-bold mb-4 text-gray-900">
+              Level {level + 1} Complete!
+            </h2>
+            <p className="text-xl md:text-2xl mb-2 text-gray-800">
+              Current Score: {score}
+            </p>
+            <p className="text-base md:text-lg text-gray-600">
+              Congratulations! You&apos;ve completed this level.
+            </p>
+
+            <Button
+              onClick={handleContinueToNextLevel}
+              className="bg-orange-700 text-lg py-3 mt-6"
+            >
+              Continue to Next Level
+            </Button>
+          </div>
+
+          {/* Right column: buttons */}
+          <div className="flex flex-col justify-center space-y-4">
+            {!isAuthenticated && (
+              <GameAuthButtons
+                level={level}
+                score={score}
+                lives={lives}
+                scenarioIndex={scenarioIndex}
+                variant="level-complete"
+              />
+            )}
+          </div>
+
+          {/* Debug info (spans both columns) */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="col-span-2 mt-6 p-4 bg-gray-100 rounded text-left text-sm">
+              <p>Debug Info:</p>
+              <p>Current Level: {level}</p>
+              <p>Total Levels: {story.levels.length}</p>
+              <p>Scenarios in Current Level: {scenarios?.length}</p>
             </div>
-          </motion.div>
-        )}
+          )}
+        </div>
+      </motion.div>
+    )}
+
 
         {(gameState === "end" || gameState === "gameover") && (
           <motion.div
